@@ -1,0 +1,890 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0060c1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Revisor Planos">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>[hidden]:not([hidden=until-found i]){display:none!important}</style>
+</head><body>
+<title>Revisor de Planos ING</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: igual a la Mesa de Cálculo — barra lateral con herramientas por categoría (logo ING arriba), vista de trabajo a la derecha con paneles de encabezado azul degradado */
+:root{
+  --logo1:#0060C1; --logo2:#0184C8;
+  --bg:#EEF4FA; --surface:#FFFFFF; --surface-alt:#E7F1FB; --ink:#16212D; --ink-muted:#4E5D6C;
+  --accent:#0060C1; --accent-ink:#FFFFFF; --accent-warm:#C2410C; --line:#CFE0F2; --grid-line:0,96,193;
+  --input-bg:#E8F1FB; --input-border:#B9D3EE; --t-zebra:#F5F9FD; --t-hover:#D9EAFA;
+  --good:#1E7A46; --good-bg:#E3F3E9; --bad:#B3261E; --bad-bg:#FBE7E6; --warn:#A35A00; --warn-bg:#FCEFD9; --yel:#F2CC0C; --yel-bg:#FFF6BF; --yel-ink:#5C4A00;
+  --ff-d:'Big Shoulders Display','Arial Narrow',Arial,sans-serif;
+  --ff-b:'IBM Plex Sans',Arial,Helvetica,sans-serif;
+  --ff-m:'IBM Plex Mono',Consolas,'Courier New',monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --logo1:#3D8FE6; --logo2:#3FB3EA;
+  --bg:#0E141C; --surface:#151D28; --surface-alt:#132339; --ink:#E6ECF3; --ink-muted:#93A3B5;
+  --accent:#5AA2EE; --accent-ink:#0B121A; --accent-warm:#FB923C; --line:#223247; --grid-line:61,143,230;
+  --input-bg:#0C1520; --input-border:#2C4462; --t-zebra:#151C26; --t-hover:#17304E;
+  --good:#5FCB85; --good-bg:#153322; --bad:#F0847C; --bad-bg:#3A1A18; --warn:#F2B24C; --warn-bg:#3A2A12; --yel:#F5D90A; --yel-bg:#3D3608; --yel-ink:#FBE97A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --logo1:#3D8FE6; --logo2:#3FB3EA;
+  --bg:#0E141C; --surface:#151D28; --surface-alt:#132339; --ink:#E6ECF3; --ink-muted:#93A3B5;
+  --accent:#5AA2EE; --accent-ink:#0B121A; --accent-warm:#FB923C; --line:#223247; --grid-line:61,143,230;
+  --input-bg:#0C1520; --input-border:#2C4462; --t-zebra:#151C26; --t-hover:#17304E;
+  --good:#5FCB85; --good-bg:#153322; --bad:#F0847C; --bad-bg:#3A1A18; --warn:#F2B24C; --warn-bg:#3A2A12; --yel:#F5D90A; --yel-bg:#3D3608; --yel-ink:#FBE97A; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:var(--ff-b);-webkit-font-smoothing:antialiased;
+  background:repeating-linear-gradient(0deg,rgba(var(--grid-line),.05) 0 1px,transparent 1px 88px),repeating-linear-gradient(90deg,rgba(var(--grid-line),.05) 0 1px,transparent 1px 88px),var(--bg)}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ---------- shell ---------- */
+.shell{display:flex;min-height:100vh}
+aside.sidebar{width:290px;flex-shrink:0;padding:1.4rem 1rem 2rem;position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;
+  background:color-mix(in srgb,var(--logo2) 7%,var(--bg));border-right:3px solid var(--logo1)}
+.brand{display:flex;flex-direction:column;gap:.7rem;padding:0 .35rem 1.1rem;border-bottom:1px solid var(--line);margin-bottom:1rem}
+.brand-logo-wrap{background:#FFFFFF;padding:.65rem .8rem;border-radius:6px}
+.brand-logo{width:100%;max-width:230px;height:auto;display:block}
+.brand h1{margin:0;font-family:var(--ff-d);font-weight:800;font-size:1.25rem;line-height:1}
+.brand small{font-family:var(--ff-m);font-size:.68rem;color:var(--ink-muted);letter-spacing:.06em;text-transform:uppercase}
+nav.cats{display:flex;flex-direction:column;gap:1.3rem}
+.cat-block h2{font-family:var(--ff-d);font-weight:700;font-size:.92rem;text-transform:uppercase;letter-spacing:.03em;margin:0 0 .4rem;
+  color:#fff;background:linear-gradient(90deg,var(--logo1),var(--logo2));padding:.3rem .55rem;border-radius:4px}
+.tool-btn{display:flex;align-items:center;gap:.5rem;width:100%;background:none;border:none;text-align:left;cursor:pointer;padding:.42rem .35rem;border-radius:5px;font-size:.82rem;color:var(--ink)}
+.tool-btn:hover{background:color-mix(in srgb,var(--logo2) 14%,transparent)}
+.tool-btn.active{background:color-mix(in srgb,var(--logo2) 20%,transparent);box-shadow:inset 3px 0 0 var(--logo1);color:var(--logo1);font-weight:600}
+.tool-btn .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--line)}
+.tool-btn.ready .dot{background:var(--good)}
+.tool-btn.alert .dot{background:var(--bad)}
+.tool-btn .name{flex:1;line-height:1.25}
+.tool-btn .n{font-family:var(--ff-m);font-size:.7rem;color:var(--ink-muted)}
+main.view{flex:1;min-width:0;padding:2.2rem 2.4rem 4rem;max-width:1180px}
+.mob-bar{display:none}
+
+/* ---------- encabezados ---------- */
+.home-head h1,.calc-head h1{font-family:var(--ff-d);font-weight:800;font-size:2rem;margin:0 0 .3rem;color:var(--logo1);text-wrap:balance}
+.home-head p,.calc-head .sub{color:var(--ink-muted);margin:0;max-width:70ch;line-height:1.55;font-size:.9rem}
+.calc-head{margin-bottom:1.4rem;border-bottom:3px solid var(--logo1);padding-bottom:.6rem}
+.status-strip{display:flex;gap:1.3rem;margin-top:1rem;flex-wrap:wrap}
+.status-strip .stat{font-family:var(--ff-m);font-size:.78rem;color:var(--ink-muted)}
+.status-strip .stat b{color:var(--ink);font-size:1.05rem}
+.status-strip .stat.bad b{color:var(--bad)} .status-strip .stat.warn b{color:var(--warn)}
+.tag{font-family:var(--ff-m);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;background:color-mix(in srgb,var(--accent-warm) 16%,transparent);color:var(--accent-warm);white-space:nowrap}
+
+/* ---------- paneles ---------- */
+.panel{background:var(--surface);border:1px solid color-mix(in srgb,var(--logo1) 22%,var(--line));border-radius:6px;padding:0 1.5rem 1.3rem;margin-bottom:1.4rem;overflow-x:auto}
+.panel h3{font-family:var(--ff-d);font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.04em;color:#fff;
+  background:linear-gradient(90deg,var(--logo1),var(--logo2));margin:0 -1.5rem 1rem;padding:.5rem 1.5rem;border-radius:5px 5px 0 0;position:sticky;left:0}
+.panel .note{font-size:.78rem;color:var(--ink-muted);line-height:1.55;margin:.65rem 0 0}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem 1rem;background:color-mix(in srgb,var(--logo2) 5%,var(--surface));border-radius:5px;padding:.6rem .7rem}
+.field{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.field label{font-size:.8rem;color:var(--ink-muted)}
+input,select,textarea{font-size:.88rem;padding:.32rem .5rem;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);color:var(--ink);min-width:0;max-width:100%}
+.field input,.field select{font-family:var(--ff-m)}
+.toolbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end;margin-bottom:.9rem}
+.toolbar .sp{flex:1}
+.btn{font-weight:600;font-size:.82rem;border-radius:5px;padding:.48rem .9rem;cursor:pointer;background:var(--surface);color:var(--logo1);border:1px solid var(--logo1)}
+.btn:hover{background:color-mix(in srgb,var(--logo2) 12%,var(--surface))}
+.btn.pri{background:var(--logo1);color:#fff;border-color:var(--logo1)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-add{background:transparent;border:1px dashed var(--accent);color:var(--accent);font-weight:600;font-size:.8rem;padding:.4rem .8rem;cursor:pointer;border-radius:4px}
+.btn-add:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.btn-remove{background:transparent;border:1px solid var(--bad);color:var(--bad);border-radius:4px;width:1.6rem;height:1.6rem;cursor:pointer;font-size:.8rem;line-height:1}
+.btn-remove:hover{background:var(--bad-bg)}
+.chip{display:inline-block;font-family:var(--ff-m);font-size:.7rem;font-weight:600;padding:.16rem .5rem;border-radius:999px;white-space:nowrap}
+.chip.ok{background:var(--good-bg);color:var(--good)} .chip.bad{background:var(--bad-bg);color:var(--bad)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.neutral{background:var(--surface-alt);color:var(--ink-muted)}
+.chip.yel{background:var(--yel-bg);color:var(--yel-ink)}
+select.st-Pendiente{background:var(--bad-bg);color:var(--bad);font-weight:600}select.st-Corregido{background:var(--yel-bg);color:var(--yel-ink);font-weight:600}select.st-Verificado{background:var(--good-bg);color:var(--good);font-weight:600}
+.chip.info{background:color-mix(in srgb,var(--logo2) 18%,transparent);color:var(--logo1)}
+.banner{padding:.6rem .9rem;border-left:4px solid var(--warn);background:var(--warn-bg);font-size:.84rem;border-radius:0 4px 4px 0;margin-bottom:1rem}
+.banner.info{border-left-color:var(--logo1);background:color-mix(in srgb,var(--logo2) 12%,var(--surface))}
+.confirm{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.6rem .9rem;border:1px solid var(--bad);background:var(--bad-bg);border-radius:5px;font-size:.84rem;margin-bottom:1rem}
+
+/* ---------- carga ---------- */
+.drop{border:2px dashed color-mix(in srgb,var(--logo1) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--logo2) 6%,var(--surface));padding:1.4rem;display:grid;grid-template-columns:auto 1fr auto;gap:1.2rem;align-items:center;transition:background .15s,border-color .15s}
+.drop.over{border-color:var(--logo1);background:color-mix(in srgb,var(--logo2) 18%,var(--surface))}
+.drop .sheet{width:66px;height:47px;border:2px solid var(--logo1);position:relative;background:var(--surface)}
+.drop .sheet::after{content:"";position:absolute;right:3px;bottom:3px;width:24px;height:11px;border:1px solid var(--logo1)}
+.drop .sheet::before{content:"";position:absolute;left:6px;top:6px;width:26px;height:18px;border:1px dashed var(--ink-muted)}
+.drop b{font-family:var(--ff-d);font-size:1.25rem;font-weight:700;color:var(--logo1);display:block}
+.drop p{margin:.2rem 0 0;color:var(--ink-muted);font-size:.85rem}
+.drop .acts{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+.progress{display:flex;align-items:center;gap:.8rem;font-size:.82rem;margin-top:1rem}
+.bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;min-width:120px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--logo1),var(--logo2));width:0;transition:width .3s}
+
+/* ---------- láminas ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+.card{background:var(--surface);border:1px solid color-mix(in srgb,var(--logo1) 22%,var(--line));border-radius:6px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.card.dup{border-color:var(--bad);box-shadow:inset 0 3px 0 var(--bad)}
+.thumb{aspect-ratio:1.414;max-width:100%;background:var(--surface-alt);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:zoom-in;position:relative}
+.thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
+.thumb .ph{font-family:var(--ff-m);font-size:.72rem;color:var(--ink-muted);text-align:center;padding:1rem}
+.thumb .pg{position:absolute;left:6px;top:6px;font-family:var(--ff-m);font-size:.7rem;font-weight:600;background:var(--logo1);color:#fff;padding:.05rem .4rem;border-radius:3px}
+.card .body{padding:.7rem;display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
+.card .body .w{grid-column:1/-1}
+.card .body label{display:flex;flex-direction:column;gap:.12rem;font-family:var(--ff-m);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-muted)}
+.card .body input{width:100%;font-size:.8rem;padding:.25rem .4rem;font-family:var(--ff-m)}
+.card .foot{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;padding:.5rem .7rem;border-top:1px solid var(--line);margin-top:auto}
+.card .foot .sp{flex:1}
+
+/* ---------- tablas ---------- */
+table.results{width:100%;border-collapse:collapse;font-size:.82rem}
+table.results th{text-align:center;font-family:var(--ff-m);font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;background:var(--logo1);color:#fff;padding:.5rem .45rem;white-space:nowrap}
+table.results td{padding:.35rem .4rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.results tr:nth-child(even) td{background:var(--t-zebra)}
+table.results tr:hover td{background:var(--t-hover)}
+table.results td.num{font-family:var(--ff-m);text-align:center;font-variant-numeric:tabular-nums}
+table.results td.l{text-align:left}
+table.editable input,table.editable select,table.editable textarea{width:100%;font-size:.8rem;padding:.3rem .4rem}
+table.editable input,table.editable select{font-family:var(--ff-m)}
+table.editable textarea{resize:vertical;min-height:2.4rem;line-height:1.35}
+table.editable select{min-width:7.5rem}
+table.editable input{min-width:5.5rem}
+table.editable input[data-k="id"],table.editable input[data-k="elem"],table.editable input[data-k="ubic"],table.editable input[data-k="obs"]{min-width:11rem}
+table.editable textarea{min-width:16rem}
+table.editable td .chip{white-space:normal;line-height:1.35}
+.steps{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.45rem;font-size:.88rem;line-height:1.5}
+.steps a{color:var(--logo1);font-weight:600}
+tr.p-Alta td:first-child{box-shadow:inset 4px 0 0 var(--bad)} tr.p-Media td:first-child{box-shadow:inset 4px 0 0 var(--warn)} tr.p-Baja td:first-child{box-shadow:inset 4px 0 0 var(--good)}
+.empty{padding:1.6rem;text-align:center;color:var(--ink-muted);font-size:.86rem}
+/* checklist */
+table.chk td.cell{text-align:center;cursor:pointer;font-family:var(--ff-m);font-size:.72rem;font-weight:600;min-width:3.6rem;user-select:none}
+table.chk td.cell.auto{opacity:.62;font-style:italic}
+table.chk td.v-OK{color:var(--good)} table.chk td.v-OBS{color:var(--bad);background:var(--bad-bg)!important} table.chk td.v-VER{color:var(--warn);background:var(--warn-bg)!important} table.chk td.v-NA{color:var(--ink-muted)}
+table.chk tr.catrow td{background:color-mix(in srgb,var(--logo2) 14%,var(--surface))!important;font-family:var(--ff-d);font-weight:700;text-transform:uppercase;color:var(--logo1);letter-spacing:.03em}
+table.chk td.code{font-family:var(--ff-m);white-space:nowrap}
+table.chk tfoot td{font-family:var(--ff-m);font-size:.72rem;text-align:center;font-weight:600}
+/* resumen */
+.hbar{display:flex;height:.9rem;border-radius:2px;overflow:hidden;background:var(--surface-alt);min-width:120px}
+.hbar i{display:block;height:100%}
+.hbar i.p{background:var(--bad)} .hbar i.c{background:var(--yel)} .hbar i.v{background:var(--good)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.76rem;color:var(--ink-muted);margin-top:.6rem}
+.legend span::before{content:"";display:inline-block;width:.7rem;height:.7rem;border-radius:2px;margin-right:.35rem;vertical-align:-1px;background:var(--c)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1rem 1.2rem;font:.82rem/1.6 var(--ff-m);white-space:pre-wrap;overflow-x:auto;max-height:70vh;overflow-y:auto;margin:0}
+
+/* ---------- visor ---------- */
+dialog{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface);color:var(--ink);width:min(1200px,96vw);max-height:94vh}
+dialog::backdrop{background:rgba(8,16,28,.62)}
+.dlg-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem 1rem;background:linear-gradient(90deg,var(--logo1),var(--logo2));color:#fff}
+.dlg-head h3{margin:0 auto 0 0;font-family:var(--ff-d);font-weight:700;font-size:1.1rem;letter-spacing:.02em}
+.dlg-head .btn{background:#fff;color:var(--logo1);border-color:#fff}
+.viewer{display:grid;grid-template-columns:1fr 340px}
+.viewer .canvasbox{overflow:auto;max-height:80vh;background:var(--surface-alt)}
+.viewer canvas{display:block;background:#fff}
+.viewer aside{border-left:1px solid var(--line);padding:.8rem;overflow:auto;max-height:80vh;display:flex;flex-direction:column;gap:.5rem;font-size:.8rem}
+.viewer aside .o{border:1px solid var(--line);border-radius:4px;padding:.5rem;display:flex;flex-direction:column;gap:.2rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--logo1);color:#fff;padding:.55rem .9rem;border-radius:6px;font-size:.84rem;font-weight:600;z-index:60;max-width:90vw;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+
+/* ---------- impresión (solo versión descargada; informe en hoja Carta ING) ---------- */
+.print-letterhead{display:none}
+@page{size:letter;margin:12mm 25mm 25mm 16mm}
+@media print{
+  body{background:#fff!important;color:#000}
+  aside.sidebar,.mob-bar,.toast,dialog,.no-print,[data-view]:not(#v-informe){display:none!important}
+  .shell{display:block} main.view{padding:0;max-width:100%}
+  .print-letterhead{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1.5px solid #1F3864;padding-bottom:3mm;margin-bottom:5mm}
+  .print-letterhead img{width:62mm}
+  .print-letterhead div{font:bold 9pt Arial,sans-serif;color:#1F3864;text-align:right;text-transform:uppercase}
+  #v-informe .calc-head h1{color:#1F3864!important;font-family:Arial,sans-serif;font-size:15pt}
+  .report{border:none;max-height:none;overflow:visible;font:10pt/1.45 Arial,sans-serif;color:#000;padding:0}
+}
+
+@media (max-width:820px){
+  .shell{flex-direction:column}
+  aside.sidebar{position:relative;width:100%;height:auto;border-right:none;border-bottom:3px solid var(--logo1)}
+  .brand-logo-wrap{max-width:260px}
+  main.view{padding:1rem 16px 4rem;max-width:100%}
+  .mob-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;align-items:center;gap:.6rem;padding:.5rem 16px;background:var(--logo1);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  html.tool-open .mob-bar{display:flex}
+  .mob-bar button{flex:none;font-weight:600;font-size:.9rem;color:var(--logo1);background:#fff;border:none;border-radius:6px;padding:.45rem .7rem}
+  .mob-bar span{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.tool-open aside.sidebar{display:none}
+  html:not(.tool-open) main.view{display:none}
+  input,select,textarea{font-size:16px}
+  .drop{grid-template-columns:1fr}.drop .sheet{display:none}.drop .acts{justify-content:flex-start}
+  .viewer{grid-template-columns:1fr}.viewer aside{border-left:none;border-top:1px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo-wrap"><img class="brand-logo" src="data:image/png;base64,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" alt="ING Estructural — Proyectos Civiles e Industriales"></div>
+      <h1>Revisor de Planos</h1>
+      <small>Control de láminas · AutoCAD → PDF</small>
+    </div>
+    <nav class="cats" id="sidebarNav"></nav>
+  </aside>
+  <div class="mob-bar" id="mobBar"><button type="button" id="mobMenu" aria-label="Volver a la lista de herramientas">☰ Herramientas</button><span id="mobTitle"></span></div>
+
+  <main class="view" id="mainView">
+    <div class="print-letterhead"><img src="data:image/png;base64,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" alt="ING Estructural"><div>ING Estructural<br>Proyectos Civiles e Industriales</div></div>
+
+    <div class="panel no-print" id="progWrap" style="padding-top:1rem" hidden><div class="progress" id="prog"><span id="progTxt"></span><div class="bar"><i id="progBar"></i></div><button class="btn" id="btnStop">Detener</button></div></div>
+    <!-- INICIO -->
+    <section data-view="" id="v-home">
+      <div class="home-head">
+        <h1>Revisor de Planos</h1>
+        <p>Revisión de sets de planos estructurales exportados de AutoCAD a PDF: índice de láminas, cortes y detalles, checklist por lámina, registro de observaciones e informe punteado. Elige una herramienta en el panel izquierdo; las que ya tienen datos se marcan con punto verde, y con punto rojo las que tienen algo pendiente.</p>
+        <div class="status-strip" id="kpisHome"></div>
+      </div>
+      <div class="panel" style="margin-top:1.6rem"><h3>Cómo se usa</h3>
+        <ol class="steps">
+          <li><a href="#carga">Datos del Set y Carga de PDF</a>: completa los datos del proyecto y arrastra los PDF exportados de AutoCAD.</li>
+          <li><a href="#laminas">Índice de Láminas</a>: corrige lo leído del cajetín y revisa las marcadas como REPETIDA; luego «Analizar láminas» para la revisión visual con Claude.</li>
+          <li><a href="#cortes">Índice de Cortes</a> y <a href="#checklist">Checklist</a>: revisa saltos, repetidos, detalles sin número y llamados ilegibles.</li>
+          <li><a href="#observaciones">Registro de Observaciones</a>: ajusta prioridad, estado y responsable de cada observación.</li>
+          <li><a href="#informe">Informe y Exportación</a>: copia el informe punteado o pega los datos en Revision_Planos_ING.xlsx.</li>
+        </ol>
+        <p class="note">Los PDF se leen en este equipo y no se guardan: al volver a abrir la página, vuelve a cargarlos para ver las imágenes o analizar. Los datos del registro quedan guardados en este navegador.</p>
+      </div>
+    </section>
+
+    <!-- CARGA -->
+    <section data-view="carga" id="v-carga" hidden>
+      <div class="calc-head"><h1>Datos del Set y Carga de PDF</h1><div class="sub">Arrastra uno o varios PDF multihoja. Se leen en este equipo: cajetín, texto, cortes/detalles y láminas duplicadas.</div></div>
+      <div id="confirmNew" class="confirm" hidden>Se borrarán láminas, cortes, checklist y observaciones de este proyecto. <button class="btn pri" id="btnNewYes">Borrar todo</button><button class="btn" id="btnNewNo">Cancelar</button></div>
+      <div id="demoBanner" class="banner info" hidden>DATOS DE EJEMPLO para mostrar el funcionamiento. Se reemplazan al cargar el primer PDF.</div>
+      <div id="aiBanner" class="banner" hidden></div>
+      <div class="panel"><h3>Datos del set</h3>
+        <div class="field-grid">
+          <div class="field"><label for="pNombre">Proyecto</label><input id="pNombre" placeholder="NOMBRE DEL PROYECTO"></div>
+          <div class="field"><label for="pCliente">Cliente</label><input id="pCliente"></div>
+          <div class="field"><label for="pRev">Revisión del set</label><input id="pRev"></div>
+          <div class="field"><label for="pNum">Numeración de detalles</label><select id="pNum"><option>GLOBAL</option><option>POR LÁMINA</option></select></div>
+          <div class="field"><label for="pRevisor">Revisor</label><input id="pRevisor"></div>
+          <div class="field"><label for="pResp">Responsable de correcciones</label><input id="pResp"></div>
+        </div>
+      </div>
+      <div class="panel"><h3>Archivos PDF</h3>
+        <div class="drop" id="drop" aria-label="Zona para arrastrar PDF">
+          <div class="sheet" aria-hidden="true"></div>
+          <div><b>Arrastra aquí los PDF del set de planos</b><p>También puedes soltarlos en cualquier parte de la ventana.</p></div>
+          <div class="acts"><input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+            <button class="btn pri" id="btnPick">Elegir PDF…</button><button class="btn" id="btnNew">Nuevo proyecto</button></div>
+        </div>
+        <div class="status-strip" id="kpis"></div>
+      </div>
+      <div class="panel"><h3>Proyecto de revisión (.json)</h3>
+        <div class="toolbar"><button class="btn" id="btnExpJson">Exportar proyecto</button><input type="file" id="impIn" accept=".json,application/json" hidden><button class="btn" id="btnImpJson">Importar proyecto</button></div>
+        <p class="note">Guarda láminas, cortes, checklist y observaciones en un archivo .json para respaldarlo o moverlo entre la app instalada y la versión dentro de Claude. Los PDF no se incluyen: al importar, vuelve a cargarlos para ver imágenes o analizar.</p>
+      </div>
+    </section>
+
+    <!-- LÁMINAS -->
+    <section data-view="laminas" id="v-laminas" hidden>
+      <div class="calc-head"><h1>Índice de Láminas</h1><div class="sub">Número, título del cajetín, código, revisión y marca de lámina repetida. Los datos leídos del cajetín se pueden corregir en cada ficha. Clic en la miniatura para ver la lámina en grande.</div></div>
+      <div class="panel" id="goClaude" hidden><h3>Revisión visual con Claude</h3>
+        <p style="margin:0 0 .8rem;font-size:.88rem;line-height:1.55">En esta app funcionan la carga de PDF, la revisión automática del texto, índices, checklist, registro, resumen e informe. La revisión visual lámina por lámina con Claude se hace en la versión dentro de Claude:</p>
+        <div class="toolbar"><a class="btn pri" href="https://claude.ai/artifact/D1kQgXery7ngW6c3fRL7gC" target="_blank" rel="noopener" style="text-decoration:none">Abrir Revisor en Claude ↗</a><button class="btn" id="btnExpJson2">Exportar proyecto para llevarlo</button></div>
+        <p class="note">Pasos: 1) «Exportar proyecto» aquí · 2) en Claude, «Importar proyecto» y vuelve a cargar los PDF · 3) analiza · 4) exporta desde Claude e importa aquí.</p>
+      </div>
+      <div class="panel" id="aiPanel"><h3>Análisis con Claude</h3>
+        <div class="toolbar">
+          <button class="btn pri" id="btnAll">Analizar láminas</button>
+          <div class="field"><label for="rigor">Rigurosidad</label><select id="rigor"><option value="normal">NORMAL · 3×2 SECTORES AGRUPADOS</option><option value="alta" selected>ALTA · 4×3, UNA LLAMADA POR SECTOR</option><option value="maxima">MÁXIMA · 5×4, UNA LLAMADA POR SECTOR</option></select></div>
+          <div class="field"><label for="chkSpell">Ortografía (texto PDF)</label><select id="chkSpellSel"><option value="1">REVISAR</option><option value="0">NO REVISAR</option></select><input type="checkbox" id="chkSpell" checked hidden></div>
+          <button class="btn" id="btnAuto">Repetir revisión automática del texto</button>
+          <div class="field"><label for="onlyNew">Alcance</label><select id="onlyNew"><option value="1">SOLO NO ANALIZADAS</option><option value="0">TODAS (RE-ANALIZAR)</option></select></div>
+        </div>
+        <div id="aiBanner2" class="banner" hidden style="margin-top:.8rem"></div>
+        <div id="txtBanner" class="banner" hidden style="margin-top:.8rem"></div>
+        <p class="note">Dos niveles de revisión: (1) revisión automática del texto del PDF, con reglas fijas: cotas y textos sobrepuestos, textos menores a 1,8 mm impresos, notas repetidas, referencias a láminas inexistentes y calidades de materiales distintas entre láminas (requiere texto PDF o SHX como comentarios); (2) revisión visual con Claude, sector por sector, con la imagen ampliada y los textos de ese sector. A mayor rigurosidad, más sectores y más llamadas (más lento y más consumo).</p>
+      </div>
+      <div class="panel"><h3>Bitácora de análisis</h3><div style="overflow-x:auto"><table class="results" id="tblLog"></table></div>
+        <p class="note">Si una lámina aparece con 0 observaciones nuevas, revisa aquí el modo (imagen o solo texto), las llamadas y si hubo error.</p></div>
+      <div class="grid" id="gridLam"></div>
+    </section>
+
+    <!-- CORTES -->
+    <section data-view="cortes" id="v-cortes" hidden>
+      <div class="calc-head"><h1>Índice de Cortes, Secciones y Detalles</h1><div class="sub">Identificador, lámina donde se dibuja, lámina donde se llama y estado: correlativo, salto, repetido, sin número o sin llamado en planta. N° orden: A-A = 1, B-B = 2… Subserie: código de lámina si los detalles se numeran por lámina.</div></div>
+      <div class="panel"><h3>Índice</h3><div style="overflow-x:auto"><table class="results editable" id="tblCor"></table></div>
+        <button class="btn-add" id="btnAddCor" style="margin-top:.7rem">+ Agregar corte o detalle</button></div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section data-view="checklist" id="v-checklist" hidden>
+      <div class="calc-head"><h1>Checklist de Revisión por Lámina</h1><div class="sub">Se llena solo con las observaciones registradas (texto en cursiva = automático). Clic en una casilla para fijarla a mano: OK → OBS → VER → N/A → automático.</div></div>
+      <div class="panel"><h3>Matriz de verificación</h3><div style="overflow-x:auto"><table class="results chk" id="tblChk"></table></div>
+        <p class="note">OBS = corregir · VER = verificar contra original · N/A = no aplica.</p></div>
+    </section>
+
+    <!-- OBSERVACIONES -->
+    <section data-view="observaciones" id="v-observaciones" hidden>
+      <div class="calc-head"><h1>Registro de Observaciones</h1><div class="sub">Solo lo que hay que corregir o verificar. Cada fila con el problema exacto y la solución propuesta. Si no se puede confirmar desde el PDF: tipo «Verificar contra original», indicando qué comparar.</div></div>
+      <div class="panel"><h3>Filtros</h3>
+        <div class="field-grid">
+          <div class="field"><label for="fLam">Lámina</label><select id="fLam"><option value="">TODAS</option></select></div>
+          <div class="field"><label for="fCat">Categoría</label><select id="fCat"><option value="">TODAS</option></select></div>
+          <div class="field"><label for="fEst">Estado</label><select id="fEst"><option value="">TODOS</option></select></div>
+          <div class="field"><label for="fPri">Prioridad</label><select id="fPri"><option value="">TODAS</option></select></div>
+        </div></div>
+      <div class="panel"><h3>Observaciones</h3><div style="overflow-x:auto"><table class="results editable" id="tblObs"></table></div>
+        <button class="btn-add" id="btnAddObs" style="margin-top:.7rem">+ Agregar observación</button></div>
+    </section>
+
+    <!-- RESUMEN -->
+    <section data-view="resumen" id="v-resumen" hidden>
+      <div class="calc-head"><h1>Resumen</h1><div class="sub">Conteo de observaciones por estado, por categoría y por lámina.</div></div>
+      <div id="resBox"></div>
+    </section>
+
+    <!-- INFORME -->
+    <section data-view="informe" id="v-informe" hidden>
+      <div class="calc-head"><h1>Informe de Revisión</h1><div class="sub no-print">Formato técnico, punteado: solo lo que hay que corregir o verificar, por lámina y categoría.</div></div>
+      <div class="cols no-print" style="margin-bottom:1.2rem">
+        <div class="panel"><h3>Informe</h3><div class="toolbar"><button class="btn pri" id="btnCopyRep">Copiar informe</button><button class="btn" id="btnSaveRep">Descargar .txt</button><button class="btn" id="btnPrint" hidden>Imprimir en hoja ING</button></div></div>
+        <div class="panel"><h3>Pegar en la planilla Excel</h3><div class="toolbar"><button class="btn" id="tsvLam">Láminas → Indice_Laminas!A5</button><button class="btn" id="tsvCor">Cortes → Indice_Cortes!A5</button><button class="btn" id="tsvChk">Checklist → Checklist_Laminas!E5</button><button class="btn" id="tsvObs">Observaciones → Registro_Observaciones!B5</button></div></div>
+        <div class="panel"><h3>Libro de datos</h3><div class="toolbar"><button class="btn" id="btnXlsx">Descargar .xlsx</button></div><p class="note">Mismas hojas y orden de columnas que Revision_Planos_ING.xlsx.</p></div>
+      </div>
+      <pre class="report" id="report"></pre>
+    </section>
+  </main>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head"><h3 id="dlgTitle"></h3>
+    <button class="btn" id="zOut" aria-label="Reducir">−</button><button class="btn" id="zIn" aria-label="Ampliar">+</button>
+    <button class="btn" id="dlgAna">Analizar esta lámina</button><button class="btn" id="dlgClose">Cerrar</button></div>
+  <div class="viewer"><div class="canvasbox"><canvas id="cv"></canvas></div><aside id="dlgObs"></aside></div>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+"use strict";
+/* ---------------- Catálogos (alineados con Revision_Planos_ING.xlsx) ---------------- */
+const CATS=["Coherencia general","Texto y datos","Cotas","Cortes y vistas"];
+const ESTADOS=["Pendiente","Corregido","Verificado"];
+const PRIOS=["Alta","Media","Baja"];
+const TIPOS_OBS=["Corregir","Verificar contra original"];
+const TIPOS_COR=["Corte","Sección","Detalle","Elevación","Vista"];
+const ITEMS=[
+["CG-01",0,"Título del cajetín coincide con el contenido"],["CG-02",0,"Lámina no duplicada con otra"],["CG-03",0,"Sin elementos repetidos dentro de la lámina"],["CG-04",0,"Ningún sector cortado por viewports"],["CG-05",0,"Cajetín consistente con índice del set"],["CG-06",0,"Escala indicada = escala real de la vista"],
+["TD-01",1,"Sin errores ortográficos"],["TD-02",1,"Sin información duplicada"],["TD-03",1,"Títulos de vistas/detalles corresponden al contenido"],["TD-04",1,"Notas/especificaciones consistentes entre láminas"],["TD-05",1,"Textos legibles a escala de impresión"],
+["CT-01",2,"Cotas en puntos correctos"],["CT-02",2,"Cotas sin superponerse entre sí"],["CT-03",2,"Cotas sin superponerse con otros elementos"],["CT-04",2,"Cotas legibles a escala de impresión"],["CT-05",2,"Cadenas de cotas cierran con cota total"],["CT-06",2,"Unidades y formato de cotas consistentes"],
+["CV-01",3,"Llamados de corte legibles en planta"],["CV-02",3,"Dirección del corte coincide con la línea de corte"],["CV-03",3,"Sentido de mirada coincide con flechas del llamado"],["CV-04",3,"La vista muestra lo que corresponde en ese punto"],["CV-05",3,"Sin información faltante"],["CV-06",3,"Sin información sobrante o errada"],["CV-07",3,"Identificación correlativa"],["CV-08",3,"Referencia cruzada llamado ↔ lámina correcta"]];
+const ITEM_CODES=ITEMS.map(i=>i[0]);
+
+/* ---------------- Estado ---------------- */
+const KEY="ing-revisor-planos-v2";
+const docs={};      // fileName -> PDFDocumentProxy (no persiste)
+const thumbs={};    // pageKey -> dataURL (no persiste)
+let S=load()||demo();
+let stopFlag=false, viewing=null, zoom=1;
+
+function blank(){return{proj:{nombre:"",cliente:"",rev:"",num:"GLOBAL",revisor:"",resp:""},pages:[],cortes:[],obs:[],chk:{},demo:false}}
+function demo(){const s=blank();s.demo=true;s.proj.nombre="GALPÓN INDUSTRIAL (EJEMPLO)";s.proj.rev="B";
+ const P=(i,c,t,e,dup)=>({key:"demo|"+i,file:"EJEMPLO.pdf",page:i,codigo:c,titulo:t,rev:"B",escala:e,fecha:"",dupCon:dup||"",auto:{},analyzed:true,hasText:true,sim:null});
+ s.pages=[P(1,"S-01","PLANTA DE FUNDACIONES","1:100"),P(2,"S-02","PLANTA ESTRUCTURA NIVEL +3.50","1:100"),P(3,"S-03","CORTES Y DETALLES DE FUNDACIONES","1:20 / 1:10"),P(4,"S-04","ELEVACIONES EJES 1 Y 5","1:50"),P(5,"S-04","ELEVACIONES EJES 1 Y 5","1:50","S-04 (pág. 4)")];
+ const C=(id,t,n,d,r,e,l,o)=>({id,tipo:t,sub:"",num:n,dib:d,ref:r,esc:e,leg:l,obs:o||""});
+ s.cortes=[C("A-A","Corte",1,"S-03","S-01","1:20","Sí"),C("B-B","Corte",2,"S-03","S-01","1:20","No","LLAMADO TAPADO POR COTA DE EJE C"),C("D-D","Corte",4,"S-03","S-01","1:20","Sí","FALTA C-C"),C("Detalle 01","Detalle",1,"S-03","S-02","1:10","Sí"),C("Detalle 02","Detalle",2,"S-03","S-02","1:10","Sí"),C("Detalle s/n","Detalle","","S-03","","1:10","","PLACA BASE SIN NÚMERO"),C("Detalle 03","Detalle",3,"S-03","S-02","1:10","Sí")];
+ const O=(lam,cat,item,elem,ubic,prob,sol,tipo,prio,est)=>({lam,cat,item,elem:elem.toUpperCase(),ubic:ubic.toUpperCase(),prob,sol,tipo,prio,est,resp:"",fdet:"",fcie:""});
+ s.obs=[O("S-04","Coherencia general","CG-02","Lámina completa","Pág. 5 del PDF","Pág. 5 es copia íntegra de S-04 (mismo código, título y contenido).","Eliminar pág. 5 o reemplazar por la lámina que corresponda; regenerar PDF desde el layout correcto.","Corregir","Alta","Pendiente"),
+ O("S-03","Cortes y vistas","CV-07","Detalle placa base","Entre Det. 02 y Det. 03","Detalle sin número dentro de la secuencia 01–03.","Asignar número correlativo, renumerar siguientes y actualizar llamados en S-02.","Corregir","Media","Pendiente"),
+ O("S-01","Cortes y vistas","CV-01","Llamado corte B-B","Eje C, entre ejes 2-3","Identificador del llamado tapado por cota de eje C; ilegible a escala de impresión.","Desplazar cota de eje o llamado; texto del llamado ≥ 2,5 mm impreso.","Corregir","Media","Pendiente"),
+ O("S-03","Cotas","CT-02","Cotas Detalle 01 (1:10)","Pedestal, lado izquierdo","Cota 150 se sobrepone a cota 250 y a barra Ø12.","Escalonar líneas de cota (≥ 7 mm impreso) y sacarlas fuera de la armadura.","Corregir","Baja","Pendiente"),
+ O("S-03","Coherencia general","CG-06","Detalle 02","Título del detalle","Escala 1:10 indicada no confirmable desde el PDF.","VERIFICAR CONTRA ORIGINAL: comparar escala del viewport en DWG vs escala del título.","Verificar contra original","Media","Pendiente")];
+ return s}
+function load(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
+let saveT=null;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S,(k,v)=>(k==="items"||k==="tokens")?undefined:v))}catch(e){}},300)}
+
+/* ---------------- Utilidades ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lamLabel=p=>p.codigo||("Pág. "+(S.pages.indexOf(p)+1));
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg||"Copiado")}catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(msg||"Copiado")}catch(_){toast("No se pudo copiar; selecciona el texto manualmente")}ta.remove()}}
+const today=()=>new Date().toISOString().slice(0,10);
+const U=v=>String(v??"").toLocaleUpperCase("es-CL");
+
+/* ---------------- PDF ---------------- */
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"}
+async function renderToCanvas(pageObj,longSide){const v1=pageObj.getViewport({scale:1});const sc=longSide/Math.max(v1.width,v1.height);const vp=pageObj.getViewport({scale:sc});
+ const c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);
+ await pageObj.render({canvasContext:ctx,viewport:vp}).promise;return c}
+function dHash(c){const w=17,h=16,t=document.createElement("canvas");t.width=w;t.height=h;const x=t.getContext("2d");x.drawImage(c,0,0,w,h);const d=x.getImageData(0,0,w,h).data;const g=[];for(let i=0;i<w*h;i++)g.push(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11);let bits="";for(let y=0;y<h;y++)for(let k=0;k<w-1;k++)bits+=g[y*w+k]>g[y*w+k+1]?"1":"0";return bits}
+const ham=(a,b)=>{if(!a||!b)return 999;let n=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])n++;return n};
+function jacc(a,b){if(!a.length&&!b.length)return null;const A=new Set(a),B=new Set(b);let i=0;A.forEach(x=>{if(B.has(x))i++});return i/(A.size+B.size-i||1)}
+
+async function handleFiles(list){
+ const files=[...list].filter(f=>/\.pdf$/i.test(f.name)||f.type==="application/pdf");
+ if(!files.length){toast("Solo se aceptan archivos PDF");return}
+ if(!window.pdfjsLib){toast("No se pudo cargar el lector de PDF; recarga la página");return}
+ if(S.demo){const p=S.proj;S=blank();S.proj=p;if(/EJEMPLO/.test(p.nombre))S.proj.nombre="";syncProj()}
+ showProg(true);let done=0,total=0;
+ for(const f of files){
+  try{const buf=await f.arrayBuffer();const doc=await pdfjsLib.getDocument({data:buf,disableFontFace:false,isEvalSupported:false}).promise;docs[f.name]=doc;total+=doc.numPages;
+   for(let n=1;n<=doc.numPages;n++){ if(stopFlag)break;
+    setProg(`Leyendo ${f.name} · pág. ${n}/${doc.numPages}`,(done)/(total||1));
+    const key=f.name+"|"+n;let p=S.pages.find(x=>x.key===key);
+    if(!p){p={key,file:f.name,page:n,codigo:"",titulo:"",rev:"",escala:"",fecha:"",dupCon:"",auto:{},analyzed:false,hasText:false,sim:null};S.pages.push(p)}
+    const pg=await doc.getPage(n);const c=await renderToCanvas(pg,520);thumbs[key]=c.toDataURL("image/jpeg",.82);p.hash=dHash(c);
+    const items=await extractText(pg,p);
+    p.hasText=items.length>5;p.text=items.map(i=>i.s).join(" ").slice(0,12000);
+    p.tokens=[...new Set(items.map(i=>i.s.toUpperCase()))].slice(0,1500);
+    p.items=items.slice(0,2500);
+    readCajetin(p,items);done++;renderLam();
+   }}catch(e){console.error(e);toast("No se pudo leer "+f.name)}
+ }
+ detectDuplicates();detectCortes();const na=runAutoChecks();showProg(false);stopFlag=false;save();renderAll();
+ toast(`${done} página(s) leídas · ${na} observación(es) de la revisión automática del texto`);
+}
+async function extractText(pg,p){const vp=pg.getViewport({scale:1});p.W=vp.width;p.H=vp.height;const out=[];
+ const push=(s,x0,y0,x1,y1,hpt)=>{out.push({s,x0,y0,x1,y1,hmm:ptmm(hpt),x:(x0+x1)/2/vp.width,y:(y0+y1)/2/vp.height,h:hpt})};
+ try{const tc=await pg.getTextContent();for(const it of tc.items){const s=(it.str||"").trim();if(!s)continue;const m=pdfjsLib.Util.transform(vp.transform,it.transform);
+  const fs=Math.hypot(m[2],m[3]);const la=Math.hypot(m[0],m[1])||1;const w=it.width||s.length*fs*.6;const ax=m[0]/la*w,ay=m[1]/la*w;
+  const xs=[m[4],m[4]+ax,m[4]+m[2],m[4]+ax+m[2]],ys=[m[5],m[5]+ay,m[5]+m[3],m[5]+ay+m[3]];
+  push(s,Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),fs)}}catch(e){}
+ p.textSrc=out.length>5?"TEXTO PDF":"";
+ if(out.length<=5){try{const an=await pg.getAnnotations();let k=0;for(const a of an){const s=String(a.contentsObj?.str||a.contents||"").trim();if(!s||!a.rect)continue;
+   const r=vp.convertToViewportRectangle(a.rect);const x0=Math.min(r[0],r[2]),x1=Math.max(r[0],r[2]),y0=Math.min(r[1],r[3]),y1=Math.max(r[1],r[3]);
+   const lines=Math.max(1,s.split(/\n/).length);push(s.replace(/\s+/g," "),x0,y0,x1,y1,Math.min(x1-x0,y1-y0)/lines);k++}
+  if(k>5)p.textSrc="COMENTARIOS SHX"}catch(e){}}
+ return out}
+function readCajetin(p,items){
+ const box=items.filter(i=>i.x>0.55&&i.y>0.62);const src=box.length?box:items;const joined=src.map(i=>i.s).join("  ");
+ const code=(joined.match(/\b(?:[A-Z]{1,4}[-_.]?){1,2}\d{2,4}[A-Z]?\b/g)||[]).filter(c=>!/^(NCH|ACI|AISC|ASTM|ISO|A\d|DS|NTM|RUT)/i.test(c)&&!/^\d/.test(c));
+ const rev=joined.match(/REV(?:ISI[ÓO]N)?\.?\s*[:N°º\-]*\s*([A-Z0-9]{1,2})\b/i);
+ const escs=[...new Set((p.text.match(/\b1\s*:\s*\d{1,4}\b/g)||[]).map(s=>s.replace(/\s/g,"")))];
+ const fecha=joined.match(/\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b/);
+ const big=src.filter(i=>/[A-ZÁÉÍÓÚÑ]{3,}/.test(i.s)&&i.s.length>8&&!/^(PROYECTO|CLIENTE|DIBUJ|REVIS|APROB|FECHA|ESCALA|L[ÁA]MINA|PLANO|ARQUITECT|INGENIER|CALCUL|PROPIETARI|UBICACI|N[°º])/i.test(i.s)).sort((a,b)=>b.h-a.h||b.s.length-a.s.length);
+ const a={codigo:code[code.length-1]||"",rev:rev?rev[1]:"",escala:escs.slice(0,3).join(" / "),fecha:fecha?fecha[0]:"",titulo:big[0]?big[0].s:""};
+ p.auto=a;for(const k of ["codigo","rev","escala","fecha","titulo"])if(!p[k])p[k]=U(a[k]);
+}
+function detectDuplicates(){
+ S.pages.forEach(p=>{p.dupAuto="";p.sim=null});
+ for(let i=0;i<S.pages.length;i++)for(let j=0;j<i;j++){const a=S.pages[i],b=S.pages[j];
+  const hm=ham(a.hash,b.hash);const jc=jacc(a.tokens||[],b.tokens||[]);
+  const imgSame=hm<=14, txtSame=jc===null?true:jc>=0.9;
+  const sameCode=a.codigo&&a.codigo===b.codigo;
+  if((imgSame&&txtSame)||sameCode){const lab=`${lamLabel(b)} (pág. ${j+1})`;a.dupAuto=lab;a.sim=Math.round((1-Math.min(hm,256)/256)*100);if(!a.dupCon)a.dupCon=lab;
+   if(!b.dupAuto){b.dupAuto=`${lamLabel(a)} (pág. ${i+1})`;b.sim=a.sim}}
+ }}
+function ordinal(id){const m=id.match(/(?:^|[\s.°º])0*(\d{1,3})\b/);if(m)return +m[1];const l=id.match(/^([A-Z])(?:\s*-\s*\1)?$/i)||id.match(/\b([A-Z])\s*-\s*\1\b/i);if(l)return l[1].toUpperCase().charCodeAt(0)-64;return ""}
+function detectCortes(){
+ const found=new Map();const add=(id,tipo,role,lam)=>{const k=id.toUpperCase();let c=found.get(k);if(!c){c={id,tipo,sub:"",num:/s\/n/i.test(id)?"":ordinal(id.replace(/^\D+/,"")||id),dib:"",ref:"",esc:"",leg:"",obs:"",auto:true};found.set(k,c)}
+  if(role==="dib"){if(!c.dib.split(", ").includes(lam))c.dib=c.dib?c.dib+", "+lam:lam}else{if(!c.ref.split(", ").includes(lam)&&!c.dib.split(", ").includes(lam))c.ref=c.ref?c.ref+", "+lam:lam}};
+ S.pages.forEach(p=>{if(!p.text)return;const lam=lamLabel(p);const T=p.text.toUpperCase();
+  const reT=/\b(CORTE|SECCI[ÓO]N|DETALLE|ELEVACI[ÓO]N)\s+(?:N[°º.]?\s*)?([A-Z]{1,2}\s*-\s*[A-Z]{1,2}|\d{1,3}\s*-\s*\d{1,3}|\d{1,3}|(?![YEO]\b)[A-Z])(?![\wÁÉÍÓÚÑ])/g;let m;const titled=new Set();
+  while((m=reT.exec(T))){let t=m[1].replace("Ó","O");const tipo=t.startsWith("CORTE")?"Corte":t.startsWith("SECC")?"Sección":t.startsWith("DET")?"Detalle":"Elevación";
+   let id=m[2].replace(/\s/g,"");if(tipo==="Detalle"&&/^\d+$/.test(id))id="Detalle "+id.padStart(2,"0");else if(tipo==="Sección"&&!/-/.test(id))id="Sección "+id;
+   titled.add(id.toUpperCase());add(id,tipo,"dib",lam)}
+  const reS=/\bDETALLE\s+(?!N[°º]|\d|[A-Z]\b)(TIPO|DE|DEL|UNI[ÓO]N|PLACA|ANCLAJE|CONEXI[ÓO]N)\b/g;let k=0;
+  while((m=reS.exec(T))&&k<5){k++;add(`Detalle s/n (${lam} #${k})`,"Detalle","dib",lam)}
+  const reB=/\b([A-Z]|\d{1,2})\s*-\s*\1\b/g;
+  while((m=reB.exec(T))){const id=m[0].replace(/\s/g,"");if(!titled.has(id))add(id,"Corte","ref",lam)}
+ });
+ const manual=S.cortes.filter(c=>!c.auto);const merged=[...manual];
+ found.forEach(c=>{if(!manual.some(m=>m.id.toUpperCase()===c.id.toUpperCase()))merged.push(c)});
+ S.cortes=merged;
+}
+function corEstado(c,all){const fl=[];const key=c.tipo+"|"+(c.sub||"");
+ if(c.num===""||c.num==null)fl.push("SIN NÚMERO");
+ const dupId=all.filter(x=>x.id.toUpperCase()===c.id.toUpperCase()).length>1;const dupNum=c.num!==""&&all.filter(x=>x.tipo+"|"+(x.sub||"")===key&&String(x.num)===String(c.num)).length>1;
+ if(dupId||dupNum)fl.push("REPETIDO");
+ const n=+c.num;if(n>1&&!all.some(x=>x.tipo+"|"+(x.sub||"")===key&&+x.num===n-1))fl.push(`SALTO (falta N° ${n-1})`);
+ if(!c.ref)fl.push("SIN LLAMADO EN PLANTA");
+ if(c.leg==="No")fl.push("LLAMADO ILEGIBLE");
+ if(c.dib&&S.pages.length&&!c.dib.split(/,\s*/).every(d=>S.pages.some(p=>lamLabel(p)===d)))fl.push("LÁMINA NO EXISTE");
+ return fl.length?fl.join(" / "):"CORRELATIVO"}
+
+/* ---------------- Claude (capacidad sample) ---------------- */
+/* ================= Revisión automática del texto del PDF (sin IA, reglas fijas) ================= */
+const ISO={A0:[841,1189],A1:[594,841],A2:[420,594],A3:[297,420],A4:[210,297]};
+const ptmm=v=>v*25.4/72;
+function sheetFormat(p){const w=ptmm(Math.min(p.W,p.H)),h=ptmm(Math.max(p.W,p.H));for(const [k,[a,b]] of Object.entries(ISO))if(Math.abs(w-a)/a<0.03&&Math.abs(h-b)/b<0.03)return k;return ""}
+function zona(p,x,y){const r=Math.min(3,Math.floor(y/p.H*3)+1),c=Math.min(4,Math.floor(x/p.W*4)+1);
+ const fil=["","SUPERIOR","MEDIA","INFERIOR"][r],col=["","IZQUIERDA","CENTRO-IZQ.","CENTRO-DER.","DERECHA"][c];
+ return `ZONA ${fil} ${col} (X≈${Math.round(ptmm(x))} MM, Y≈${Math.round(ptmm(p.H-y))} MM DESDE ESQ. INF. IZQ.)`}
+const isNum=s=>/^[±ØΦ%]?\s*\d+([.,]\d+)?\s*(MM|CM|M|°|%)?$/i.test(s.trim());
+function addAutoObs(o){if(S.obs.some(x=>x.autoKey===o.autoKey))return 0;S.obs.push(Object.assign({resp:S.proj.resp||"",fdet:today(),fcie:"",est:"Pendiente",auto:true},o));return 1}
+function autoChecksPage(p){if(!p.items||!p.items.length)return 0;const lam=lamLabel(p);let n=0;const it=p.items;const fmt=sheetFormat(p);
+ // 1) Textos y cotas sobrepuestos
+ const ord=it.map((t,i)=>i).sort((a,b)=>it[a].x0-it[b].x0);let ov=[];
+ for(let a=0;a<ord.length;a++){const A=it[ord[a]];for(let b=a+1;b<ord.length;b++){const B=it[ord[b]];if(B.x0>A.x1)break;
+  const ix=Math.min(A.x1,B.x1)-Math.max(A.x0,B.x0),iy=Math.min(A.y1,B.y1)-Math.max(A.y0,B.y0);if(ix<=0||iy<=0)continue;
+  if(A.s===B.s&&Math.abs(A.x0-B.x0)<1&&Math.abs(A.y0-B.y0)<1)continue;
+  const aA=(A.x1-A.x0)*(A.y1-A.y0),aB=(B.x1-B.x0)*(B.y1-B.y0);if(!aA||!aB)continue;
+  if(ix*iy/Math.min(aA,aB)>0.2)ov.push([A,B])}}
+ ov.slice(0,30).forEach(([A,B])=>{const nA=isNum(A.s),nB=isNum(B.s);const item=nA&&nB?"CT-02":(nA||nB)?"CT-03":"TD-05";
+  n+=addAutoObs({lam,cat:item.startsWith("CT")?"Cotas":"Texto y datos",item,elem:U(nA&&nB?"COTAS":(nA||nB)?"COTA / TEXTO":"TEXTOS"),ubic:zona(p,(A.x0+A.x1)/2,(A.y0+A.y1)/2),
+   prob:`${nA?"Cota":"Texto"} «${A.s}» se sobrepone con ${nB?"cota":"texto"} «${B.s}».`,sol:`Desplazar «${nA&&!nB?B.s:A.s}» o la línea de cota para dejar ≥ 2 mm impresos de separación; si es por espacio, acotar fuera del elemento o ampliar el detalle.`,
+   tipo:"Corregir",prio:nA||nB?"Media":"Baja",autoKey:`ov|${p.key}|${A.s}|${B.s}|${Math.round(A.x0)}|${Math.round(A.y0)}`})});
+ if(ov.length>30)n+=addAutoObs({lam,cat:"Cotas",item:"CT-02",elem:"COTAS Y TEXTOS",ubic:"VARIAS ZONAS",prob:`Hay ${ov.length} superposiciones de texto en total; se detallan las primeras 30.`,sol:"Revisar la lámina completa por superposiciones antes de reemitir.",tipo:"Corregir",prio:"Media",autoKey:`ovN|${p.key}`});
+ // 2) Textos muy pequeños a escala de impresión
+ const small=it.filter(t=>t.hmm>0&&t.hmm<1.8&&t.s.length>0);
+ if(small.length){const mn=Math.min(...small.map(t=>t.hmm));const ej=small.slice(0,6).map(t=>`«${t.s}» ${t.hmm.toFixed(1)} mm (${zona(p,t.x0,t.y0).split(" (")[0]})`).join("; ");
+  n+=addAutoObs({lam,cat:"Texto y datos",item:small.some(t=>isNum(t.s))?"CT-04":"TD-05",elem:"TEXTOS / COTAS PEQUEÑOS",ubic:"VER EJEMPLOS",
+   prob:`${small.length} textos con altura impresa < 1,8 mm (mínima ${mn.toFixed(1)} mm) en hoja ${fmt||"de tamaño no estándar"}. Ej.: ${ej}.`,
+   sol:fmt?"Aumentar altura de texto/cota a ≥ 2,0 mm impresos (2,5 mm en títulos y llamados); revisar escala de anotación del viewport.":"VERIFICAR CONTRA ORIGINAL: comparar tamaño de papel de la configuración de ploteo con el tamaño real de impresión; luego aplicar mínimo 2,0 mm impresos.",
+   tipo:fmt?"Corregir":"Verificar contra original",prio:"Baja",autoKey:`small|${p.key}`})}
+ // 3) Notas o textos largos repetidos en la misma lámina
+ const cnt={};it.forEach(t=>{if(t.s.length>=20&&!isNum(t.s)){(cnt[t.s]=cnt[t.s]||[]).push(t)}});
+ Object.entries(cnt).filter(([s,a])=>a.length>1&&!a.every(t=>Math.abs(t.x0-a[0].x0)<1&&Math.abs(t.y0-a[0].y0)<1)).slice(0,8).forEach(([s,a])=>{
+  n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-02",elem:"TEXTO REPETIDO",ubic:a.slice(0,3).map(t=>zona(p,t.x0,t.y0).split(" (")[0]).join(" / "),
+   prob:`El texto «${s.slice(0,90)}» aparece ${a.length} veces en la lámina.`,sol:"Verificar si es información duplicada; dejar una sola vez o referenciar a la nota general.",tipo:"Verificar contra original",prio:"Baja",autoKey:`dup|${p.key}|${s.slice(0,60)}`})});
+ return n}
+function autoChecksSet(){let n=0;const codes=S.pages.map(p=>p.codigo).filter(Boolean);
+ // 4) Referencias a láminas que no existen en el set
+ const pre=[...new Set(codes.map(c=>{const m=c.match(/^([A-Z]{1,4})([-_. ]?)(\d+)/);return m?m[1]+"|"+m[2]+"|"+m[3].length:null}).filter(Boolean))];
+ S.pages.forEach(p=>{if(!p.text)return;const T=p.text.toUpperCase();pre.forEach(k=>{const [L,sep,d]=k.split("|");const re=new RegExp("\\b"+L+(sep?"\\"+sep:"")+"\\d{"+d+"}\\b","g");
+  const found=[...new Set(T.match(re)||[])].filter(x=>!codes.includes(x));
+  found.forEach(x=>{n+=addAutoObs({lam:lamLabel(p),cat:"Cortes y vistas",item:"CV-08",elem:`REFERENCIA ${x}`,ubic:"TEXTO DE LA LÁMINA",prob:`Se cita la lámina ${x}, que no está en el set revisado.`,sol:`Corregir la referencia a la lámina correcta o incorporar ${x} al set.`,tipo:"Corregir",prio:"Media",autoKey:`ref|${p.key}|${x}`})})})});
+ // 5) Calidades de materiales con notación distinta entre láminas
+ const fam=[["Hormigón",/\b(?:H|G)\s?-?\s?\d{2}(?:\s?\(\d{2}\))?\b/g],["Acero de refuerzo",/\bA\s?6?3[0]?\s?-\s?4[2]0?\s?H\b|\bA\s?44\s?-\s?28\s?H\b/g],["Acero estructural",/\bA\s?(?:36|572|270\s?ES|345\s?ES|42\s?-\s?27\s?ES)\b/g]];
+ fam.forEach(([nom,re])=>{const per={};S.pages.forEach(p=>{if(!p.text)return;(p.text.toUpperCase().match(re)||[]).forEach(v=>{v=v.replace(/\s/g,"");(per[v]=per[v]||new Set()).add(lamLabel(p))})});
+  const ks=Object.keys(per);if(ks.length>1){const first=[...per[ks[0]]][0];n+=addAutoObs({lam:first,cat:"Texto y datos",item:"TD-04",elem:U(nom),ubic:"NOTAS / ESPECIFICACIONES",
+   prob:`${nom}: se usan ${ks.length} designaciones distintas en el set: ${ks.map(k=>`${k} (${[...per[k]].join(", ")})`).join("; ")}.`,sol:"Verificar que cada designación corresponda al elemento indicado y unificar la notación (norma vigente) en todas las láminas.",tipo:"Verificar contra original",prio:"Baja",autoKey:`mat|${nom}|${ks.sort().join(",")}`})}});
+ return n}
+function runAutoChecks(){let n=0;S.pages.forEach(p=>{n+=autoChecksPage(p)});n+=autoChecksSet();save();return n}
+
+/* ================= Claude: análisis por sectores ================= */
+let sample=null,imgLimits=null;
+(async()=>{try{sample=await window.claude?.use?.("sample")}catch(e){sample=null}
+ if(sample){try{const l=await sample.limits();imgLimits=l.images||null}catch(e){imgLimits=null}}
+ const b=$("#aiBanner"),b2=$("#aiBanner2");
+ const inClaude=!!window.claude;$("#goClaude").hidden=inClaude;if(!inClaude){$("#btnAll").disabled=true;document.querySelector("#goClaude .toolbar").appendChild($("#btnAuto"));$("#aiPanel").hidden=true}
+ const msg=!sample?(inClaude?"El análisis con Claude no está disponible en esta vista; revisa los permisos de la página (menú de la página → Permisos).":"Esta es la app instalada: el análisis visual con Claude se hace en la versión dentro de Claude (botón «Abrir Revisor en Claude»).")+(inClaude?" Funcionan la lectura del PDF, la revisión automática del texto, índices, registro y exportación.":"")
+  :!imgLimits?"ATENCIÓN: esta vista no permite enviar imágenes a Claude. El análisis usará solo el texto del PDF, sin revisión visual de cotas, viewports ni cortes. Si los textos son SHX, prácticamente no encontrará nada.":"";
+ [b,b2].forEach(x=>{if(x){x.hidden=!msg;x.textContent=msg}});renderLam()})();
+const RIG={normal:{c:3,r:2,per:false,lab:"NORMAL"},alta:{c:4,r:3,per:true,lab:"ALTA"},maxima:{c:5,r:4,per:true,lab:"MÁXIMA"}};
+function logA(e){S.log=S.log||[];S.log.unshift(Object.assign({t:new Date().toLocaleString("es-CL")},e));S.log=S.log.slice(0,80);save();renderLog()}
+function renderLog(){const t=$("#tblLog");if(!t)return;const L=S.log||[];if(!L.length){t.innerHTML=`<tr><td class="empty">Sin análisis realizados.</td></tr>`;return}
+ t.innerHTML=`<thead><tr><th>Fecha</th><th>Lámina</th><th>Rigurosidad</th><th>Modo</th><th>Llamadas</th><th>Imágenes</th><th>Obs. nuevas</th><th>Ítems OBS/VER</th><th>Resultado</th></tr></thead><tbody>`+
+ L.map(e=>`<tr><td class="num">${esc(e.t)}</td><td class="num">${esc(e.lam)}</td><td class="num">${esc(e.rig||"")}</td><td class="num">${esc(e.modo||"")}</td><td class="num">${e.calls??""}</td><td class="num">${e.imgs??""}</td><td class="num"><b>${e.nuevas??""}</b></td><td class="num">${e.items??""}</td><td class="l">${e.err?`<span class="chip bad">${esc(e.err)}</span>`:`<span class="chip ok">OK</span>`}${e.ilegible?` <span class="chip warn">${e.ilegible} sector(es) poco legibles</span>`:""}</td></tr>`).join("")+"</tbody>"}
+
+function sectorTexts(p,x0,y0,x1,y1){if(!p.items)return"";return p.items.filter(t=>t.x0>=x0&&t.x1<=x1&&t.y0>=y0&&t.y1<=y1).slice(0,400).map(t=>`${t.s} [${t.hmm.toFixed(1)}mm]`).join(" | ").slice(0,7000)}
+function buildPrompt(p,o){
+ const idx=S.pages.map((x,i)=>`${i+1}. ${lamLabel(x)} — ${x.titulo||"(sin título)"}${x.dupCon?" [posible duplicado de "+x.dupCon+"]":""}`).join("\n");
+ const cor=S.cortes.map(c=>`${c.id} | ${c.tipo} | dibujo: ${c.dib||"-"} | llamado: ${c.ref||"-"}`).join("\n").slice(0,4000);
+ const ya=S.obs.filter(x=>x.lam===lamLabel(p)).map(x=>`- ${x.item} ${x.elem}: ${x.prob}`).join("\n").slice(0,3000);
+ return `Eres un revisor senior y EXIGENTE de planos de ingeniería estructural (hormigón armado, acero, madera) de ING Estructural. Tu trabajo vale por lo que encuentras: un set real casi siempre tiene errores. Revisa este ${o.scope} de una lámina exportada de AutoCAD 2026 a PDF.
+
+IMÁGENES: ${o.desc}
+LÁMINA: N° ${S.pages.indexOf(p)+1} · código "${p.codigo||"?"}" · título cajetín "${p.titulo||"?"}" · rev "${p.rev||"?"}" · escala(s) "${p.escala||"?"}" · hoja ${sheetFormat(p)||"?"}
+NUMERACIÓN DE DETALLES DEL SET: ${S.proj.num}
+
+ÍNDICE DEL SET:
+${idx}
+
+CORTES/DETALLES DEL SET:
+${cor||"(ninguno)"}
+
+TEXTOS DEL PDF EN ESTA ZONA (con altura impresa; vacío si los textos son SHX):
+${o.texts||"(sin capa de texto)"}
+
+OBSERVACIONES YA REGISTRADAS PARA ESTA LÁMINA (no las repitas):
+${ya||"(ninguna)"}
+
+MÉTODO — recorre la imagen ampliada completa, de izquierda a derecha y de arriba abajo:
+1. Cada COTA: ¿está en el punto correcto (eje, cara, centro)? ¿su texto se sobrepone a otra cota, línea, armadura, achurado o texto? ¿se lee a escala de impresión? ¿la cadena suma la cota total?
+2. Cada TEXTO y título de vista: ortografía, legibilidad, si corresponde a lo dibujado, si está repetido.
+3. Cada LLAMADO de corte/detalle: ¿legible? ¿tiene identificador y lámina de referencia? ¿flechas de dirección y sentido claras?
+4. Cada VISTA/CORTE dibujado: ¿coincide con su llamado (dirección y sentido)? ¿falta o sobra información (armaduras, perfiles, pernos, soldaduras, niveles, ejes, cotas)?
+5. Bordes del viewport: ¿algo queda cortado (elementos, cotas, textos)?
+6. Detalles sin número, numeración con saltos o repetida.
+
+REGLAS:
+- Reporta SOLO lo que hay que corregir o verificar; nunca lo que está bien.
+- Cada observación: problema exacto (qué cota/texto/elemento, con su valor o texto literal, y dónde dentro de la imagen) + solución concreta.
+- Si dudas o la imagen no permite confirmarlo: NO lo omitas; repórtalo con tipo "Verificar contra original" e indica qué comparar.
+- No inventes valores que no se lean. Elemento y ubicación en MAYÚSCULAS.
+- Prioridad: Alta = altera lo que se construye; Media = ambigüedad o referencia cruzada errada; Baja = forma, ortografía, legibilidad.
+
+Responde SOLO JSON válido:
+{"legibilidad":"BUENA|PARCIAL|MALA",
+ "inventario":{"cotas":0,"textos":0,"llamados":0,"vistas":0},
+ "items":[{"item":"CG-01","estado":"OK|OBS|VER|NA"}  (los 25 códigos: ${ITEM_CODES.join(", ")})],
+ "cajetin":{"codigo":"","titulo":"","revision":"","escala":""},
+ "cortes":[{"id":"A-A","tipo":"Corte|Sección|Detalle|Elevación|Vista","rol":"dibujo|llamado","lamina_referida":"","legible":"Sí|No"}],
+ "observaciones":[{"categoria":"${CATS.join("|")}","item":"código","elemento":"","ubicacion":"","problema":"","solucion":"","tipo":"Corregir|Verificar contra original","prioridad":"Alta|Media|Baja"}]}`}
+
+async function spellCheck(p){if(!sample||!p.items||p.items.length<5)return{n:0,calls:0};
+ const words=[...new Set(p.items.flatMap(t=>t.s.toUpperCase().split(/[^A-ZÁÉÍÓÚÑÜ]+/)).filter(w=>w.length>=4))].slice(0,1800);if(!words.length)return{n:0,calls:0};
+ const r=await sample.json(`Eres corrector ortográfico de planos de ingeniería estructural en español de Chile. Lista de palabras (en mayúsculas) extraídas de una lámina:
+${words.join(" ")}
+
+Identifica SOLO palabras mal escritas (errores de tipeo, letras cambiadas o faltantes) y palabras sin tilde que la requieren. No marques siglas, normas (NCh, ACI, AISC), designaciones de materiales, abreviaturas técnicas habituales (ESP., DIAM., REF., NIV., EJ.) ni nombres propios.
+Responde SOLO JSON: {"errores":[{"palabra":"","correccion":"","tipo":"ortografia|tilde"}]}`,{modelTier:"default",cache:false});
+ const errs=(r&&r.errores)||[];const lam=lamLabel(p);let n=0;
+ const loc=w=>{const t=p.items.find(t=>t.s.toUpperCase().includes(w));return t?zona(p,t.x0,t.y0):"TEXTO DE LA LÁMINA"};
+ errs.filter(e=>e.tipo!=="tilde"&&e.palabra&&e.correccion&&e.palabra!==e.correccion).slice(0,30).forEach(e=>{n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-01",elem:`TEXTO «${U(e.palabra)}»`,ubic:loc(U(e.palabra)),prob:`Error ortográfico: «${e.palabra}».`,sol:`Corregir a «${e.correccion}».`,tipo:"Corregir",prio:"Baja",autoKey:`sp|${p.key}|${e.palabra}`})});
+ const til=errs.filter(e=>e.tipo==="tilde"&&e.palabra&&e.correccion);
+ if(til.length)n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-01",elem:"TILDES",ubic:"VARIOS TEXTOS",prob:`Palabras sin tilde: ${til.slice(0,25).map(e=>`${e.palabra} → ${e.correccion}`).join(", ")}${til.length>25?` (+${til.length-25})`:""}.`,sol:"Corregir tildes (en AutoCAD usar fuente que admita tildes o el código %%… correspondiente).",tipo:"Corregir",prio:"Baja",autoKey:`til|${p.key}`});
+ return{n,calls:1}}
+
+const RANK={OBS:3,VER:2,OK:1,NA:0};
+async function analyzePage(p){
+ const rigK=$("#rigor").value,R=RIG[rigK];const lam0=lamLabel(p);
+ if(!sample){toast("Análisis con Claude no disponible en esta vista");return false}
+ const doc=docs[p.file];if(!doc){toast(`Vuelve a cargar ${p.file} para analizar sus láminas`);return false}
+ const before=S.obs.length;let calls=0,imgs=0,ilegible=0,err="";p.itemStatus={};const modo=imgLimits?"IMAGEN + TEXTO":"SOLO TEXTO";
+ const pg=await doc.getPage(p.page);const jobs=[];
+ if(imgLimits){const maxN=Math.max(1,imgLimits.maxCount||1);const ov=await renderToCanvas(pg,1600);const ovB=await new Promise(r=>ov.toBlob(r,"image/jpeg",.88));
+  const big=await renderToCanvas(pg,Math.min(1300*Math.max(R.c,R.r),7200));const sx=p.W/big.width,sy=p.H/big.height;const tw=big.width/R.c,th=big.height/R.r;const tiles=[];
+  for(let r=0;r<R.r;r++)for(let c=0;c<R.c;c++){const ovl=0.08;const x0=Math.max(0,c*tw-tw*ovl),y0=Math.max(0,r*th-th*ovl),w=Math.min(big.width-x0,tw*(1+2*ovl)),h=Math.min(big.height-y0,th*(1+2*ovl));
+   const t=document.createElement("canvas");t.width=Math.round(w);t.height=Math.round(h);t.getContext("2d").drawImage(big,x0,y0,w,h,0,0,t.width,t.height);
+   tiles.push({b:await new Promise(res=>t.toBlob(res,"image/jpeg",.92)),name:`SECTOR F${r+1}-C${c+1} (fila ${r+1} de ${R.r} desde arriba, columna ${c+1} de ${R.c} desde la izquierda)`,txt:sectorTexts(p,x0*sx,y0*sy,(x0+w)*sx,(y0+h)*sy)})}
+  if(R.per){tiles.forEach(t=>{const withOv=maxN>=2;jobs.push({imgs:withOv?[ovB,t.b]:[t.b],scope:t.name,texts:t.txt,desc:withOv?`imagen 1 = lámina completa (solo contexto, no reportes desde ella); imagen 2 = ${t.name}, ampliado: revisa ESTE sector en detalle. Ubica cada observación como «${t.name.split(" (")[0]}, zona superior/central/inferior izquierda/derecha».`:`imagen 1 = ${t.name}, ampliado. Ubica cada observación dentro del sector.`})})}
+  else{const per=Math.max(1,maxN-1);for(let i=0;i<tiles.length;i+=per){const sl=tiles.slice(i,i+per);const withOv=maxN>=2;
+   jobs.push({imgs:withOv?[ovB,...sl.map(t=>t.b)]:sl.map(t=>t.b),scope:"grupo de sectores",texts:sl.map(t=>t.txt).join(" | ").slice(0,9000),desc:(withOv?"imagen 1 = lámina completa; ":"")+sl.map((t,k)=>`imagen ${k+(withOv?2:1)} = ${t.name}`).join("; ")+". Los sectores se traslapan ~8%: no dupliques observaciones del traslape."})}}}
+ else jobs.push({imgs:[],scope:"texto de la lámina (sin imagen)",texts:(p.items||[]).map(t=>t.s).join(" | ").slice(0,12000),desc:"sin imágenes: analiza solo los textos"});
+ const all=[];let caj=null,cor=[];
+ for(let k=0;k<jobs.length;k++){if(stopFlag)break;const j=jobs[k];setProg(`Analizando ${lamLabel(p)} · ${j.scope.split(" (")[0]} (${k+1}/${jobs.length})`,null);
+  try{const opt={modelTier:"complex",cache:false};if(j.imgs.length)opt.images=j.imgs;calls++;imgs+=j.imgs.length;
+   const r=await sample.json(buildPrompt(p,j),opt);
+   if(r){if(Array.isArray(r.observaciones))all.push(...r.observaciones.map(o=>Object.assign(o,{_sec:j.scope.split(" (")[0]})));if(r.cajetin&&!caj)caj=r.cajetin;if(Array.isArray(r.cortes))cor.push(...r.cortes);
+    if(r.legibilidad==="MALA")ilegible++;(r.items||[]).forEach(x=>{if(!ITEM_CODES.includes(x.item))return;const e=x.estado==="N/A"?"NA":x.estado;if((RANK[e]??-1)>(RANK[p.itemStatus[x.item]]??-1))p.itemStatus[x.item]=e})}
+  }catch(e){const code=e&&e.code;err=code||"error";if(code==="not_granted"){toast("Permiso para usar Claude no otorgado");stopFlag=true;break}
+   if(code==="rate_limited"){toast("Límite de uso alcanzado; intenta más tarde");stopFlag=true;break}if(code==="cancelled")break;
+   if(code==="image_rejected"||code==="images_unavailable"){toast("Las imágenes fueron rechazadas: "+(e.message||code));break}toast("Error en análisis de "+lamLabel(p)+": "+(e&&e.message||code||"desconocido"))}}
+ if(caj){if(!p.codigo&&caj.codigo)p.codigo=U(caj.codigo);if(!p.titulo&&caj.titulo)p.titulo=U(caj.titulo);if(!p.rev&&caj.revision)p.rev=U(caj.revision);if(!p.escala&&caj.escala)p.escala=caj.escala}
+ const lam=lamLabel(p);const seen=new Set(S.obs.filter(o=>o.lam===lam).map(o=>(o.prob||"").toLowerCase().slice(0,60)));
+ for(const o of all){const k=(o.problema||"").toLowerCase().slice(0,60);if(!o.problema||seen.has(k))continue;seen.add(k);
+  const ub=U(o.ubicacion||"");S.obs.push({lam,cat:CATS.includes(o.categoria)?o.categoria:"Coherencia general",item:ITEM_CODES.includes(o.item)?o.item:"",elem:U(o.elemento),ubic:ub.includes(o._sec)?ub:(o._sec&&o._sec.startsWith("SECTOR")?o._sec.replace("SECTOR","SECTOR")+" · ":"")+ub,prob:o.problema,sol:o.solucion||"",tipo:TIPOS_OBS.includes(o.tipo)?o.tipo:"Corregir",prio:PRIOS.includes(o.prioridad)?o.prioridad:"Media",est:"Pendiente",resp:S.proj.resp||"",fdet:today(),fcie:"",ia:true})}
+ for(const c of cor){if(!c.id)continue;let x=S.cortes.find(y=>y.id.toUpperCase()===String(c.id).toUpperCase());
+  if(!x){x={id:U(c.id),tipo:TIPOS_COR.includes(c.tipo)?c.tipo:"Corte",sub:"",num:ordinal(String(c.id).replace(/^\D+(?=\d)/,"")),dib:"",ref:"",esc:"",leg:"",obs:"",auto:true};S.cortes.push(x)}
+  const list=k=>x[k]?x[k].split(/,\s*/):[];if(c.rol==="dibujo"&&!list("dib").includes(lam))x.dib=[...list("dib"),lam].join(", ");
+  if(c.rol==="llamado"&&!list("ref").includes(lam))x.ref=[...list("ref"),lam].join(", ");if(c.legible==="No")x.leg="No";else if(c.legible==="Sí"&&!x.leg)x.leg="Sí"}
+ let sp={n:0,calls:0};if(!stopFlag&&$("#chkSpell").checked){setProg(`Ortografía ${lamLabel(p)}`,null);try{sp=await spellCheck(p)}catch(e){err=err||(e&&e.code)||"error ortografía"}}
+ p.analyzed=!err||all.length>0;p.lastRig=R.lab;
+ const items=Object.values(p.itemStatus).filter(v=>v==="OBS"||v==="VER").length;
+ logA({lam:lam0,rig:R.lab,modo,calls:calls+sp.calls,imgs,nuevas:S.obs.length-before,items,err,ilegible});save();return !err}
+
+async function analyzeAll(){const only=$("#onlyNew").value==="1";const list=S.pages.filter(p=>docs[p.file]&&(!only||!p.analyzed));
+ if(!list.length){toast(S.pages.length?"No hay láminas pendientes (o falta volver a cargar el PDF)":"Primero carga los PDF");return}
+ stopFlag=false;showProg(true);for(let i=0;i<list.length;i++){if(stopFlag)break;setProg(`Analizando ${lamLabel(list[i])} (${i+1}/${list.length})`,i/list.length);await analyzePage(list[i]);renderAll()}
+ showProg(false);stopFlag=false;renderAll();toast("Análisis terminado")}
+
+/* ---------------- Navegación tipo Mesa de Cálculo ---------------- */
+const VIEWS=[
+ {id:"carga",cat:"Proyecto",name:"Datos del Set y Carga de PDF"},
+ {id:"laminas",cat:"Revisión",name:"Índice de Láminas"},
+ {id:"cortes",cat:"Revisión",name:"Índice de Cortes, Secciones y Detalles"},
+ {id:"checklist",cat:"Revisión",name:"Checklist por Lámina"},
+ {id:"observaciones",cat:"Revisión",name:"Registro de Observaciones"},
+ {id:"resumen",cat:"Salida",name:"Resumen"},
+ {id:"informe",cat:"Salida",name:"Informe y Exportación"}];
+const VCATS=["Proyecto","Revisión","Salida"];
+function buildSidebar(){$("#sidebarNav").innerHTML=VCATS.map(c=>`<div class="cat-block"><h2>${c}</h2>${VIEWS.filter(v=>v.cat===c).map(v=>`<button class="tool-btn" data-id="${v.id}"><span class="dot"></span><span class="name">${v.name}</span><span class="n" id="n-${v.id}"></span></button>`).join("")}</div>`).join("");
+ $("#sidebarNav").querySelectorAll(".tool-btn").forEach(b=>b.onclick=()=>{location.hash=b.dataset.id})}
+function route(){const id=location.hash.replace("#","");const v=VIEWS.find(x=>x.id===id);
+ document.querySelectorAll("main [data-view]").forEach(s=>s.hidden=s.dataset.view!==(v?id:""));
+ document.querySelectorAll(".tool-btn").forEach(b=>b.classList.toggle("active",b.dataset.id===id));
+ document.documentElement.classList.toggle("tool-open",!!v);$("#mobTitle").textContent=v?v.name:"";
+ if(id==="informe")renderRep();if(id==="resumen")renderRes();if(id==="checklist")renderChk();
+ if(window.matchMedia&&matchMedia("(max-width:820px)").matches)window.scrollTo(0,0)}
+function sideState(){const pend=S.obs.filter(o=>o.est==="Pendiente").length,dups=S.pages.filter(p=>p.dupCon).length,corBad=S.cortes.filter(c=>corEstado(c,S.cortes)!=="CORRELATIVO").length;
+ const st={carga:[S.pages.length>0,false,S.pages.length?S.pages.length+" pág.":""],laminas:[S.pages.length>0,dups>0,S.pages.length||""],cortes:[S.cortes.length>0,corBad>0,S.cortes.length||""],
+  checklist:[S.pages.some(p=>p.analyzed)||S.obs.length>0,false,""],observaciones:[S.obs.length>0,pend>0,S.obs.length||""],resumen:[S.obs.length>0,false,""],informe:[S.obs.length>0||dups>0||corBad>0,false,""]};
+ Object.entries(st).forEach(([id,[ready,alert,n]])=>{const b=document.querySelector(`.tool-btn[data-id="${id}"]`);if(!b)return;b.classList.toggle("ready",ready&&!alert);b.classList.toggle("alert",alert);$("#n-"+id).textContent=n})}
+
+/* ---------------- Render ---------------- */
+function showProg(on){$("#progWrap").hidden=!on}
+function setProg(t,f){$("#progTxt").textContent=t;if(f!=null)$("#progBar").style.width=Math.round(f*100)+"%"}
+function renderAll(){renderLog();renderKpis();renderLam();renderCor();renderObs();renderChk();renderRes();renderRep();sideState()}
+function renderKpis(){const pend=S.obs.filter(o=>o.est==="Pendiente").length,alta=S.obs.filter(o=>o.est==="Pendiente"&&o.prio==="Alta").length;
+ const dups=S.pages.filter(p=>p.dupCon).length,corBad=S.cortes.filter(c=>corEstado(c,S.cortes)!=="CORRELATIVO").length,ana=S.pages.filter(p=>p.analyzed).length;
+ const h=`<div class="stat"><b>${S.pages.length}</b> láminas</div><div class="stat"><b>${ana}</b> analizadas</div><div class="stat ${dups?"bad":""}"><b>${dups}</b> repetidas</div><div class="stat ${corBad?"warn":""}"><b>${corBad}</b> cortes/detalles a revisar</div><div class="stat ${pend?"warn":""}"><b>${pend}</b> obs. pendientes</div><div class="stat ${alta?"bad":""}"><b>${alta}</b> alta pendientes</div>`;
+ $("#kpis").innerHTML=h;$("#kpisHome").innerHTML=h+(S.proj.nombre?`<div class="stat"><span class="tag">${esc(S.proj.nombre)}</span></div>`:"");$("#demoBanner").hidden=!S.demo;sideState()}
+function renderTxtBanner(){const b=$("#txtBanner");if(!b)return;const P=S.pages.filter(p=>!S.demo&&p.items!==undefined);if(!P.length){b.hidden=true;return}
+ const sin=P.filter(p=>!p.hasText).length;b.hidden=!sin;b.textContent=sin?`${sin} de ${P.length} láminas no traen texto legible por máquina (los textos SHX se exportaron como dibujo). En esas láminas la revisión automática del texto no puede encontrar nada: queda solo la revisión visual con Claude. Para habilitarla, exporta desde AutoCAD con PDFSHX = 1 (textos SHX como comentarios) o usa fuentes TrueType (Arial) en los estilos de texto.`:""}
+function renderLam(){renderTxtBanner();const g=$("#gridLam");if(!S.pages.length){g.innerHTML=`<div class="panel" style="grid-column:1/-1"><div class="empty">Sin láminas. Carga los PDF en «Datos del Set y Carga de PDF».</div></div>`;return}
+ g.innerHTML=S.pages.map((p,i)=>{const lam=lamLabel(p);const os=S.obs.filter(o=>o.lam===lam&&o.est!=="Verificado");const a=os.filter(o=>o.prio==="Alta").length;
+  const th=thumbs[p.key]?`<img src="${thumbs[p.key]}" alt="Miniatura ${esc(lam)}">`:`<div class="ph">${S.demo?"EJEMPLO<br>SIN IMAGEN":"VUELVE A CARGAR<br>"+esc(p.file)+"<br>PARA VER LA IMAGEN"}</div>`;
+  return `<article class="card ${p.dupCon?"dup":""}" data-i="${i}">
+   <div class="thumb" data-view-i="${i}">${th}<span class="pg">${i+1}</span></div>
+   <div class="body">
+    <label>Código<input data-f="codigo" value="${esc(p.codigo)}"></label>
+    <label>Revisión<input data-f="rev" value="${esc(p.rev)}"></label>
+    <label class="w">Título del cajetín<input data-f="titulo" value="${esc(p.titulo)}"></label>
+    <label>Escala(s)<input data-f="escala" value="${esc(p.escala)}"></label>
+    <label>Fecha<input data-f="fecha" value="${esc(p.fecha)}"></label>
+    <label class="w">Duplicada con<input data-f="dupCon" value="${esc(p.dupCon)}" placeholder="—"></label>
+   </div>
+   <div class="foot">
+    ${p.dupCon?`<span class="chip bad">REPETIDA${p.sim?" · "+p.sim+"%":""}</span>`:""}
+    ${p.analyzed?`<span class="chip info">ANALIZADA${p.lastRig?" · "+p.lastRig:""}</span>`:""}${p.textSrc==="COMENTARIOS SHX"?`<span class="chip neutral">SHX COMO COMENTARIOS</span>`:""}
+    ${!p.hasText&&!S.demo?`<span class="chip warn" title="Textos como geometría (SHX): sin revisión automática del texto; solo revisión visual">SIN TEXTO PDF</span>`:""}
+    ${os.length?`<span class="chip ${a?"bad":"warn"}">${os.length} OBS${a?" · "+a+" ALTA":""}</span>`:""}
+    <span class="sp"></span>
+    <button class="btn" data-ana="${i}" ${(!sample||!docs[p.file])?"disabled":""}>Analizar</button>
+   </div></article>`}).join("")}
+function sel(opts,v,attr){return `<select ${attr}>${["",...opts].map(o=>`<option value="${esc(o)}" ${o===v?"selected":""}>${esc(U(o))}</option>`).join("")}</select>`}
+function renderCor(){const t=$("#tblCor");if(!S.cortes.length){t.innerHTML=`<tr><td class="empty">Sin cortes ni detalles. Se detectan al leer los PDF o al analizar con Claude; también puedes agregarlos.</td></tr>`;return}
+ const order=S.cortes.map((c,i)=>i).sort((a,b)=>{const A=S.cortes[a],B=S.cortes[b];return (A.tipo+(A.sub||"")).localeCompare(B.tipo+(B.sub||""))||((+A.num||999)-(+B.num||999))});
+ t.innerHTML=`<thead><tr><th>Identificador</th><th>Tipo</th><th>Subserie</th><th>N° orden</th><th>Lámina dibujo</th><th>Lámina(s) llamado</th><th>Escala</th><th>Legible</th><th>Observación breve</th><th>Estado</th><th></th></tr></thead><tbody>`+
+ order.map(i=>{const c=S.cortes[i];const e=corEstado(c,S.cortes);return `<tr data-c="${i}">
+  <td><input data-k="id" value="${esc(U(c.id))}" size="10"></td><td>${sel(TIPOS_COR,c.tipo,'data-k="tipo"')}</td><td><input data-k="sub" value="${esc(c.sub)}" size="6"></td>
+  <td><input data-k="num" value="${esc(c.num)}" size="3"></td><td><input data-k="dib" value="${esc(c.dib)}" size="8"></td><td><input data-k="ref" value="${esc(c.ref)}" size="10"></td>
+  <td><input data-k="esc" value="${esc(c.esc)}" size="5"></td><td>${sel(["Sí","No"],c.leg,'data-k="leg"')}</td><td><input data-k="obs" value="${esc(c.obs)}" size="22"></td>
+  <td class="l" style="min-width:11rem"><span class="chip ${e==="CORRELATIVO"?"ok":"bad"}">${esc(U(e))}</span></td><td><button class="btn-remove" data-delc="${i}" aria-label="Eliminar fila">✕</button></td></tr>`}).join("")+"</tbody>"}
+function obsFiltered(){const fl=$("#fLam").value,fc=$("#fCat").value,fe=$("#fEst").value,fp=$("#fPri").value;
+ return S.obs.map((o,i)=>i).filter(i=>{const o=S.obs[i];return(!fl||o.lam===fl)&&(!fc||o.cat===fc)&&(!fe||o.est===fe)&&(!fp||o.prio===fp)})}
+function lamList(){return [...new Set(S.pages.map(lamLabel).concat(S.obs.map(o=>o.lam)))].filter(Boolean)}
+function renderObs(){const fl=$("#fLam"),cur=fl.value;const labs=lamList();
+ fl.innerHTML=`<option value="">TODAS</option>`+labs.map(l=>`<option ${l===cur?"selected":""}>${esc(l)}</option>`).join("");
+ const t=$("#tblObs");const idx=obsFiltered();if(!S.obs.length){t.innerHTML=`<tr><td class="empty">Sin observaciones registradas.</td></tr>`;return}
+ t.innerHTML=`<thead><tr><th>N°</th><th>Lámina</th><th>Categoría</th><th>Ítem</th><th>Elemento afectado</th><th>Ubicación</th><th>Problema exacto</th><th>Solución propuesta</th><th>Tipo</th><th>Prioridad</th><th>Estado</th><th>Responsable</th><th></th></tr></thead><tbody>`+
+ idx.map(i=>{const o=S.obs[i];return `<tr data-o="${i}" class="p-${esc(o.prio)}"><td class="num">${i+1}</td>
+  <td>${sel(labs,o.lam,'data-k="lam"')}</td><td>${sel(CATS,o.cat,'data-k="cat"')}</td><td>${sel(ITEM_CODES,o.item,'data-k="item"')}</td>
+  <td><input data-k="elem" value="${esc(o.elem)}" size="16"></td><td><input data-k="ubic" value="${esc(o.ubic)}" size="14"></td>
+  <td><textarea data-k="prob" rows="2" cols="30">${esc(o.prob)}</textarea></td><td><textarea data-k="sol" rows="2" cols="30">${esc(o.sol)}</textarea></td>
+  <td>${sel(TIPOS_OBS,o.tipo,'data-k="tipo"')}</td><td>${sel(PRIOS,o.prio,'data-k="prio"')}</td><td>${sel(ESTADOS,o.est,'data-k="est" class="st-'+o.est+'"')}</td>
+  <td><input data-k="resp" value="${esc(o.resp)}" size="9"></td><td><button class="btn-remove" data-delo="${i}" aria-label="Eliminar observación">✕</button></td></tr>`}).join("")+"</tbody>"}
+
+/* ---------------- Checklist ---------------- */
+function chkAuto(p,code){const l=lamLabel(p);const os=S.obs.filter(o=>o.lam===l&&o.item===code&&o.est!=="Verificado");
+ if(os.some(o=>o.tipo==="Corregir"))return"OBS";if(os.length)return"VER";if(code==="CG-02"&&p.dupCon)return"OBS";
+ if(code==="CV-07"&&S.cortes.some(c=>(c.dib||"").split(/,\s*/).includes(l)&&/SALTO|REPETIDO|SIN NÚMERO/.test(corEstado(c,S.cortes))))return"OBS";
+ if(code==="CV-01"&&S.cortes.some(c=>(c.ref||"").split(/,\s*/).includes(l)&&c.leg==="No"))return"OBS";
+ const st=(p.itemStatus||{})[code];if(st)return st==="NA"?"N/A":st;return ""}
+function chkVal(p,code){const m=(S.chk||{})[p.key];if(m&&m[code])return{v:m[code],auto:false};return{v:chkAuto(p,code),auto:true}}
+function renderChk(){const t=$("#tblChk");if(!S.pages.length){t.innerHTML=`<tr><td class="empty">Sin láminas cargadas.</td></tr>`;return}
+ const P=S.pages;let h=`<thead><tr><th>Código</th><th>Ítem de verificación</th>${P.map(p=>`<th title="${esc(p.titulo)}">${esc(lamLabel(p))}</th>`).join("")}</tr></thead><tbody>`;let lc=-1;
+ ITEMS.forEach(([code,ci,txt])=>{if(ci!==lc){h+=`<tr class="catrow"><td colspan="${P.length+2}">${esc(CATS[ci])}</td></tr>`;lc=ci}
+  h+=`<tr><td class="code">${code}</td><td class="l">${esc(txt)}</td>${P.map((p,j)=>{const {v,auto}=chkVal(p,code);return `<td class="cell v-${v==="N/A"?"NA":v} ${auto?"auto":""}" data-p="${j}" data-code="${code}" role="button" tabindex="0" title="${auto?"Automático":"Fijado a mano"}">${v||"·"}</td>`}).join("")}</tr>`});
+ const cnt=(p,x)=>ITEMS.filter(([c])=>chkVal(p,c).v===x).length;
+ h+=`</tbody><tfoot><tr><td></td><td class="l">N° OBS</td>${P.map(p=>`<td>${cnt(p,"OBS")}</td>`).join("")}</tr><tr><td></td><td class="l">N° VER</td>${P.map(p=>`<td>${cnt(p,"VER")}</td>`).join("")}</tr>
+  <tr><td></td><td class="l">Estado lámina</td>${P.map(p=>{const o=cnt(p,"OBS"),v=cnt(p,"VER"),b=ITEMS.filter(([c])=>!chkVal(p,c).v).length;const e=o?["bad","CON OBS"]:v?["warn","VERIFICAR"]:b?["neutral","PENDIENTE"]:["ok","REVISADA"];return `<td><span class="chip ${e[0]}">${e[1]}</span></td>`}).join("")}</tr></tfoot>`;
+ t.innerHTML=h}
+const CYCLE=["OK","OBS","VER","N/A",null];
+function cycleChk(j,code){const p=S.pages[j];S.chk=S.chk||{};const m=S.chk[p.key]=S.chk[p.key]||{};const cur=m[code]||null;const nx=CYCLE[(CYCLE.indexOf(cur)+1)%CYCLE.length];if(nx)m[code]=nx;else delete m[code];save();renderChk()}
+
+/* ---------------- Resumen ---------------- */
+function renderRes(){const box=$("#resBox");const T=S.obs.length;
+ const by=(f)=>ESTADOS.map(e=>S.obs.filter(o=>f(o)&&o.est===e).length);
+ const bar=(a)=>{const t=a[0]+a[1]+a[2];if(!t)return`<div class="hbar"></div>`;return `<div class="hbar"><i class="p" style="width:${a[0]/t*100}%"></i><i class="c" style="width:${a[1]/t*100}%"></i><i class="v" style="width:${a[2]/t*100}%"></i></div>`};
+ const row=(lab,a,extra)=>`<tr><td class="l">${esc(lab)}</td>${a.map(x=>`<td class="num">${x}</td>`).join("")}<td class="num"><b>${a[0]+a[1]+a[2]}</b></td>${extra||""}<td style="min-width:140px">${bar(a)}</td></tr>`;
+ const est=by(()=>true);
+ const prio=p=>PRIOS.map(x=>`<td class="num">${S.obs.filter(o=>p(o)&&o.prio===x).length}</td>`).join("");
+ box.innerHTML=`
+ <div class="panel"><h3>Por estado</h3><div class="status-strip" style="margin:0 0 .8rem">${ESTADOS.map((e,i)=>`<div class="stat ${i===0&&est[0]?"bad":""}"><b>${est[i]}</b> ${e.toLowerCase()}${T?" ("+Math.round(est[i]/T*100)+"%)":""}</div>`).join("")}<div class="stat"><b>${T}</b> total</div></div>${bar(est)}
+  <div class="legend"><span style="--c:var(--bad)">Pendiente</span><span style="--c:var(--yel)">Corregido</span><span style="--c:var(--good)">Verificado</span></div></div>
+ <div class="panel"><h3>Por categoría</h3><table class="results"><thead><tr><th>Categoría</th>${ESTADOS.map(e=>`<th>${e}</th>`).join("")}<th>Total</th><th>Alta</th><th>Media</th><th>Baja</th><th>Avance</th></tr></thead><tbody>
+  ${CATS.map(c=>row(c,by(o=>o.cat===c),prio(o=>o.cat===c))).join("")}</tbody></table></div>
+ <div class="panel"><h3>Por lámina</h3>${lamList().length?`<table class="results"><thead><tr><th>Lámina</th>${ESTADOS.map(e=>`<th>${e}</th>`).join("")}<th>Total</th><th>Alta</th><th>Media</th><th>Baja</th><th>Avance</th></tr></thead><tbody>
+  ${lamList().map(l=>row(l,by(o=>o.lam===l),prio(o=>o.lam===l))).join("")}</tbody></table>`:`<div class="empty">Sin láminas.</div>`}</div>`}
+
+/* ---------------- Informe ---------------- */
+function buildReport(){const L=[];const pr={Alta:0,Media:1,Baja:2};
+ L.push(`REVISIÓN DE PLANOS — ${S.proj.nombre||"[PROYECTO]"}${S.proj.cliente?" · "+S.proj.cliente:""}${S.proj.rev?" · REV. SET "+S.proj.rev:""} · ${today()}`);
+ if(S.proj.revisor)L.push(`Revisor: ${S.proj.revisor}`);L.push("Solo se indica lo que se debe corregir o verificar.","");
+ const setL=[];S.pages.forEach((p,i)=>{if(p.dupCon)setL.push(`• Pág. ${i+1} (${lamLabel(p)}): lámina repetida con ${p.dupCon} → eliminar o reemplazar por la lámina que corresponde.`)});
+ S.cortes.forEach(c=>{const e=corEstado(c,S.cortes);if(e!=="CORRELATIVO")setL.push(`• ${c.id}${c.dib?" (dibujado en "+c.dib+")":""}: ${e}${c.obs?" — "+c.obs:""} → ${solCorte(e)}`)});
+ if(setL.length){L.push("SET COMPLETO — ÍNDICES",...setL,"")}
+ const open=S.obs.filter(o=>o.est!=="Verificado");const labs=[...new Set(S.pages.map(lamLabel).concat(open.map(o=>o.lam)))];
+ labs.forEach(l=>{const os=open.filter(o=>o.lam===l);if(!os.length)return;const pg=S.pages.find(p=>lamLabel(p)===l);L.push(`LÁMINA ${l}${pg&&pg.titulo?" — "+pg.titulo:""}`);
+  CATS.forEach(c=>{const oc=os.filter(o=>o.cat===c).sort((a,b)=>pr[a.prio]-pr[b.prio]);if(!oc.length)return;L.push(`  ${c}`);
+   oc.forEach(o=>{const v=o.tipo==="Verificar contra original";L.push(`  • [${o.prio}]${v?" VERIFICAR CONTRA ORIGINAL ·":""} ${o.elem}${o.ubic?" · "+o.ubic:""}: ${o.prob}`);L.push(`    → ${o.sol}${o.est==="Corregido"?"  (corregido, falta verificar)":""}`)})});L.push("")});
+ if(L.length<=4)L.push("Sin observaciones registradas.");return L.join("\n")}
+function solCorte(e){const s=[];if(/SIN NÚMERO/.test(e))s.push("asignar número correlativo y actualizar llamados");if(/REPETIDO/.test(e))s.push("renumerar uno de los repetidos");if(/SALTO/.test(e))s.push("dibujar el faltante o renumerar la secuencia");if(/SIN LLAMADO/.test(e))s.push("agregar llamado en planta/elevación o eliminar la vista");if(/ILEGIBLE/.test(e))s.push("aumentar tamaño del llamado y despejar textos/cotas encima");if(/NO EXISTE/.test(e))s.push("corregir lámina de referencia");return s.join("; ")}
+function renderRep(){$("#report").textContent=buildReport()}
+
+/* ---------------- Exportación ---------------- */
+const rowsLam=()=>S.pages.map((p,i)=>[i+1,p.codigo,p.titulo,p.rev,p.escala,p.fecha,p.dupCon]);
+const rowsCor=()=>S.cortes.map(c=>[U(c.id),c.tipo,c.sub,c.num===""?"":+c.num||c.num,c.dib,c.ref,c.esc,c.leg,c.obs]);
+const rowsObs=()=>S.obs.map(o=>[o.lam,o.cat,o.item,o.elem,o.ubic,o.prob,o.sol,o.tipo,o.prio,o.est,o.resp,o.fdet,o.fcie]);
+function rowsChk(){const P=S.pages.slice(0,40);const R=[];let lc=-1;
+ ITEMS.forEach(([code,ci])=>{if(ci!==lc){R.push(P.map(()=>""));lc=ci}R.push(P.map(p=>chkVal(p,code).v))});return R}
+const tsv=rows=>rows.map(r=>r.map(v=>String(v??"").replace(/[\t\n\r]+/g," ")).join("\t")).join("\n");
+async function saveFile(filename,data){let d=null;try{d=await window.claude?.use?.("downloads")}catch(e){}
+ if(!d){try{const b=data instanceof Blob?data:new Blob([data],{type:"text/plain;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}catch(e){toast("Descarga no disponible; usa los botones de copiar")}return}
+ try{await d.save({filename,data})}catch(e){if(e&&e.code==="declined")return;toast("No se pudo descargar ("+(e&&e.code||"error")+")")}}
+async function exportXlsx(){if(!window.XLSX){toast("No se cargó la librería de Excel");return}const wb=XLSX.utils.book_new();
+ const add=(name,head,rows)=>{const ws=XLSX.utils.aoa_to_sheet([head,...rows]);ws["!cols"]=head.map(h=>({wch:Math.max(10,Math.min(50,String(h).length+6))}));XLSX.utils.book_append_sheet(wb,ws,name)};
+ add("Indice_Laminas",["N° pág. PDF","Código plano","Título del cajetín","Revisión","Escala(s)","Fecha","Duplicada con (código)"],rowsLam());
+ add("Indice_Cortes",["Identificador","Tipo","Subserie (opcional)","N° orden","Lámina donde se dibuja","Lámina(s) donde se referencia","Escala","Llamado legible","Observación breve","Estado (calculado)"],S.cortes.map((c,i)=>[...rowsCor()[i],corEstado(c,S.cortes)]));
+ const P=S.pages.slice(0,40);const chkRows=[];let lc=-1;ITEMS.forEach(([code,ci,txt])=>{if(ci!==lc){chkRows.push([CATS[ci].toUpperCase(),""]);lc=ci}chkRows.push([code,txt,...P.map(p=>chkVal(p,code).v)])});
+ add("Checklist_Laminas",["Código","Ítem",...P.map(lamLabel)],chkRows);
+ add("Registro_Observaciones",["Lámina","Categoría","Ítem checklist","Elemento afectado","Ubicación","Problema exacto","Solución propuesta","Tipo","Prioridad","Estado","Responsable","Fecha detección","Fecha cierre"],rowsObs());
+ const ws=XLSX.utils.aoa_to_sheet(buildReport().split("\n").map(l=>[l]));ws["!cols"]=[{wch:140}];XLSX.utils.book_append_sheet(wb,ws,"Informe");
+ const out=XLSX.write(wb,{bookType:"xlsx",type:"array"});
+ await saveFile(`Revision_${(S.proj.nombre||"planos").replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_")}_${today()}.xlsx`,new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))}
+
+/* ---------------- Visor ---------------- */
+async function openViewer(i){const p=S.pages[i];viewing=i;zoom=1;$("#dlgTitle").textContent=`${lamLabel(p)} — ${p.titulo||""}`;$("#dlg").showModal();
+ $("#dlgAna").disabled=!sample||!docs[p.file];await drawViewer();renderDlgObs()}
+async function drawViewer(){const p=S.pages[viewing];const cv=$("#cv");const doc=docs[p.file];const ctx=cv.getContext("2d");
+ if(!doc){cv.width=600;cv.height=200;ctx.fillStyle="#fff";ctx.fillRect(0,0,600,200);ctx.fillStyle="#555";ctx.font="14px Arial";ctx.fillText(S.demo?"Lámina de ejemplo: sin imagen.":"Vuelve a cargar "+p.file+" para ver la imagen.",20,100);return}
+ const pg=await doc.getPage(p.page);const c=await renderToCanvas(pg,Math.round(1400*zoom));cv.width=c.width;cv.height=c.height;ctx.drawImage(c,0,0)}
+function renderDlgObs(){const l=lamLabel(S.pages[viewing]);const os=S.obs.filter(o=>o.lam===l);
+ $("#dlgObs").innerHTML=`<b>OBSERVACIONES (${os.length})</b>`+(os.length?os.map(o=>`<div class="o"><span><span class="chip ${o.prio==="Alta"?"bad":o.prio==="Media"?"warn":"ok"}">${esc(U(o.prio))}</span> <span class="chip neutral">${esc(o.item||o.cat)}</span> <span class="chip ${o.est==="Pendiente"?"bad":o.est==="Corregido"?"yel":"ok"}">${esc(U(o.est))}</span></span><b>${esc(o.elem)}${o.ubic?" · "+esc(o.ubic):""}</b><span>${esc(o.prob)}</span><span style="color:var(--ink-muted)">→ ${esc(o.sol)}</span></div>`).join(""):`<span style="color:var(--ink-muted)">Sin observaciones para esta lámina.</span>`)}
+
+/* ---------------- Eventos ---------------- */
+// Regla de la Mesa: los textos de una línea se escriben siempre en MAYÚSCULAS (no aplica a párrafos largos).
+document.addEventListener("input",e=>{const t=e.target;if(!t||t.tagName!=="INPUT"||!/^(text|search|)$/.test(t.type||""))return;
+ const v=t.value;if(!v||!/[a-záéíóúñü]/.test(v))return;const a=t.selectionStart,b=t.selectionEnd;t.value=v.toLocaleUpperCase("es-CL");try{t.setSelectionRange(a,b)}catch(er){}},true);
+const drop=$("#drop");
+["dragenter","dragover"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==="drop"||!e.relatedTarget)drop.classList.remove("over")}));
+document.addEventListener("drop",async e=>{if(e.dataTransfer&&e.dataTransfer.files.length){await handleFiles(e.dataTransfer.files);location.hash="laminas"}});
+$("#btnPick").onclick=()=>$("#fileIn").click();$("#fileIn").onchange=async e=>{await handleFiles(e.target.files);e.target.value="";location.hash="laminas"};
+$("#btnNew").onclick=()=>$("#confirmNew").hidden=false;$("#btnNewNo").onclick=()=>$("#confirmNew").hidden=true;
+$("#btnNewYes").onclick=()=>{S=blank();Object.keys(thumbs).forEach(k=>delete thumbs[k]);$("#confirmNew").hidden=true;syncProj();save();renderAll();toast("Proyecto nuevo")};
+const PF=[["pNombre","nombre"],["pCliente","cliente"],["pRev","rev"],["pNum","num"],["pRevisor","revisor"],["pResp","resp"]];
+function syncProj(){PF.forEach(([id,k])=>{$("#"+id).value=S.proj[k]||($("#"+id).tagName==="SELECT"?"GLOBAL":"")})}
+PF.forEach(([id,k])=>$("#"+id).addEventListener("input",e=>{S.proj[k]=e.target.value;save();renderKpis()}));
+$("#gridLam").addEventListener("input",e=>{const f=e.target.dataset.f;if(!f)return;const i=+e.target.closest(".card").dataset.i;const p=S.pages[i];const old=lamLabel(p);p[f]=e.target.value;
+ if(f==="codigo"){const nw=lamLabel(p);S.obs.forEach(o=>{if(o.lam===old)o.lam=nw})}save();renderKpis()});
+$("#gridLam").addEventListener("change",e=>{if(e.target.dataset.f)renderAll()});
+$("#gridLam").addEventListener("click",async e=>{const v=e.target.closest("[data-view-i]");if(v){openViewer(+v.dataset.viewI);return}
+ const a=e.target.closest("[data-ana]");if(a){stopFlag=false;showProg(true);await analyzePage(S.pages[+a.dataset.ana]);showProg(false);renderAll()}});
+$("#btnAll").onclick=analyzeAll;$("#chkSpellSel").onchange=e=>{$("#chkSpell").checked=e.target.value==="1"};$("#btnAuto").onclick=()=>{const n=runAutoChecks();renderAll();toast(n?`${n} observación(es) nuevas de la revisión automática`:(S.pages.some(p=>p.items&&p.items.length)?"Sin observaciones nuevas en la revisión automática":"Vuelve a cargar los PDF para repetir la revisión automática"))};$("#btnStop").onclick=()=>{stopFlag=true;toast("Se detendrá al terminar la parte en curso")};
+$("#tblCor").addEventListener("change",e=>{const k=e.target.dataset.k;if(!k)return;const i=+e.target.closest("tr").dataset.c;let v=e.target.value;if(k==="num")v=v.trim()===""?"":(isNaN(+v)?v:+v);S.cortes[i][k]=v;S.cortes[i].auto=false;save();renderCor();renderKpis()});
+$("#tblCor").addEventListener("click",e=>{const d=e.target.closest("[data-delc]");if(d){S.cortes.splice(+d.dataset.delc,1);save();renderCor();renderKpis()}});
+$("#btnAddCor").onclick=()=>{S.cortes.push({id:"",tipo:"Detalle",sub:"",num:"",dib:"",ref:"",esc:"",leg:"",obs:"",auto:false});save();renderCor()};
+$("#tblChk").addEventListener("click",e=>{const c=e.target.closest("td.cell");if(c)cycleChk(+c.dataset.p,c.dataset.code)});
+$("#tblChk").addEventListener("keydown",e=>{const c=e.target.closest("td.cell");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();cycleChk(+c.dataset.p,c.dataset.code)}});
+$("#tblObs").addEventListener("change",e=>{const k=e.target.dataset.k;if(!k)return;const i=+e.target.closest("tr").dataset.o;S.obs[i][k]=e.target.value;if(k==="est"&&e.target.value!=="Pendiente"&&!S.obs[i].fcie)S.obs[i].fcie=today();save();if(["prio","est","lam","item","tipo"].includes(k)){renderObs();renderKpis()}});
+$("#tblObs").addEventListener("click",e=>{const d=e.target.closest("[data-delo]");if(d){S.obs.splice(+d.dataset.delo,1);save();renderObs();renderKpis()}});
+$("#btnAddObs").onclick=()=>{S.obs.push({lam:$("#fLam").value||(S.pages[0]?lamLabel(S.pages[0]):""),cat:"Coherencia general",item:"",elem:"",ubic:"",prob:"",sol:"",tipo:"Corregir",prio:"Media",est:"Pendiente",resp:S.proj.resp||"",fdet:today(),fcie:""});save();renderObs();renderKpis()};
+[["fCat",CATS],["fEst",ESTADOS],["fPri",PRIOS]].forEach(([id,o])=>{$("#"+id).innerHTML+=o.map(x=>`<option value="${x}">${U(x)}</option>`).join("");$("#"+id).onchange=renderObs});$("#fLam").onchange=renderObs;
+$("#btnCopyRep").onclick=()=>copy(buildReport(),"Informe copiado");$("#btnSaveRep").onclick=()=>saveFile(`Informe_revision_${today()}.txt`,buildReport());
+$("#tsvLam").onclick=()=>copy(tsv(rowsLam()),"Copiado: pegar en Indice_Laminas!A5");$("#tsvCor").onclick=()=>copy(tsv(rowsCor()),"Copiado: pegar en Indice_Cortes!A5");
+$("#tsvChk").onclick=()=>copy(tsv(rowsChk()),"Copiado: pegar en Checklist_Laminas!E5");$("#tsvObs").onclick=()=>copy(tsv(rowsObs()),"Copiado: pegar en Registro_Observaciones!B5");
+$("#btnXlsx").onclick=exportXlsx;
+if(!window.claude){$("#btnPrint").hidden=false;$("#btnPrint").onclick=()=>{renderRep();window.print()}}
+$("#dlgClose").onclick=()=>$("#dlg").close();$("#zIn").onclick=()=>{zoom=Math.min(4,zoom*1.5);drawViewer()};$("#zOut").onclick=()=>{zoom=Math.max(.5,zoom/1.5);drawViewer()};
+$("#dlgAna").onclick=async()=>{stopFlag=false;showProg(true);await analyzePage(S.pages[viewing]);showProg(false);renderAll();renderDlgObs()};
+$("#mobMenu").onclick=()=>{location.hash=""};
+function expJson(){const name=`Revision_${(S.proj.nombre||"planos").replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_")}_${today()}.json`;saveFile(name,new Blob([JSON.stringify(S,(k,v)=>(k==="items"||k==="tokens")?undefined:v,1)],{type:"application/json"}))}
+$("#btnExpJson").onclick=expJson;$("#btnExpJson2").onclick=expJson;$("#btnImpJson").onclick=()=>$("#impIn").click();
+$("#impIn").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.pages)||!Array.isArray(d.obs))throw 0;
+ d.chk=d.chk||{};d.proj=Object.assign(blank().proj,d.proj||{});d.demo=false;S=d;syncProj();save();renderAll();toast(`Proyecto importado: ${S.pages.length} láminas, ${S.obs.length} observaciones`)}catch(er){toast("El archivo no es un proyecto del Revisor de Planos")}};
+buildSidebar();syncProj();renderAll();window.addEventListener("hashchange",route);route();
+</script>
+
+<script>
+/* App instalable (PWA) — versión 20261004-1454. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.update();
+      reg.addEventListener('updatefound', () => { const w = reg.installing; if (!w) return;
+        w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) {
+          const b = document.createElement('div'); b.textContent = 'Nueva versión del Revisor disponible — toque para actualizar';
+          b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:99999;background:#0060c1;color:#fff;padding:10px 14px;border-radius:8px;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer';
+          b.onclick = () => location.reload(); document.body.appendChild(b); } }); });
+    }).catch(() => {});
+  });
+}
+</script>
+</body></html>
