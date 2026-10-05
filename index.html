@@ -83,6 +83,9 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
       <span>o haz clic para elegirlos · recibirás el informe de revisión</span>
       <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
     </div>
+    <div class="chatbox" style="flex-direction:column;align-items:stretch"><div><b>¿Ya tienes el informe del chat?</b><span>Pégalo aquí: lo ordeno por lámina y te lo entrego en Word con el formato ING.</span></div>
+      <textarea id="pegado" rows="5" placeholder="Pega aquí el informe de revisión que te entregó Claude en el chat" style="width:100%;font:.85rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical"></textarea>
+      <div class="btns"><button class="pri" id="btnWordPeg">Descargar Word ING</button><button id="btnOrdenar">Ver ordenado por lámina</button></div></div>
     <div class="chatbox"><div><b>Revisión gratis en el chat de Claude</b><span>Abre un chat nuevo con la instrucción lista; ahí adjuntas los mismos PDF y envías.</span></div><button class="pri" id="btnChat">Revisar en el chat ↗</button></div>
   </section>
 
@@ -95,7 +98,7 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
   <section class="card" id="vRep" hidden>
     <h2>Informe de revisión</h2>
     <div class="in">
-      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnSave">Descargar</button><button id="btnNew">Revisar otros planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
+      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnWord">Descargar Word ING</button><button id="btnSave">Descargar .txt</button><button id="btnNew">Revisar otros planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
       <div class="stats" id="stats"></div>
       <div class="rep" id="rep"></div>
     </div>
@@ -454,10 +457,118 @@ Responde SOLO JSON: {"errores":[{"palabra":"","correccion":"","tipo":"ortografia
  return{n,calls:1}}
 
 function solCorte(e){const s=[];if(/SIN NÚMERO/.test(e))s.push("asignar número correlativo y actualizar llamados");if(/REPETIDO/.test(e))s.push("renumerar uno de los repetidos");if(/SALTO/.test(e))s.push("dibujar el faltante o renumerar la secuencia");if(/SIN LLAMADO/.test(e))s.push("agregar llamado en planta/elevación o eliminar la vista");if(/ILEGIBLE/.test(e))s.push("aumentar tamaño del llamado y despejar textos/cotas encima");if(/NO EXISTE/.test(e))s.push("corregir lámina de referencia");return s.join("; ")}
+/* ===== Informe del chat → ordenado por lámina y Word formato ING ===== */
+const PRI={Alta:0,Media:1,Baja:2};
+function cleanLine(l){return l.replace(/\r/g,"").replace(/^\s*#{1,6}\s*/,"").replace(/\*\*/g,"").replace(/^\s*>\s*/,"").replace(/`/g,"").trimEnd()}
+function catOf(t){const x=t.replace(/[:：]\s*$/,"").trim().toLowerCase();return CATS.find(c=>c.toLowerCase()===x)||null}
+function parseItem(t){let prio="Media",ver=false;t=t.replace(/^\s*(?:[•\-\*·]|\d+[.)])\s+/,"").trim();
+ const pm=t.match(/^\[(Alta|Media|Baja)\]\s*/i);if(pm){prio=pm[1][0].toUpperCase()+pm[1].slice(1).toLowerCase();t=t.slice(pm[0].length)}
+ if(/^VERIFICAR CONTRA ORIGINAL\s*[·:\-]?\s*/i.test(t)){ver=true;t=t.replace(/^VERIFICAR CONTRA ORIGINAL\s*[·:\-]?\s*/i,"")}
+ let sol="";const ar=t.split(/\s*(?:→|->)\s*/);if(ar.length>1){t=ar[0];sol=ar.slice(1).join(" → ")}
+ let head="",prob=t;const k=t.indexOf(": ");if(k>0&&k<140){head=t.slice(0,k);prob=t.slice(k+2)}
+ return{prio,ver,head:head.trim(),prob:prob.trim(),sol:sol.trim()}}
+function parseReport(text){const M={titulo:"INFORME DE REVISIÓN DE PLANOS",proyecto:"",fecha:today(),resumen:"",alcance:[],set:[],laminas:[],general:[]};
+ let sec="",lam=null,cat=null,last=null;const getLam=(code,tit)=>{code=U(code.trim());let L=M.laminas.find(x=>x.codigo===code);if(!L){L={codigo:code,titulo:"",items:[]};M.laminas.push(L)}if(tit&&!L.titulo)L.titulo=U(tit.trim());return L};
+ text.split("\n").map(cleanLine).forEach(raw=>{const l=raw.trim();if(!l){return}
+  let m;
+  if((m=l.match(/^INFORME DE REVISI[ÓO]N DE PLANOS\s*(?:[—–-]\s*(.+?))?(?:\s*·\s*(\d{4}-\d{2}-\d{2}))?$/i))){if(m[1])M.proyecto=U(m[1]);if(m[2])M.fecha=m[2];return}
+  if(/^L[áa]minas revisadas/i.test(l)){M.resumen=l;return}
+  if(/^ALCANCE\b/i.test(l)){sec="alcance";lam=null;cat=null;last=null;return}
+  if(/^SET COMPLETO/i.test(l)){sec="set";lam=null;cat=null;last=null;return}
+  if((m=l.match(/^L[ÁA]MINA\s+(\S+(?:\s\d+)?)(?:\s*[—–-]\s*(.+))?$/i))){sec="lam";lam=getLam(m[1].replace(/[:.]$/,""),m[2]);cat=null;last=null;return}
+  const c=catOf(l);if(c){cat=c;return}
+  if(/^(→|->|Soluci[óo]n\s*:)/i.test(l)){if(last)last.sol=(last.sol?last.sol+" ":"")+l.replace(/^(→|->|Soluci[óo]n\s*:)\s*/i,"");return}
+  const isB=/^(?:[•\-\*·]|\d+[.)])\s+/.test(l)||/^\[(Alta|Media|Baja)\]/i.test(l);
+  if(isB){const it=parseItem(l);it.cat=cat||"Coherencia general";
+   if(sec==="alcance"){M.alcance.push(l.replace(/^(?:[•\-\*·]|\d+[.)])\s+/,""));last=null;return}
+   if(sec==="set"){M.set.push(it);last=it;return}
+   if(lam){lam.items.push(it);last=it;return}
+   M.general.push(it);last=it;return}
+  if(last){last.prob+=" "+l;return}
+  if(sec==="alcance"){M.alcance.push(l)}});
+ M.laminas.sort((a,b)=>a.codigo.localeCompare(b.codigo,"es",{numeric:true}));
+ M.laminas.forEach(L=>L.items.sort((a,b)=>CATS.indexOf(a.cat)-CATS.indexOf(b.cat)||PRI[a.prio]-PRI[b.prio]));
+ M.set.sort((a,b)=>PRI[a.prio]-PRI[b.prio]);
+ if(!M.proyecto)M.proyecto=U($("#pNombre").value.trim());return M}
+function countM(M){const all=[...M.set,...M.general,...M.laminas.flatMap(L=>L.items)];const n=p=>all.filter(i=>i.prio===p).length;return{t:all.length,a:n("Alta"),m:n("Media"),b:n("Baja")}}
+function modelText(M){const C=countM(M),T=[];T.push(`${M.titulo}${M.proyecto?" — "+M.proyecto:""} · ${M.fecha}`);
+ T.push(`Láminas con observaciones: ${M.laminas.length}. Observaciones: ${C.t} (Alta ${C.a}, Media ${C.m}, Baja ${C.b}).`);
+ const it=(i,ind)=>[`${ind}• [${i.prio}]${i.ver?" VERIFICAR CONTRA ORIGINAL ·":""} ${i.head?i.head+": ":""}${i.prob}`,...(i.sol?[`${ind}  → ${i.sol}`]:[])];
+ if(M.alcance.length)T.push("","ALCANCE",...M.alcance.map(a=>"• "+a));
+ if(M.set.length||M.general.length)T.push("","SET COMPLETO",...[...M.set,...M.general].flatMap(i=>it(i,"")));
+ M.laminas.forEach(L=>{T.push("",`LÁMINA ${L.codigo}${L.titulo?" — "+L.titulo:""}`);CATS.forEach(c=>{const x=L.items.filter(i=>i.cat===c);if(x.length)T.push(`  ${c}`,...x.flatMap(i=>it(i,"  ")))})});
+ return T.join("\n")}
+function modelHtml(M){const C=countM(M),H=[];
+ $("#stats").innerHTML=`<span><b>${M.laminas.length}</b> láminas</span><span><b>${C.t}</b> observaciones</span><span class="a"><b>${C.a}</b> alta</span><span class="m"><b>${C.m}</b> media</span><span class="bj"><b>${C.b}</b> baja</span>`;
+ const li=i=>`<li class="${i.prio}"><span class="chip ${i.prio}">${i.prio.toUpperCase()}</span>${i.ver?'<span class="chip ver">VERIFICAR CONTRA ORIGINAL</span>':""}${i.head?`<b>${esc(i.head)}</b>: `:""}${esc(i.prob)}${i.sol?`<span class="sol">→ ${esc(i.sol)}</span>`:""}</li>`;
+ if(M.alcance.length)H.push(`<div class="note"><b>Alcance:</b><br>${M.alcance.map(esc).join("<br>")}</div>`);
+ if(M.set.length||M.general.length)H.push(`<h3>Set completo</h3><ul>${[...M.set,...M.general].map(li).join("")}</ul>`);
+ M.laminas.forEach(L=>{H.push(`<h3>LÁMINA ${esc(L.codigo)}${L.titulo?" — "+esc(L.titulo):""}</h3>`);CATS.forEach(c=>{const x=L.items.filter(i=>i.cat===c);if(x.length)H.push(`<h4>${esc(c)}</h4><ul>${x.map(li).join("")}</ul>`)})});
+ return H.join("")}
+let lastModel=null;
+function showModel(M){lastModel=M;lastText=modelText(M);$("#rep").innerHTML=modelHtml(M);$("#vRep").querySelector("h2").textContent="Informe de revisión";$("#vRep").hidden=false;
+ try{localStorage.setItem("ing-revisor-simple-last",JSON.stringify({h:$("#rep").innerHTML,s:$("#stats").innerHTML,t:lastText}))}catch(e){}
+ $("#vRep").scrollIntoView({behavior:"smooth",block:"start"})}
+
+function loadDocx(){if(window.docx)return Promise.resolve(window.docx);return new Promise((ok,fail)=>{const s=document.createElement("script");s.src="docx.iife.js";s.onload=()=>window.docx?ok(window.docx):fail(new Error("sin librería"));s.onerror=()=>fail(new Error("no se pudo cargar la librería Word"));document.head.appendChild(s)})}
+const b64u=d=>{const b=atob(d.split(",")[1]||"");const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function wordING(M){const d=await loadDocx();
+ const {Document,Packer,Paragraph,TextRun,ImageRun,Table,TableRow,TableCell,Header,Footer,AlignmentType,WidthType,BorderStyle,ShadingType,PageNumber,HeadingLevel,PageBreak,TabStopType,VerticalAlign,TableLayoutType,TableOfContents}=d;
+ const NAVY="1F3864",BLUE="2E5395",GREY="595959",W=9920,F="Arial",PC={Alta:"B91C1C",Media:"B45309",Baja:"15803D"},PF={Alta:"FDE8E8",Media:"FEF3C7",Baja:"E7F5EC"};
+ const run=(t,o={})=>new TextRun({text:String(t??""),font:F,size:o.size||24,bold:o.bold,italics:o.italics,color:o.color,underline:o.underline});
+ const none={style:BorderStyle.NONE,size:0,color:"FFFFFF"},bd={style:BorderStyle.SINGLE,size:4,color:"A6A6A6"},borders={top:bd,bottom:bd,left:bd,right:bd};
+ const fit=w=>{const s=w.reduce((a,b)=>a+b,0);const r=w.map(x=>Math.round(x*W/s));r[r.length-1]+=W-r.reduce((a,b)=>a+b,0);return r};
+ const cell=(ch,w,o={})=>new TableCell({width:{size:w,type:WidthType.DXA},borders,verticalAlign:VerticalAlign.CENTER,margins:{top:50,bottom:50,left:80,right:80},shading:o.fill?{fill:o.fill,type:ShadingType.CLEAR,color:"auto"}:undefined,children:Array.isArray(ch)?ch:[new Paragraph({alignment:o.center?AlignmentType.CENTER:AlignmentType.LEFT,spacing:{after:0},children:[run(ch,{size:o.size||18,bold:o.bold,color:o.color,italics:o.italics})]})]});
+ const table=(head,rows,widths,o={})=>{widths=fit(widths);const tr=[];if(head)tr.push(new TableRow({tableHeader:true,children:head.map((h,i)=>cell(h,widths[i],{fill:NAVY,color:"FFFFFF",bold:true,center:true}))}));
+  rows.forEach((r,k)=>tr.push(new TableRow({cantSplit:true,children:r.map((c,i)=>typeof c==="object"&&c&&c.cell?cell(c.text,widths[i],c):cell(c,widths[i],{fill:o.key&&i===0?"F2F5FA":(k%2&&!o.key?"F7F9FC":undefined),bold:o.key&&i===0,size:o.size}))})));
+  return new Table({width:{size:W,type:WidthType.DXA},columnWidths:widths,layout:TableLayoutType.FIXED,rows:tr})};
+ const C=countM(M),logo=$("header .logo img")?.src||"";
+ const hdrCell=(w,ch,o={})=>new TableCell({width:{size:w,type:WidthType.DXA},verticalAlign:o.va,borders:{top:none,left:none,right:none,bottom:{style:BorderStyle.SINGLE,size:8,color:NAVY}},children:ch});
+ const header=new Header({children:[new Table({width:{size:W,type:WidthType.DXA},columnWidths:[4460,5460],layout:TableLayoutType.FIXED,borders:{top:none,left:none,right:none,bottom:{style:BorderStyle.SINGLE,size:8,color:NAVY},insideHorizontal:none,insideVertical:none},
+  rows:[new TableRow({children:[hdrCell(4460,[new Paragraph({spacing:{after:60},children:logo?[new ImageRun({type:"png",data:b64u(logo),transformation:{width:288,height:93}})]:[]})]),
+   hdrCell(5460,[new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:0},children:[run("INFORME DE REVISIÓN DE PLANOS",{size:18,bold:true,color:NAVY})]}),
+    new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:0},children:[run(M.proyecto||"",{size:16,color:GREY})]}),
+    new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:60},children:[run(M.fecha,{size:16,color:GREY})]})],{va:VerticalAlign.BOTTOM})]})]})]});
+ const footer=new Footer({children:[new Paragraph({border:{top:{style:BorderStyle.SINGLE,size:6,color:NAVY,space:4}},spacing:{before:0,after:0},tabStops:[{type:TabStopType.RIGHT,position:W}],
+  children:[run("ING ESTRUCTURAL — Proyectos Civiles e Industriales",{size:16,bold:true,color:NAVY}),new TextRun({children:["\tPágina ",PageNumber.CURRENT," de ",PageNumber.TOTAL_PAGES],font:F,size:16,color:GREY})]})]});
+ const K=[];const H1=t=>new Paragraph({heading:HeadingLevel.HEADING_1,keepNext:true,spacing:{before:280,after:140},children:[run(t,{size:30,bold:true,color:NAVY})]});
+ const H2=t=>new Paragraph({heading:HeadingLevel.HEADING_2,keepNext:true,spacing:{before:200,after:100},children:[run(t,{size:26,bold:true,color:BLUE})]});
+ K.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:200,after:160},children:[run("INFORME DE REVISIÓN DE PLANOS",{size:44,bold:true,color:NAVY,underline:{}})]}));
+ if(M.proyecto)K.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:360},children:[run(M.proyecto,{size:32,color:BLUE,underline:{}})]}));
+ K.push(table(null,[["Proyecto",M.proyecto||"—"],["Fecha de revisión",M.fecha],["Láminas con observaciones",String(M.laminas.length)],["Observaciones",`${C.t}  (Alta ${C.a} · Media ${C.m} · Baja ${C.b})`]],[2700,7220],{key:true,size:21}));
+ K.push(new Paragraph({spacing:{after:240},children:[]}));
+ if(M.laminas.length){K.push(new Paragraph({spacing:{after:120},keepNext:true,children:[run("Resumen por lámina",{bold:true,color:NAVY})]}));
+  K.push(table(["Lámina","Título","Alta","Media","Baja","Total"],M.laminas.map(L=>{const n=p=>String(L.items.filter(i=>i.prio===p).length);return[L.codigo,L.titulo||"—",{cell:1,text:n("Alta"),center:true,color:PC.Alta,bold:true},{cell:1,text:n("Media"),center:true,color:PC.Media,bold:true},{cell:1,text:n("Baja"),center:true,color:PC.Baja,bold:true},{cell:1,text:String(L.items.length),center:true,bold:true}]}),[1400,4920,900,900,900,900]))}
+ const many=M.laminas.length>=3;
+ if(many){K.push(new Paragraph({children:[new PageBreak()]}));K.push(new Paragraph({spacing:{after:200},children:[run("ÍNDICE",{size:30,bold:true,color:NAVY})]}));K.push(new TableOfContents("Índice",{hyperlink:true,headingStyleRange:"1-2"}));}
+ K.push(new Paragraph({children:[new PageBreak()]}));
+ const obsTable=items=>table(["N°","Prioridad","Elemento / ubicación","Problema","Solución propuesta"],items.map((i,k)=>[{cell:1,text:String(k+1),center:true},{cell:1,text:i.prio.toUpperCase(),center:true,bold:true,color:PC[i.prio],fill:PF[i.prio]},i.head||"—",i.prob,(i.ver?"VERIFICAR CONTRA ORIGINAL: ":"")+(i.sol||"—")]),[520,1000,2100,3150,3150]);
+ let n=0;
+ if(M.alcance.length){K.push(H1(`${++n}. ALCANCE DE LA REVISIÓN`));M.alcance.forEach(a=>K.push(new Paragraph({spacing:{after:80},children:[run("• "+a,{size:22})]})))}
+ if(M.set.length||M.general.length){K.push(H1(`${++n}. SET COMPLETO`));K.push(obsTable([...M.set,...M.general]))}
+ M.laminas.forEach(L=>{K.push(H1(`${++n}. LÁMINA ${L.codigo}${L.titulo?" — "+L.titulo:""}`));let m=0;
+  CATS.forEach(c=>{const x=L.items.filter(i=>i.cat===c);if(!x.length)return;K.push(H2(`${n}.${++m} ${c.toUpperCase()}`));K.push(obsTable(x));K.push(new Paragraph({spacing:{after:120},children:[]}))})});
+ const doc=new Document({creator:"ING Estructural",title:"Informe de revisión de planos"+(M.proyecto?" — "+M.proyecto:""),features:{updateFields:many},
+  styles:{default:{document:{run:{font:F,size:24}}},paragraphStyles:[
+   {id:"Heading1",name:"Heading 1",basedOn:"Normal",next:"Normal",quickFormat:true,run:{font:F,size:30,bold:true,color:NAVY},paragraph:{spacing:{before:280,after:140},outlineLevel:0}},
+   {id:"Heading2",name:"Heading 2",basedOn:"Normal",next:"Normal",quickFormat:true,run:{font:F,size:26,bold:true,color:BLUE},paragraph:{spacing:{before:200,after:100},outlineLevel:1}}]},
+  sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:2269,bottom:1418,left:902,right:1418,header:227,footer:227}}},headers:{default:header},footers:{default:footer},children:K}]});
+ return Packer.toBlob(doc)}
+async function downloadWord(M){if(!M){toast("Primero genera o pega un informe");return}try{toast("Generando Word…");const blob=await wordING(M);
+ const name=`Informe_Revision_${(M.proyecto||"Planos").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"")}_${M.fecha}.docx`;
+ let dl=null;try{dl=await window.claude?.use?.("downloads")}catch(e){}
+ if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(!(e&&e.code==="declined"))toast("No se pudo descargar")}return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast("Descargado: "+name)}catch(e){console.error(e);toast("No se pudo generar el Word: "+(e.message||e))}}
+$("#btnOrdenar").onclick=()=>{const t=$("#pegado").value.trim();if(!t){toast("Pega primero el informe del chat");return}const M=parseReport(t);if(!M.laminas.length&&!M.set.length&&!M.general.length){toast("No reconocí observaciones en el texto pegado");return}showModel(M)};
+$("#btnWordPeg").onclick=()=>{const t=$("#pegado").value.trim();if(!t){toast("Pega primero el informe del chat");return}const M=parseReport(t);showModel(M);downloadWord(M)};
+$("#btnWord").onclick=()=>downloadWord(lastModel||parseReport(lastText||""));
+
+const _sr=showReport;showReport=function(){_sr();try{lastModel=parseReport(lastText)}catch(e){lastModel=null}};
+
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1116. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-1143. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
