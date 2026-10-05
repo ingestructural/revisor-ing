@@ -72,6 +72,9 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
 .stepc textarea{width:100%;font:.85rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical}
 .opts{display:flex;flex-direction:column;gap:6px;font-size:.88rem}.opts input{margin-right:6px;accent-color:var(--logo1)}
 table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{background:var(--logo1);color:#fff;font-weight:600;padding:4px 6px;white-space:nowrap}table.ct td{border-bottom:1px solid var(--line);padding:3px 6px}
+.drop.small{padding:18px}.drop.small b{font-size:1.15rem}
+.folder{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid color-mix(in srgb,var(--logo1) 30%,var(--line));border-radius:8px;padding:10px 14px;margin-bottom:12px}.folder b{display:block;color:var(--logo1)}.folder span{font-size:.8rem;color:var(--muted)}
+table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface));font-weight:700;color:var(--logo1)}table.cuadro tr.t td{font-weight:700}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--logo1);color:#fff;padding:9px 14px;border-radius:6px;font-size:.88rem;font-weight:600;z-index:9}
 </style>
 
@@ -89,11 +92,12 @@ table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{backgr
   <section id="vDrop">
     <div class="proj"><label for="pNombre">Proyecto</label><input id="pNombre" placeholder="OPCIONAL"></div>
     <nav class="steps4" role="tablist" aria-label="Etapas">
-      <button role="tab" data-t="1" aria-selected="true"><i>1</i><span>Revisión gratuita</span><small>en la app</small></button>
-      <button role="tab" data-t="2" aria-selected="false"><i>2</i><span>Revisión por chat</span><small>con la app</small></button>
+      <button role="tab" data-t="1" aria-selected="true"><i>1</i><span>Revisión general</span><small>en la app · gratis</small></button>
+      <button role="tab" data-t="2" aria-selected="false"><i>2</i><span>Revisión técnica</span><small>por chat · incluye normativa</small></button>
       <button role="tab" data-t="3" aria-selected="false"><i>3</i><span>Cubicación</span><small>por chat</small></button>
-      <button role="tab" data-t="4" aria-selected="false"><i>4</i><span>Complementar detalles</span><small>DXF por chat</small></button>
+      <button role="tab" data-t="4" aria-selected="false"><i>4</i><span>Detallamiento complementario</span><small>DXF por chat</small></button>
     </nav>
+    <div class="folder"><div><b>Carpeta «Revisor Planos»</b><span id="fStat"></span></div><button class="pri" id="btnFolder">📁 Guardar carpeta con los 4 informes</button></div>
 
     <div class="tab" id="t1">
       <div id="engine" class="engine off"></div>
@@ -105,8 +109,8 @@ table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{backgr
     </div>
 
     <div class="tab" id="t2" hidden>
-      <div class="stepc"><b>Paso 1 · Abrir el chat de revisión</b><span>Se abre un chat nuevo con la instrucción lista. Adjunta ahí los PDF y envía. Incluye tres revisiones: (1) coherencia, textos y cotas; (2) cortes, vistas y detalles; (3) normativa: recubrimientos, ganchos y doblados, empalmes y anclajes, espaciamientos, gramiles, distancias entre pernos y a bordes, soldaduras.</span>
-        <div class="btns"><button class="pri" id="btnChat">Abrir chat de revisión ↗</button></div></div>
+      <div class="stepc"><b>Paso 1 · Abrir el chat de revisión técnica</b><span>Se abre un chat nuevo con la instrucción lista. Adjunta ahí los PDF y envía. Incluye tres revisiones: (1) coherencia, textos y cotas; (2) cortes, vistas y detalles; (3) normativa: recubrimientos, ganchos y doblados, empalmes y anclajes, espaciamientos, gramiles, distancias entre pernos y a bordes, soldaduras.</span>
+        <div class="btns"><button class="pri" id="btnChat">Abrir chat de revisión técnica ↗</button></div></div>
       <div class="stepc"><b>Paso 2 · Pegar el informe del chat</b><span>Lo ordeno por lámina y categoría y lo descargas en el formato ING.</span>
         <textarea id="pegado" rows="6" placeholder="Pega aquí el informe que te entregó Claude"></textarea>
         <div class="btns"><button class="pri" id="btnWordPeg">Word ING</button><button class="pri" id="btnPdfPeg">PDF</button><button class="pri" id="btnXlsPeg">Excel con ✔</button><button id="btnOrdenar">Ver ordenado</button></div></div>
@@ -122,7 +126,7 @@ table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{backgr
     </div>
 
     <div class="tab" id="t4" hidden>
-      <div class="stepc"><b>Complementar detalles en DXF</b><span>Elige qué generar y abre el chat; adjunta los PDF ahí. Claude dibuja los detalles en DXF (capas ordenadas, cotas en mm) y los deja en la carpeta del proyecto.</span>
+      <div class="stepc"><b>Paso 1 · Detallamiento complementario en DXF</b><span>Elige qué generar y abre el chat; adjunta los PDF ahí. Claude dibuja los detalles en DXF (capas ordenadas, cotas en mm) y los deja en la carpeta del proyecto.</span>
         <div class="opts">
           <label><input type="checkbox" value="formas y dimensiones de barras de armadura (planilla de doblado con cotas)" checked> Formas y dimensiones de barras</label>
           <label><input type="checkbox" value="vistas y cortes faltantes de los elementos" checked> Vistas y cortes faltantes</label>
@@ -130,7 +134,10 @@ table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{backgr
           <label><input type="checkbox" value="detalles típicos de anclajes, empalmes y ganchos"> Anclajes, empalmes y ganchos típicos</label>
         </div>
         <textarea id="detReq" rows="3" placeholder="Opcional: detalles específicos (ej.: forma de barras de la viga V-3, corte 4-4 de la fundación F2)"></textarea>
-        <div class="btns"><button class="pri" id="btnChatDet">Abrir chat de detalles ↗</button></div></div>
+        <div class="btns"><button class="pri" id="btnChatDet">Abrir chat de detallamiento ↗</button></div></div>
+      <div class="stepc"><b>Paso 2 · Agregar los DXF que entregó el chat</b><span>Arrástralos aquí (o haz clic) para incluirlos en la carpeta «Revisor Planos» junto con su índice.</span>
+        <div class="drop small" id="dropDxf" tabindex="0" role="button" aria-label="Agregar DXF"><b>Arrastra aquí los DXF</b><input type="file" id="dxfIn" accept=".dxf" multiple hidden></div>
+        <div id="dxfList" class="sub"></div></div>
     </div>
   </section>
 
@@ -193,7 +200,7 @@ async function listModels(key){const r=await fetch("https://api.anthropic.com/v1
  if(!r.ok)throw{code:r.status===401?"clave_invalida":"error_"+r.status};return((await r.json()).data||[])}
 function engineStatus(){const el=$("#engine");if(!el)return;const on=canImg();
  el.className="engine "+(on?"on":"info");
- el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"} · además de las verificaciones automáticas`:`<b>Revisión gratuita:</b> láminas repetidas, numeración de cortes y detalles, y verificaciones de texto (si el PDF trae texto). Para la revisión visual completa usa la etapa 2.`;
+ el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"} · además de las verificaciones automáticas`:`<b>Revisión general:</b> láminas repetidas, numeración de cortes y detalles, y verificaciones de texto (si el PDF trae texto). Para la revisión visual completa usa la Revisión técnica (etapa 2).`;
  const b=$("#btnCfg2");if(b)b.onclick=openCfg;$("#btnCfg").hidden=IN_CLAUDE}
 function openCfg(){$("#cfg").hidden=false;$("#cfgKey").value=apiKey();const cur=lsg(MODK);if(cur&&!$("#cfgModel").options.length)$("#cfgModel").innerHTML=`<option>${esc(cur)}</option>`;$("#cfgKey").focus()}
 
@@ -262,7 +269,7 @@ function showReport(){$("#vRep").querySelector("h2").textContent="Informe de rev
  const pr={Alta:0,Media:1,Baja:2};const setI=setItems();const all=S.obs.length+setI.length;const cnt=x=>S.obs.filter(o=>o.prio===x).length+setI.filter(o=>o.prio===x).length;
  $("#stats").innerHTML=`<span><b>${S.pages.length}</b> láminas</span><span><b>${all}</b> observaciones</span><span class="a"><b>${cnt("Alta")}</b> alta</span><span class="m"><b>${cnt("Media")}</b> media</span><span class="bj"><b>${cnt("Baja")}</b> baja</span>`;
  const T=[];const H=[];
- T.push(`INFORME DE REVISIÓN DE PLANOS${S.proj.nombre?" — "+S.proj.nombre:""} · ${today()}`);T.push(`Láminas revisadas: ${S.pages.length} (${S.pages.map(lamLabel).join(", ")}). Observaciones: ${all} (Alta ${cnt("Alta")}, Media ${cnt("Media")}, Baja ${cnt("Baja")}).`);
+ T.push(`REVISIÓN GENERAL DE PLANOS${S.proj.nombre?" — "+S.proj.nombre:""} · ${today()}`);T.push(`Láminas revisadas: ${S.pages.length} (${S.pages.map(lamLabel).join(", ")}). Observaciones: ${all} (Alta ${cnt("Alta")}, Media ${cnt("Media")}, Baja ${cnt("Baja")}).`);
  if(S.notes.length){H.push(`<div class="note"><b>Alcance:</b><br>${S.notes.map(esc).join("<br>")}</div>`);T.push("","ALCANCE",...S.notes.map(n=>"• "+n))}
  if(setI.length){H.push(`<h3>Set completo</h3><ul>${setI.map(o=>`<li class="${o.prio}"><span class="chip ${o.prio}">${o.prio.toUpperCase()}</span>${esc(o.txt)}<span class="sol">→ ${esc(o.sol)}</span></li>`).join("")}</ul>`);
   T.push("","SET COMPLETO",...setI.flatMap(o=>[`• [${o.prio}] ${o.txt}`,`  → ${o.sol}`]))}
@@ -285,7 +292,7 @@ async function saveFile(filename,data){let d=null;try{d=await window.claude?.use
 const drop=$("#drop");
 ["dragenter","dragover"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==="drop"||!e.relatedTarget)drop.classList.remove("over")}));
-document.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files.length&&$("#vRun").hidden)review(e.dataTransfer.files)});
+document.addEventListener("drop",e=>{if(e.target.closest&&e.target.closest("#dropDxf"))return;if(e.dataTransfer&&e.dataTransfer.files.length&&$("#vRun").hidden){if($("#t1").hidden)document.querySelector('.steps4 button[data-t="1"]').click();review(e.dataTransfer.files)}});
 drop.onclick=()=>$("#fileIn").click();drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("#fileIn").click()}};
 $("#fileIn").onchange=e=>{const f=[...e.target.files];e.target.value="";review(f)};
 $("#pNombre").addEventListener("input",e=>{const t=e.target,a=t.selectionStart;t.value=U(t.value);try{t.setSelectionRange(a,a)}catch(er){}});
@@ -516,7 +523,7 @@ function parseReport(text){const M={titulo:"INFORME DE REVISIÓN DE PLANOS",proy
  let sec="",lam=null,cat=null,last=null;const getLam=(code,tit)=>{code=U(code.trim());let L=M.laminas.find(x=>x.codigo===code);if(!L){L={codigo:code,titulo:"",items:[]};M.laminas.push(L)}if(tit&&!L.titulo)L.titulo=U(tit.trim());return L};
  text.split("\n").map(cleanLine).forEach(raw=>{const l=raw.trim();if(!l){return}
   let m;
-  if((m=l.match(/^INFORME DE REVISI[ÓO]N DE PLANOS\s*(?:[—–-]\s*(.+?))?(?:\s*·\s*(\d{4}-\d{2}-\d{2}))?$/i))){if(m[1])M.proyecto=U(m[1]);if(m[2])M.fecha=m[2];return}
+  if((m=l.match(/^(?:INFORME DE )?REVISI[ÓO]N(?: GENERAL| T[ÉE]CNICA)? DE PLANOS\s*(?:[—–-]\s*(.+?))?(?:\s*·\s*(\d{4}-\d{2}-\d{2}))?$/i))){if(m[1])M.proyecto=U(m[1]);if(m[2])M.fecha=m[2];return}
   if(/^L[áa]minas revisadas/i.test(l)){M.resumen=l;return}
   if(/^ALCANCE\b/i.test(l)){sec="alcance";lam=null;cat=null;last=null;return}
   if(/^SET COMPLETO/i.test(l)){sec="set";lam=null;cat=null;last=null;return}
@@ -571,14 +578,14 @@ async function wordING(M){const d=await loadDocx();
  const hdrCell=(w,ch,o={})=>new TableCell({width:{size:w,type:WidthType.DXA},verticalAlign:o.va,borders:{top:none,left:none,right:none,bottom:{style:BorderStyle.SINGLE,size:8,color:NAVY}},children:ch});
  const header=new Header({children:[new Table({width:{size:W,type:WidthType.DXA},columnWidths:[4460,5460],layout:TableLayoutType.FIXED,borders:{top:none,left:none,right:none,bottom:{style:BorderStyle.SINGLE,size:8,color:NAVY},insideHorizontal:none,insideVertical:none},
   rows:[new TableRow({children:[hdrCell(4460,[new Paragraph({spacing:{after:60},children:logo?[new ImageRun({type:"png",data:b64u(logo),transformation:{width:288,height:93}})]:[]})]),
-   hdrCell(5460,[new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:0},children:[run("INFORME DE REVISIÓN DE PLANOS",{size:18,bold:true,color:NAVY})]}),
+   hdrCell(5460,[new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:0},children:[run(M.titulo,{size:18,bold:true,color:NAVY})]}),
     new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:0},children:[run(M.proyecto||"",{size:16,color:GREY})]}),
     new Paragraph({alignment:AlignmentType.RIGHT,spacing:{after:60},children:[run(M.fecha,{size:16,color:GREY})]})],{va:VerticalAlign.BOTTOM})]})]})]});
  const footer=new Footer({children:[new Paragraph({border:{top:{style:BorderStyle.SINGLE,size:6,color:NAVY,space:4}},spacing:{before:0,after:0},tabStops:[{type:TabStopType.RIGHT,position:W}],
   children:[run("ING ESTRUCTURAL — Proyectos Civiles e Industriales",{size:16,bold:true,color:NAVY}),new TextRun({children:["\tPágina ",PageNumber.CURRENT," de ",PageNumber.TOTAL_PAGES],font:F,size:16,color:GREY})]})]});
  const K=[];const H1=t=>new Paragraph({heading:HeadingLevel.HEADING_1,keepNext:true,spacing:{before:280,after:140},children:[run(t,{size:30,bold:true,color:NAVY})]});
  const H2=t=>new Paragraph({heading:HeadingLevel.HEADING_2,keepNext:true,spacing:{before:200,after:100},children:[run(t,{size:26,bold:true,color:BLUE})]});
- K.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:200,after:160},children:[run("INFORME DE REVISIÓN DE PLANOS",{size:44,bold:true,color:NAVY,underline:{}})]}));
+ K.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:200,after:160},children:[run(M.titulo,{size:44,bold:true,color:NAVY,underline:{}})]}));
  if(M.proyecto)K.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:360},children:[run(M.proyecto,{size:32,color:BLUE,underline:{}})]}));
  K.push(table(null,[["Proyecto",M.proyecto||"—"],["Fecha de revisión",M.fecha],["Láminas con observaciones",String(M.laminas.length)],["Observaciones",`${C.t}  (Alta ${C.a} · Media ${C.m} · Baja ${C.b})`]],[2700,7220],{key:true,size:21}));
  K.push(new Paragraph({spacing:{after:240},children:[]}));
@@ -593,14 +600,14 @@ async function wordING(M){const d=await loadDocx();
  if(M.set.length||M.general.length){K.push(H1(`${++n}. SET COMPLETO`));K.push(obsTable([...M.set,...M.general]))}
  M.laminas.forEach(L=>{K.push(H1(`${++n}. LÁMINA ${L.codigo}${L.titulo?" — "+L.titulo:""}`));let m=0;
   CATS.forEach(c=>{const x=L.items.filter(i=>i.cat===c);if(!x.length)return;K.push(H2(`${n}.${++m} ${c.toUpperCase()}`));K.push(obsTable(x));K.push(new Paragraph({spacing:{after:120},children:[]}))})});
- const doc=new Document({creator:"ING Estructural",title:"Informe de revisión de planos"+(M.proyecto?" — "+M.proyecto:""),features:{updateFields:many},
+ const doc=new Document({creator:"ING Estructural",title:M.titulo+(M.proyecto?" — "+M.proyecto:""),features:{updateFields:many},
   styles:{default:{document:{run:{font:F,size:24}}},paragraphStyles:[
    {id:"Heading1",name:"Heading 1",basedOn:"Normal",next:"Normal",quickFormat:true,run:{font:F,size:30,bold:true,color:NAVY},paragraph:{spacing:{before:280,after:140},outlineLevel:0}},
    {id:"Heading2",name:"Heading 2",basedOn:"Normal",next:"Normal",quickFormat:true,run:{font:F,size:26,bold:true,color:BLUE},paragraph:{spacing:{before:200,after:100},outlineLevel:1}}]},
   sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:2269,bottom:1418,left:902,right:1418,header:227,footer:227}}},headers:{default:header},footers:{default:footer},children:K}]});
  return Packer.toBlob(doc)}
 async function downloadWord(M){if(!M){toast("Primero genera o pega un informe");return}try{toast("Generando Word…");const blob=await wordING(M);
- const name=`Informe_Revision_${(M.proyecto||"Planos").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"")}_${M.fecha}.docx`;
+ const name=`${fileBase(M)}_${slugName(M.proyecto)}_${M.fecha}.docx`;
  let dl=null;try{dl=await window.claude?.use?.("downloads")}catch(e){}
  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(!(e&&e.code==="declined"))toast("No se pudo descargar")}return}
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast("Descargado: "+name)}catch(e){console.error(e);toast("No se pudo generar el Word: "+(e.message||e))}}
@@ -751,8 +758,8 @@ function modelFromPaste(){const t=$("#pegado").value.trim();if(!t){toast("Pega p
  if(!M.laminas.length&&!M.set.length&&!M.general.length){toast("No reconocí observaciones en el texto pegado");return null}showModel(M);return M}
 
 /* ---- PDF del informe ---- */
-async function pdfReport(M){const C=countM(M);const P=new MiniPDF({logo:await logoJpeg(),title:"INFORME DE REVISIÓN DE PLANOS",sub:M.proyecto||"",date:M.fecha});
- P.space(10);P.para("INFORME DE REVISIÓN DE PLANOS",{size:20,bold:true,color:"1F3864",center:true,after:6});if(M.proyecto)P.para(M.proyecto,{size:14,color:"2E5395",center:true,after:14});
+async function pdfReport(M){const C=countM(M);const P=new MiniPDF({logo:await logoJpeg(),title:M.titulo,sub:M.proyecto||"",date:M.fecha});
+ P.space(10);P.para(M.titulo,{size:20,bold:true,color:"1F3864",center:true,after:6});if(M.proyecto)P.para(M.proyecto,{size:14,color:"2E5395",center:true,after:14});
  P.table(null,[[{text:"Proyecto",bold:true,fill:"F2F5FA"},M.proyecto||"—"],[{text:"Fecha de revisión",bold:true,fill:"F2F5FA"},M.fecha],[{text:"Láminas con observaciones",bold:true,fill:"F2F5FA"},String(M.laminas.length)],[{text:"Observaciones",bold:true,fill:"F2F5FA"},`${C.t}  (Alta ${C.a} · Media ${C.m} · Baja ${C.b})`]],[2700,7220],{size:9});
  if(M.laminas.length){P.para("Resumen por lámina",{size:10,bold:true,color:"1F3864",after:4});
   P.table(["Lámina","Título","Alta","Media","Baja","Total"],M.laminas.map(L=>{const n=p=>String(L.items.filter(i=>i.prio===p).length);return[L.codigo,L.titulo||"—",{text:n("Alta"),center:true,bold:true,color:PCOL.Alta},{text:n("Media"),center:true,bold:true,color:PCOL.Media},{text:n("Baja"),center:true,bold:true,color:PCOL.Baja},{text:String(L.items.length),center:true,bold:true}]}),[1400,4920,900,900,900,900],{size:9})}
@@ -764,7 +771,7 @@ async function pdfReport(M){const C=countM(M);const P=new MiniPDF({logo:await lo
 
 /* ---- Excel del informe con casillas de control ---- */
 function xlsxReport(M){const H=t=>({v:t,s:1}),T=t=>({v:t,s:2}),Cc=t=>({v:t,s:8}),chk={v:"",s:10};
- const rows=[[{v:"REGISTRO DE OBSERVACIONES — REVISIÓN DE PLANOS",s:6}],[{v:`${M.proyecto||"Proyecto"} · ${M.fecha} · Marque ✔ en las columnas Corregido y Verificado (lista desplegable).`,s:7}],[],
+ const rows=[[{v:"REGISTRO DE OBSERVACIONES — "+M.titulo,s:6}],[{v:`${M.proyecto||"Proyecto"} · ${M.fecha} · Marque ✔ en las columnas Corregido y Verificado (lista desplegable).`,s:7}],[],
   ["N°","Lámina","Categoría","Prioridad","Elemento / ubicación","Problema","Solución propuesta","Verificar contra original","Corregido","Verificado","Responsable","Fecha","Comentario"].map(H)];
  const all=[...[...M.set,...M.general].map(i=>({...i,lam:"SET"})),...M.laminas.flatMap(L=>L.items.map(i=>({...i,lam:L.codigo})))];
  all.forEach((i,k)=>rows.push([{v:k+1,s:9},Cc(i.lam),T(i.cat),{v:i.prio.toUpperCase(),s:{Alta:11,Media:12,Baja:13}[i.prio]},T(i.head||"—"),T(i.prob),T(i.sol||"—"),Cc(i.ver?"SÍ":""),chk,chk,{v:"",s:3},{v:"",s:3},{v:"",s:3}]));
@@ -777,7 +784,7 @@ function xlsxReport(M){const H=t=>({v:t,s:1}),T=t=>({v:t,s:2}),Cc=t=>({v:t,s:8})
    validations:[{sqref:`I5:J${last}`,list:["✔"]}],cf:[{sqref:`A5:M${last}`,formula:`$J5="✔"`,dxf:0},{sqref:`A5:M${last}`,formula:`AND($I5="✔",$J5<>"✔")`,dxf:1}]},
   {name:"Resumen",rows:res,cols:[12,14,8,8,8,12,12,12,13],merges:["A1:I1","A2:I2"]}],"Registro de observaciones")}
 
-async function exportFmt(kind,M){M=M||curModel();if(!M){toast("Primero genera o pega un informe");return}const base=`Informe_Revision_${slugName(M.proyecto)}_${M.fecha}`;
+async function exportFmt(kind,M){M=M||curModel();if(!M){toast("Primero genera o pega un informe");return}const base=`${fileBase(M)}_${slugName(M.proyecto)}_${M.fecha}`;
  try{if(kind==="word")return downloadWord(M);if(kind==="pdf"){toast("Generando PDF…");return saveBlob(await pdfReport(M),base+".pdf")}
   if(kind==="xlsx")return saveBlob(xlsxReport(M),`Registro_Observaciones_${slugName(M.proyecto)}_${M.fecha}.xlsx`)}catch(e){console.error(e);toast("No se pudo generar: "+(e.message||e))}}
 
@@ -794,7 +801,7 @@ function parseCub(text){const D={proyecto:U($("#pNombre").value.trim()),fecha:to
  text.split("\n").forEach(raw=>{const l=raw.replace(/\*\*/g,"").replace(/`/g,"").trim();if(!l)return;
   let m=l.match(/^CUBICACI[ÓO]N\s*(?:[—–-]\s*(.+?))?(?:\s*·\s*(\d{4}-\d{2}-\d{2}))?$/i);if(m){if(m[1])D.proyecto=U(m[1]);if(m[2])D.fecha=m[2];return}
   const isRow=l.startsWith("|")||l.includes("\t");
-  if(!isRow){const h=l.replace(/^#+\s*/,"");const c=CUB.find(c=>c.re.test(h));if(c&&h.length<60){cur=c;return}return}
+  if(!isRow){const h=l.replace(/^#+\s*/,"");if(/^(CUADRO|RESUMEN|TOTAL)/i.test(h)){cur=null;return}const head=/^#/.test(l)||h===h.toUpperCase();const c=CUB.find(c=>c.re.test(h));if(c&&head&&h.length<60){cur=c;return}return}
   if(!cur)return;let cells=l.includes("\t")&&!l.startsWith("|")?l.split("\t"):l.replace(/^\|/,"").replace(/\|$/,"").split("|");cells=cells.map(x=>x.trim());
   if(cells.every(x=>/^:?-{2,}:?$/.test(x)||x===""))return;
   if(cur.num.every(i=>numv(cells[i])==="")&&/l[áa]mina|elemento|cantidad/i.test(cells.join(" ")))return;
@@ -804,9 +811,27 @@ function cubCount(D){return CUB.reduce((a,c)=>a+D[c.k].length,0)}
 function cubCalc(D){const s=(a,f)=>a.reduce((x,r)=>x+(+f(r)||0),0);const kgm=d=>Math.PI/4*d*d/1e6*7850;
  return{hor:s(D.hor,r=>r[3]*r[4]*r[5]*r[6]),arm:s(D.arm,r=>kgm(r[3])*r[5]*r[6]),per:s(D.per,r=>r[3]*r[4]*r[5]),pno:s(D.pno,r=>r[5]),pla:s(D.pla,r=>r[2]*r[3]*r[4]/1e9*7850*r[5])}}
 function showCub(D){const K=cubCalc(D);const f=(v,d=2)=>Number(v).toLocaleString("es-CL",{minimumFractionDigits:d,maximumFractionDigits:d});
- $("#cubOut").innerHTML=`<div class="stats"><span><b>${f(K.hor)}</b> m³ hormigón</span><span><b>${f(K.arm,0)}</b> kg armaduras</span><span><b>${f(K.per,0)}</b> kg perfiles</span><span><b>${f(K.pla,0)}</b> kg planchas</span><span><b>${f(K.pno,0)}</b> pernos</span>${K.hor?`<span><b>${f(K.arm/K.hor,0)}</b> kg/m³ cuantía</span>`:""}</div>`+
- CUB.filter(c=>D[c.k].length).map(c=>`<h4 style="margin:12px 0 4px;color:var(--logo1)">${c.name} (${D[c.k].length})</h4><div style="overflow-x:auto"><table class="ct"><tr>${c.cols.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${D[c.k].slice(0,200).map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>`).join("");
+ const stats=`<div class="stats"><span><b>${f(K.hor)}</b> m³ hormigón</span><span><b>${f(K.arm,0)}</b> kg armaduras</span><span><b>${f(K.per,0)}</b> kg perfiles</span><span><b>${f(K.pla,0)}</b> kg planchas</span><span><b>${f(K.pno,0)}</b> pernos</span>${K.hor?`<span><b>${f(K.arm/K.hor,0)}</b> kg/m³ cuantía</span>`:""}</div>`;
+ const det=CUB.filter(c=>D[c.k].length).map(c=>`<h4 style="margin:12px 0 4px;color:var(--logo1)">${c.name} (${D[c.k].length})</h4><div style="overflow-x:auto"><table class="ct"><tr>${c.cols.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${D[c.k].slice(0,200).map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>`).join("");
+ $("#cubOut").innerHTML=stats+cuadroHtml(D)+`<details style="margin-top:10px"><summary style="cursor:pointer;color:var(--logo1);font-weight:600">Ver detalle por partida</summary>${det}</details>`;
  $("#cubOut").hidden=false;$("#cubBtns").hidden=false}
+function partidas(D){const G=[];const uniq=(a,f)=>[...new Set(a.map(f).filter(x=>x!==""&&x!==undefined&&x!==null))];const sum=(a,f)=>a.reduce((x,r)=>x+(+f(r)||0),0);
+ const kgm=d=>Math.PI/4*d*d/1e6*7850;const vol=r=>r[3]*r[4]*r[5]*r[6],karm=r=>kgm(r[3])*r[5]*r[6],kper=r=>r[3]*r[4]*r[5],kpla=r=>r[2]*r[3]*r[4]/1e9*7850*r[5];
+ const grp=(k,name,u,rows,keyF,labF,valF,sort)=>{if(!rows.length)return;const n=G.length+1;let ks=uniq(rows,keyF);if(sort)ks.sort(sort);
+  const items=ks.map((key,i)=>({n:`${n}.${i+1}`,key,label:labF(key),u,val:sum(rows.filter(r=>JSON.stringify(keyF(r))===JSON.stringify(key)),valF)}));
+  if(k!=="otr")items.push({n:`${n}.${items.length+1}`,key:null,label:`Total ${name.toLowerCase()}`,u,val:sum(rows,valF),total:true});G.push({n:String(n),k,name,items})};
+ grp("hor","HORMIGONES","m³",D.hor,r=>r[7]||"S/G",g=>`Hormigón ${g}`,vol);
+ grp("arm","ARMADURAS","kg",D.arm,r=>r[3],d=>`Barras Ø${d} mm`,karm,(a,b)=>a-b);
+ grp("per","PERFILES DE ACERO","kg",D.per,r=>r[2],p=>`Perfil ${p}`,kper);
+ grp("pla","PLANCHAS","kg",D.pla,r=>r[2],e=>`Plancha e = ${e} mm`,kpla,(a,b)=>a-b);
+ const pk=r=>[r[3],r[6]||""];const pn=[];D.pno.forEach(r=>{if(!pn.some(x=>x[0]===r[3]&&x[1]===(r[6]||"")))pn.push(pk(r))});
+ if(D.pno.length){const n=G.length+1;const items=pn.sort((a,b)=>a[0]-b[0]).map((key,i)=>({n:`${n}.${i+1}`,key,label:`Pernos Ø${key[0]} mm${key[1]?" "+key[1]:""}`,u:"un",val:D.pno.filter(r=>r[3]===key[0]&&(r[6]||"")===key[1]).reduce((x,r)=>x+(+r[5]||0),0)}));
+  items.push({n:`${n}.${items.length+1}`,key:null,label:"Total pernos",u:"un",val:D.pno.reduce((x,r)=>x+(+r[5]||0),0),total:true});G.push({n:String(n),k:"pno",name:"PERNOS",items})}
+ if(D.otr.length){const n=G.length+1;const ks=[];D.otr.forEach(r=>{if(!ks.some(x=>x[0]===r[1]&&x[1]===r[2]))ks.push([r[1],r[2]])});
+  G.push({n:String(n),k:"otr",name:"OTROS",items:ks.map((key,i)=>({n:`${n}.${i+1}`,key,label:key[0],u:key[1],val:D.otr.filter(r=>r[1]===key[0]&&r[2]===key[1]).reduce((x,r)=>x+(+r[3]||0),0)}))})}
+ return G}
+function cuadroHtml(D){const f=(v,u)=>Number(v).toLocaleString("es-CL",{minimumFractionDigits:u==="m³"?2:0,maximumFractionDigits:u==="m³"?2:0});const K=cubCalc(D);
+ return `<h4 style="margin:14px 0 4px;color:var(--logo1)">Cuadro de partidas</h4><div style="overflow-x:auto"><table class="ct cuadro"><tr><th>N°</th><th>Partida</th><th>Unidad</th><th>Cantidad</th></tr>${partidas(D).map(g=>`<tr class="g"><td>${g.n}</td><td colspan="3">${esc(g.name)}</td></tr>${g.items.map(it=>`<tr${it.total?' class="t"':""}><td>${it.n}</td><td>${esc(it.label)}</td><td>${esc(it.u)}</td><td style="text-align:right">${f(it.val,it.u)}</td></tr>`).join("")}`).join("")}${K.hor&&K.arm?`<tr class="t"><td></td><td>Cuantía de armadura</td><td>kg/m³</td><td style="text-align:right">${f(K.arm/K.hor)}</td></tr>`:""}</table></div>`}
 function xlsxCub(D){const H=t=>({v:t,s:1}),I=v=>typeof v==="number"?{v,s:15}:{v:v??"",s:3};const sheets=[];
  const mk=(c,extra,fx,totCol)=>{const rows=[[{v:`CUBICACIÓN — ${c.name.toUpperCase()}`,s:6}],[{v:`${D.proyecto||"Proyecto"} · ${D.fecha} · Celdas azul/amarillo: datos (editables) · negro: fórmulas`,s:7}],[],[...c.cols,...extra].map(H)];
   D[c.k].forEach((r,k)=>{const n=5+k;rows.push([...r.map(I),...fx.map(f=>({f:f(n),s:5}))])});const last=4+D[c.k].length;
@@ -819,21 +844,28 @@ function xlsxCub(D){const H=t=>({v:t,s:1}),I=v=>typeof v==="number"?{v,s:15}:{v:
  const ln=mk(cn,[],[],[5]);
  const ll=mk(cl,["Peso total (kg)"],[n=>`C${n}/1000*D${n}/1000*E${n}/1000*7850*F${n}`],[8]);
  mk(co,[],[],null);
- const r=[[{v:"RESUMEN DE CUBICACIÓN",s:6}],[{v:`${D.proyecto||"Proyecto"} · ${D.fecha}`,s:7}],[],["Partida","Detalle","Cantidad","Unidad"].map(H)];
- const uniq=(a,i)=>[...new Set(a.map(x=>x[i]).filter(x=>x!==""&&x!==undefined))];
- const add=(p,d,f,u)=>r.push([{v:p,s:2},{v:d,s:2},{f,s:5},{v:u,s:8}]);
- add("Hormigón","Total",`SUM('Hormigón'!J5:J${Math.max(5,lh)})`,"m³");uniq(D.hor,7).forEach(g=>add("Hormigón",`Grado ${g}`,`SUMIF('Hormigón'!H5:H${Math.max(5,lh)},"${g}",'Hormigón'!J5:J${Math.max(5,lh)})`,"m³"));
- add("Armaduras","Total",`SUM('Armaduras'!K5:K${Math.max(5,la)})`,"kg");uniq(D.arm,3).sort((a,b)=>a-b).forEach(d=>add("Armaduras",`Ø${d}`,`SUMIF('Armaduras'!D5:D${Math.max(5,la)},${d},'Armaduras'!K5:K${Math.max(5,la)})`,"kg"));
- add("Armaduras","Cuantía",`IF(C5=0,0,C${6+uniq(D.hor,7).length}/C5)`,"kg/m³");
- add("Perfiles","Total",`SUM('Perfiles'!H5:H${Math.max(5,lp)})`,"kg");uniq(D.per,6).forEach(q=>add("Perfiles",`Calidad ${q}`,`SUMIF('Perfiles'!G5:G${Math.max(5,lp)},"${q}",'Perfiles'!H5:H${Math.max(5,lp)})`,"kg"));
- add("Planchas","Total",`SUM('Planchas'!H5:H${Math.max(5,ll)})`,"kg");
- add("Pernos","Total",`SUM('Pernos'!F5:F${Math.max(5,ln)})`,"un");uniq(D.pno,3).sort((a,b)=>a-b).forEach(d=>add("Pernos",`Ø${d} mm`,`SUMIF('Pernos'!D5:D${Math.max(5,ln)},${d},'Pernos'!F5:F${Math.max(5,ln)})`,"un"));
- sheets.unshift({name:"Resumen",rows:r,cols:[16,22,16,10],merges:["A1:D1","A2:D2"]});
+ const P=partidas(D);const r=[[{v:"CUADRO DE PARTIDAS — CUBICACIÓN",s:6}],[{v:`${D.proyecto||"Proyecto"} · ${D.fecha} · Cantidades calculadas con fórmulas desde las hojas de detalle`,s:7}],[],["N°","Partida","Unidad","Cantidad"].map(H)];
+ const L={hor:Math.max(5,lh),arm:Math.max(5,la),per:Math.max(5,lp),pno:Math.max(5,ln),pla:Math.max(5,ll),otr:Math.max(5,4+D.otr.length)};
+ const q=s=>String(s).replace(/"/g,'""');
+ const fx={hor:it=>it.key===null?`SUM('Hormigón'!J5:J${L.hor})`:`SUMIF('Hormigón'!H5:H${L.hor},"${q(it.key)}",'Hormigón'!J5:J${L.hor})`,
+  arm:it=>it.key===null?`SUM('Armaduras'!K5:K${L.arm})`:`SUMIF('Armaduras'!D5:D${L.arm},${it.key},'Armaduras'!K5:K${L.arm})`,
+  per:it=>it.key===null?`SUM('Perfiles'!H5:H${L.per})`:`SUMIF('Perfiles'!C5:C${L.per},"${q(it.key)}",'Perfiles'!H5:H${L.per})`,
+  pla:it=>it.key===null?`SUM('Planchas'!H5:H${L.pla})`:`SUMIF('Planchas'!C5:C${L.pla},${it.key},'Planchas'!H5:H${L.pla})`,
+  pno:it=>it.key===null?`SUM('Pernos'!F5:F${L.pno})`:`SUMIFS('Pernos'!F5:F${L.pno},'Pernos'!D5:D${L.pno},${it.key[0]},'Pernos'!G5:G${L.pno},"${q(it.key[1])}")`,
+  otr:it=>`SUMIFS('Otros'!D5:D${L.otr},'Otros'!B5:B${L.otr},"${q(it.key[0])}",'Otros'!C5:C${L.otr},"${q(it.key[1])}")`};
+ let horRow=0,armRow=0;
+ P.forEach(g=>{r.push([{v:g.n,s:1},{v:g.name,s:1},{v:"",s:1},{v:"",s:1}]);g.items.forEach(it=>{const row=r.length+1;if(it.total&&g.k==="hor")horRow=row;if(it.total&&g.k==="arm")armRow=row;
+   r.push([{v:it.n,s:8},{v:it.label,s:it.total?2:2},{v:it.u,s:8},{f:fx[g.k](it),s:it.total?5:4}])})});
+ if(horRow&&armRow)r.push([{v:"",s:8},{v:"Cuantía de armadura (kg/m³)",s:2},{v:"kg/m³",s:8},{f:`IF(D${horRow}=0,0,D${armRow}/D${horRow})`,s:5}]);
+ sheets.unshift({name:"Cuadro de partidas",rows:r,cols:[8,46,10,16],merges:["A1:D1","A2:D2"]});
  return xlsxBlob(sheets,"Cubicación")}
 async function pdfCub(D){const K=cubCalc(D);const P=new MiniPDF({logo:await logoJpeg(),title:"CUBICACIÓN DE PLANOS",sub:D.proyecto||"",date:D.fecha});
  const f=(v,d=2)=>Number(v).toLocaleString("es-CL",{minimumFractionDigits:d,maximumFractionDigits:d});
  P.space(10);P.para("CUBICACIÓN DE PLANOS",{size:20,bold:true,color:"1F3864",center:true,after:6});if(D.proyecto)P.para(D.proyecto,{size:14,color:"2E5395",center:true,after:14});
- P.table(["Partida","Cantidad","Unidad"],[["Hormigón",f(K.hor),"m³"],["Armaduras",f(K.arm,0),"kg"],["Perfiles de acero",f(K.per,0),"kg"],["Planchas",f(K.pla,0),"kg"],["Pernos",f(K.pno,0),"un"],...(K.hor?[["Cuantía de armadura",f(K.arm/K.hor,0),"kg/m³"]]:[])],[5000,3000,1920],{size:9});
+ P.para("Cuadro de partidas",{size:11,bold:true,color:"1F3864",after:4});
+ const rowsQ=[];partidas(D).forEach(g=>{rowsQ.push([{text:g.n,bold:true,fill:"DCE6F2"},{text:g.name,bold:true,fill:"DCE6F2"},{text:"",fill:"DCE6F2"},{text:"",fill:"DCE6F2"}]);g.items.forEach(it=>rowsQ.push([{text:it.n,center:true},{text:it.label,bold:!!it.total},{text:it.u,center:true},{text:f(it.val,it.u==="m³"?2:0),bold:!!it.total,center:true}]))});
+ if(K.hor&&K.arm)rowsQ.push([{text:""},{text:"Cuantía de armadura",bold:true},{text:"kg/m³",center:true},{text:f(K.arm/K.hor,0),bold:true,center:true}]);
+ P.table(["N°","Partida","Unidad","Cantidad"],rowsQ,[900,5620,1400,2000],{size:9});
  CUB.forEach(c=>{if(!D[c.k].length)return;P.h1(c.name.toUpperCase());P.table(c.cols,D[c.k].map(r=>r.map(v=>typeof v==="number"?{text:f(v,v%1?2:0),center:true}:String(v))),c.cols.map((h,i)=>i===1||/Observ/.test(h)?2:/Forma|Ubicaci|Conexi|Perfil|Tipo/.test(h)?1.6:1),{size:7})});
  return P.blob()}
 let lastCub=null;
@@ -851,7 +883,7 @@ Cuantifica hormigones, armaduras, perfiles de acero, pernos de conexión, planch
 function promptDet(){const o=[...document.querySelectorAll("#t4 input[type=checkbox]:checked")].map(x=>x.value);const extra=$("#detReq").value.trim();
  return `Complementa los detalles de estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
 Genera en DXF${o.length?": "+o.join("; "):" los detalles que falten"}.${extra?"\nDetalles pedidos: "+extra:""}
-Usa capas ordenadas, cotas en mm y textos legibles a la escala indicada; guarda los DXF en la carpeta del proyecto y dime qué contiene cada uno.`}
+Usa capas ordenadas, cotas en mm y textos legibles a la escala indicada; guarda los DXF en la carpeta «Revisor Planos/4 Detallamiento Complementario» del proyecto (o entrégamelos como archivos) y dime qué contiene cada uno.`}
 
 /* ===== Pestañas y botones de las 4 etapas ===== */
 document.querySelectorAll(".steps4 button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".steps4 button").forEach(x=>x.setAttribute("aria-selected",x===b));["1","2","3","4"].forEach(t=>$("#t"+t).hidden=t!==b.dataset.t);try{localStorage.setItem("ing-revisor-tab",b.dataset.t)}catch(e){}});
@@ -870,10 +902,51 @@ $("#btnCubXls").onclick=()=>{const D=lastCub||cubFromPaste();if(D)saveBlob(xlsxC
 $("#btnCubPdf").onclick=async()=>{const D=lastCub||cubFromPaste();if(D){toast("Generando PDF…");try{saveBlob(await pdfCub(D),`Cubicacion_${slugName(D.proyecto)}_${D.fecha}.pdf`)}catch(e){toast("No se pudo generar el PDF")}}};
 $("#pegCub").addEventListener("input",()=>{lastCub=null});$("#pegado").addEventListener("input",()=>{lastModel=null});
 
+/* ===== Resultados por etapa y carpeta «Revisor Planos» ===== */
+const RES={gen:null,tec:null,cub:null,det:{files:[]}};
+const T_GEN="REVISIÓN GENERAL DE PLANOS",T_TEC="REVISIÓN TÉCNICA DE PLANOS";
+function fileBase(M){return M.titulo===T_GEN?"Revision_General":M.titulo===T_TEC?"Revision_Tecnica":"Informe_Revision"}
+const _sr2=showReport;showReport=function(){_sr2();if(lastModel){lastModel.titulo=T_GEN;RES.gen=lastModel}fStatus()};
+const _mfp=modelFromPaste;modelFromPaste=function(){const M=_mfp();if(M){M.titulo=T_TEC;RES.tec=M;showModel(M)}fStatus();return M};
+const _cfp=cubFromPaste;cubFromPaste=function(){const D=_cfp();if(D)RES.cub=D;fStatus();return D};
+function fStatus(){const s=[["1 General",RES.gen],["2 Técnica",RES.tec],["3 Cubicación",RES.cub],["4 Detallamiento",RES.det.files.length?1:null]];
+ $("#fStat").innerHTML=s.map(([n,v])=>`<span class="chip ${v?"Baja":"ver"}" style="margin-right:4px">${v?"✔":"·"} ${n}</span>`).join("")}
+function addDxf(list){const fs=[...list].filter(f=>/\.dxf$/i.test(f.name));if(!fs.length){toast("Solo se aceptan archivos DXF");return}
+ fs.forEach(f=>{if(!RES.det.files.some(x=>x.name===f.name))RES.det.files.push(f)});
+ $("#dxfList").innerHTML=RES.det.files.map((f,i)=>`${i+1}. ${esc(f.name)} (${Math.round(f.size/1024)} kB)`).join("<br>");fStatus();toast(`${fs.length} DXF agregado(s)`)}
+const dd=$("#dropDxf");dd.onclick=()=>$("#dxfIn").click();$("#dxfIn").onchange=e=>{addDxf(e.target.files);e.target.value=""};
+dd.addEventListener("dragover",e=>{e.preventDefault();dd.classList.add("over")});dd.addEventListener("dragleave",()=>dd.classList.remove("over"));
+dd.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();dd.classList.remove("over");$("#drop").classList.remove("over");if(e.dataTransfer)addDxf(e.dataTransfer.files)});
+async function pdfIndiceDet(){const proj=U($("#pNombre").value.trim());const P=new MiniPDF({logo:await logoJpeg(),title:"DETALLAMIENTO COMPLEMENTARIO",sub:proj,date:today()});
+ P.space(10);P.para("DETALLAMIENTO COMPLEMENTARIO",{size:20,bold:true,color:"1F3864",center:true,after:6});if(proj)P.para(proj,{size:14,color:"2E5395",center:true,after:14});
+ const o=[...document.querySelectorAll("#t4 input[type=checkbox]:checked")].map(x=>x.value),req=$("#detReq").value.trim();
+ P.para("Alcance solicitado",{size:11,bold:true,color:"1F3864",after:4});(o.length?o:["Detalles faltantes"]).forEach(x=>P.para("• "+x,{size:9}));if(req)P.para("Detalles específicos: "+req,{size:9});
+ P.space(6);P.para("Archivos DXF",{size:11,bold:true,color:"1F3864",after:4});
+ P.table(["N°","Archivo","Tamaño"],RES.det.files.map((f,i)=>[{text:String(i+1),center:true},f.name,{text:Math.round(f.size/1024)+" kB",center:true}]),[700,7220,2000],{size:9});
+ P.para("Los DXF fueron generados por Claude a partir de los PDF del proyecto; revisar antes de incorporarlos a los planos.",{size:8,color:"595959"});return P.blob()}
+async function folderFiles(){const out=[],proj=slugName(U($("#pNombre").value.trim())||"Proyecto"),d=today();
+ const rep=async(dir,M)=>{const b=`${fileBase(M)}_${proj}_${d}`;out.push({path:`${dir}/${b}.pdf`,blob:await pdfReport(M)});out.push({path:`${dir}/${b}.docx`,blob:await wordING(M)});out.push({path:`${dir}/Registro_Observaciones_${proj}_${d}.xlsx`,blob:xlsxReport(M)})};
+ if(RES.gen)await rep("1 Revisión General",RES.gen);
+ if(RES.tec)await rep("2 Revisión Técnica",RES.tec);
+ if(RES.cub){out.push({path:`3 Cubicación/Cubicacion_${proj}_${d}.xlsx`,blob:xlsxCub(RES.cub)});out.push({path:`3 Cubicación/Cubicacion_${proj}_${d}.pdf`,blob:await pdfCub(RES.cub)})}
+ if(RES.det.files.length){RES.det.files.forEach(f=>out.push({path:`4 Detallamiento Complementario/${f.name}`,blob:f}));out.push({path:`4 Detallamiento Complementario/Indice_Detallamiento_${proj}_${d}.pdf`,blob:await pdfIndiceDet()})}
+ return out}
+async function saveFolder(){const fs=await folderFiles().catch(e=>{console.error(e);toast("No se pudieron generar los informes: "+(e.message||e));return null});if(!fs)return;
+ if(!fs.length){toast("Aún no hay informes: completa al menos una etapa");return}
+ const faltan=[["1 Revisión general",RES.gen],["2 Revisión técnica",RES.tec],["3 Cubicación",RES.cub],["4 Detallamiento",RES.det.files.length]].filter(x=>!x[1]).map(x=>x[0]);
+ if(typeof window.showDirectoryPicker==="function"&&!window.claude){try{const root=await window.showDirectoryPicker({id:"revisorPlanos",mode:"readwrite",startIn:"documents"});
+   const base=await root.getDirectoryHandle("Revisor Planos",{create:true});
+   for(const f of fs){const parts=f.path.split("/");let dir=base;for(const p of parts.slice(0,-1))dir=await dir.getDirectoryHandle(p,{create:true});const fh=await dir.getFileHandle(parts.at(-1),{create:true});const w=await fh.createWritable();await w.write(f.blob);await w.close()}
+   toast(`Carpeta «Revisor Planos» guardada en ${root.name}: ${fs.length} archivos${faltan.length?" · falta: "+faltan.join(", "):""}`);return}catch(e){if(e&&e.name==="AbortError")return;console.error(e)}}
+ const files=[];for(const f of fs)files.push({name:"Revisor Planos/"+f.path,data:new Uint8Array(await f.blob.arrayBuffer())});
+ await saveBlob(zipStore(files),`Revisor Planos ${U($("#pNombre").value.trim())||""}`.trim().replace(/\s+/g," ")+".zip");if(faltan.length)toast("Falta: "+faltan.join(", "))}
+$("#btnFolder").onclick=()=>{toast("Preparando la carpeta…");saveFolder()};
+fStatus();
+
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1205. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-1232. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
