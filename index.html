@@ -102,9 +102,9 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
     <div class="tab" id="t1">
       <div id="engine" class="engine off"></div>
       <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir o arrastrar PDF">
-        <b>Arrastra aquí los PDF de los planos</b>
-        <span>o haz clic para elegirlos · láminas repetidas, numeración de cortes y verificaciones de texto</span>
-        <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+        <b>Arrastra aquí los PDF y/o DXF de los planos</b>
+        <span>o haz clic para elegirlos · con el DXF la revisión es exacta: cotas que no suman, valores de cota cambiados, textos encimados, alturas de texto, escalas y cajetines</span>
+        <input type="file" id="fileIn" accept="application/pdf,.pdf,.dxf" multiple hidden>
       </div>
     </div>
 
@@ -200,7 +200,7 @@ async function listModels(key){const r=await fetch("https://api.anthropic.com/v1
  if(!r.ok)throw{code:r.status===401?"clave_invalida":"error_"+r.status};return((await r.json()).data||[])}
 function engineStatus(){const el=$("#engine");if(!el)return;const on=canImg();
  el.className="engine "+(on?"on":"info");
- el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"} · además de las verificaciones automáticas`:`<b>Revisión general:</b> láminas repetidas, numeración de cortes y detalles, y verificaciones de texto (si el PDF trae texto). Para la revisión visual completa usa la Revisión técnica (etapa 2).`;
+ el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"} · además de las verificaciones automáticas`:`<b>Revisión general:</b> arrastra los PDF y el DXF de INGEXPORT. Con el DXF se revisan exacto las cotas (valores cambiados, cadenas que no suman, repetidas), textos encimados o chicos, escalas de viewports y cajetines; con el PDF, láminas repetidas. Para la revisión visual y normativa usa la etapa 2.`;
  const b=$("#btnCfg2");if(b)b.onclick=openCfg;$("#btnCfg").hidden=IN_CLAUDE}
 function openCfg(){$("#cfg").hidden=false;$("#cfgKey").value=apiKey();const cur=lsg(MODK);if(cur&&!$("#cfgModel").options.length)$("#cfgModel").innerHTML=`<option>${esc(cur)}</option>`;$("#cfgKey").focus()}
 
@@ -243,8 +243,8 @@ function prog(i,n,sub){const f=n?(i+(sub&&/(\d+)\/(\d+)/.test(sub)?(+RegExp.$1/+
 function step(t){$("#runStep").textContent=t}
 
 async function review(list){
- const files=[...list].filter(f=>/\.pdf$/i.test(f.name)||f.type==="application/pdf");if(!files.length){toast("Solo se aceptan archivos PDF");return}
- if(!window.pdfjsLib){toast("No se pudo cargar el lector de PDF; revisa la conexión y recarga");return}
+ const files=[...list].filter(f=>/\.pdf$/i.test(f.name)||f.type==="application/pdf");if(!files.length&&!DXQ.length){toast("Solo se aceptan archivos PDF o DXF");return}
+ if(files.length&&!window.pdfjsLib){toast("No se pudo cargar el lector de PDF; revisa la conexión y recarga");return}
  S=blankS();stopFlag=false;$("#vDrop").hidden=true;$("#vRep").hidden=true;$("#vRun").hidden=false;step("Leyendo los PDF…");prog(0,1,"");
  for(const f of files){try{const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer(),isEvalSupported:false}).promise;docs[f.name]=doc;
   for(let n=1;n<=doc.numPages;n++){$("#runSub").textContent=`${f.name} · página ${n} de ${doc.numPages}`;const key=f.name+"|"+n;
@@ -260,7 +260,7 @@ async function review(list){
   if(stopFlag&&S.pages.some(p=>p)){S.notes.push("Revisión detenida antes de terminar: el informe puede estar incompleto.")}}
  else if(engineOn())S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes y los PDF no traen texto. Solo se verificaron láminas repetidas. Para la revisión completa usa «Revisar en el chat ↗» (gratis) o la app RP con tu clave de Claude.");
  else S.notes.push("REVISIÓN VISUAL NO REALIZADA: este informe incluye solo las verificaciones automáticas. Para la revisión completa usa «Revisar en el chat ↗» (gratis) o configura tu clave de Claude (⚙ Configurar).");
- detectCortes();showReport()}
+ await applyDXF();detectCortes();showReport()}
 
 /* ===== Informe ===== */
 function setItems(){const out=[];S.pages.forEach((p,i)=>{if(p.dupCon)out.push({prio:"Alta",txt:`Pág. ${i+1} (${lamLabel(p)}): lámina repetida con ${p.dupCon}.`,sol:"Eliminar la página repetida o reemplazarla por la lámina que corresponde."})});
@@ -389,11 +389,12 @@ function detectCortes(){
  found.forEach(c=>{if(!manual.some(m=>m.id.toUpperCase()===c.id.toUpperCase()))merged.push(c)});
  S.cortes=merged;
 }
-function corEstado(c,all){const fl=[];const key=c.tipo+"|"+(c.sub||"");
+const serie=x=>x.tipo+"|"+(x.sub||"")+"|"+(/^\s*[A-Z]{1,2}\s*(-|$)/i.test(String(x.id).replace(/^(Detalle|Sección)\s+/i,""))?"L":"N");
+function corEstado(c,all){const fl=[];const key=serie(c);
  if(c.num===""||c.num==null)fl.push("SIN NÚMERO");
- const dupId=all.filter(x=>x.id.toUpperCase()===c.id.toUpperCase()).length>1;const dupNum=c.num!==""&&all.filter(x=>x.tipo+"|"+(x.sub||"")===key&&String(x.num)===String(c.num)).length>1;
+ const dupId=all.filter(x=>x.id.toUpperCase()===c.id.toUpperCase()).length>1;const dupNum=c.num!==""&&all.filter(x=>serie(x)===key&&String(x.num)===String(c.num)).length>1;
  if(dupId||dupNum)fl.push("REPETIDO");
- const n=+c.num;if(n>1&&!all.some(x=>x.tipo+"|"+(x.sub||"")===key&&+x.num===n-1))fl.push(`SALTO (falta N° ${n-1})`);
+ const n=+c.num;if(n>1&&!all.some(x=>serie(x)===key&&+x.num===n-1))fl.push(`SALTO (falta N° ${n-1})`);
  if(!c.ref)fl.push("SIN LLAMADO EN PLANTA");
  if(c.leg==="No")fl.push("LLAMADO ILEGIBLE");
  if(c.dib&&S.pages.length&&!c.dib.split(/,\s*/).every(d=>S.pages.some(p=>lamLabel(p)===d)))fl.push("LÁMINA NO EXISTE");
@@ -955,11 +956,202 @@ $("#btnReset").onclick=()=>{const b=$("#btnReset");if(b.dataset.arm){clearTimeou
  b.dataset.arm="1";b.textContent="⚠ ¿Borrar todo? Clic otra vez";b.style.background="#B3261E";b.style.color="#fff";b.style.borderColor="#B3261E";b._t=setTimeout(()=>{delete b.dataset.arm;b.textContent="🗑 Borrar todos los informes";b.style.background="";b.style.color="";b.style.borderColor=""},4000)};
 $("#btnReset2").onclick=()=>{$("#btnReset").scrollIntoView({behavior:"smooth",block:"center"});$("#btnReset").click()};
 fStatus();
+/* ===== Revisión general desde DXF (exacta, sin IA): cotas, cadenas, textos, escalas y cajetines ===== */
+let DXQ=[];
+function dxfRead(txt){
+ const L=txt.split(/\r?\n/);const P=[];for(let i=0;i+1<L.length;i+=2){const c=parseInt(L[i],10);if(isNaN(c))continue;P.push([c,L[i+1]])}
+ const D={hdr:{},layers:{},dims:{},brec:{},layouts:[],blocks:{},ents:[]};
+ let i=0,sec="";const N=P.length;
+ const readEnt=()=>{const e={t:P[i][1].trim(),g:[]};i++;while(i<N&&P[i][0]!==0){e.g.push(P[i]);i++}return e};
+ while(i<N){const [c,v]=P[i];
+  if(c===0&&v.trim()==="SECTION"){sec=(P[i+1]&&P[i+1][1]||"").trim();i+=2;continue}
+  if(c===0&&v.trim()==="ENDSEC"){sec="";i++;continue}
+  if(c===0&&v.trim()==="EOF")break;
+  if(sec==="HEADER"){if(c===9){const k=v.trim();i++;if(i<N&&P[i][0]!==9&&P[i][0]!==0){D.hdr[k]=P[i][1].trim();i++}}else i++;continue}
+  if(c!==0){i++;continue}
+  const e=readEnt();
+  if(sec==="TABLES"){
+   if(e.t==="LAYER"){const n=gs(e,2);D.layers[n.toUpperCase()]={off:gn(e,62,7)<0,frozen:(gn(e,70,0)&1)===1}}
+   else if(e.t==="DIMSTYLE"){D.dims[gs(e,2).toUpperCase()]={txt:gn(e,140,2.5),sc:gn(e,40,1),lfac:gn(e,144,1),dec:gn(e,271,2)}}
+   else if(e.t==="BLOCK_RECORD"){D.brec[gs(e,5).toUpperCase()]=gs(e,2)}}
+  else if(sec==="BLOCKS"){
+   if(e.t==="BLOCK"){D._cb={name:gs(e,2),bx:gn(e,10,0),by:gn(e,20,0),ents:[]};D.blocks[D._cb.name.toUpperCase()]=D._cb}
+   else if(e.t==="ENDBLK"){D._cb=null}
+   else if(D._cb){D._cb.ents.push(e)}}
+  else if(sec==="ENTITIES"){D.ents.push(e)}
+  else if(sec==="OBJECTS"){if(e.t==="LAYOUT"){D.layouts.push({name:gs(e,1),tab:gn(e,71,0),br:gs(e,340).toUpperCase()})}}
+ }
+ // entidades de presentaciones no activas (bloques *Paper_Space0…)
+ Object.values(D.blocks).forEach(b=>{if(/^\*paper_space./i.test(b.name))b.ents.forEach(e=>D.ents.push(e))});
+ return D}
+function gv(e,c){for(const p of e.g)if(p[0]===c)return p[1];return undefined}
+function gs(e,c){const v=gv(e,c);return v===undefined?"":String(v).trim()}
+function gn(e,c,d){const v=gv(e,c);if(v===undefined)return d;const n=parseFloat(v);return isFinite(n)?n:d}
+function gall(e,c){return e.g.filter(p=>p[0]===c).map(p=>parseFloat(p[1]))}
+function dxfTxt(s){return String(s||"").replace(/\\U\+([0-9A-Fa-f]{4})/g,(m,h)=>String.fromCharCode(parseInt(h,16))).replace(/%%[cC]/g,"Ø").replace(/%%[dD]/g,"°").replace(/%%[pP]/g,"±").replace(/%%%/g,"%").replace(/%%[uUoOkK]/g,"")
+ .replace(/\\P/g,"\n").replace(/\\S([^;^#\/]*)[\^#\/]([^;]*);/g,"$1/$2").replace(/\\[ACcFfHhQqTtWwp][^;\\]*;/g,"").replace(/\\[LlOoKkNX]/g,"").replace(/\\~/g," ").replace(/\\\\/g,"\\").replace(/[{}]/g,"").trim()}
+const f2=v=>{const r=Math.round(v*100)/100;return String(r).replace(".",",")};
+function nfmt(v,dec){const d=Math.max(0,Math.min(6,dec|0));let t=v.toFixed(d);if(d>0)t=t.replace(/0+$/,"").replace(/\.$/,"");return t.replace(".",",")}
 
+/* geometría de textos: caja rotada → AABB */
+function boxOf(x,y,w,h,rot,ox,oy){const c=Math.cos(rot),s=Math.sin(rot);const pts=[[ox,oy],[ox+w,oy],[ox+w,oy+h],[ox,oy+h]].map(([a,b])=>[x+a*c-b*s,y+a*s+b*c]);
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return{x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys)}}
+const CW=0.72; // ancho medio de carácter / altura (fuentes SHX romanas)
+function textItem(e,xf){const t=e.t;let s,x,y,h,rot,w,H,ox,oy;
+ if(t==="TEXT"||t==="ATTRIB"){if(t==="ATTRIB"&&(gn(e,70,0)&1))return null;s=dxfTxt(gs(e,1));if(!s)return null;h=gn(e,40,0);rot=gn(e,50,0)*Math.PI/180;const wf=gn(e,41,1)||1;
+  const ha=gn(e,72,0),va=t==="ATTRIB"?gn(e,74,0):gn(e,73,0);const al=ha||va;x=al?gn(e,11,gn(e,10,0)):gn(e,10,0);y=al?gn(e,21,gn(e,20,0)):gn(e,20,0);
+  w=s.length*h*CW*wf;H=h;ox=-w*({1:.5,2:1,4:.5}[ha]||0);oy=-h*(ha===4?.5:({2:.5,3:1}[va]||0))}
+ else if(t==="MTEXT"){s=dxfTxt(e.g.filter(p=>p[0]===3).map(p=>p[1]).join("")+(gv(e,1)||""));if(!s)return null;h=gn(e,40,0);x=gn(e,10,0);y=gn(e,20,0);const dx=gv(e,11);rot=dx!==undefined?Math.atan2(gn(e,21,0),gn(e,11,1)):gn(e,50,0)*Math.PI/180;
+  const lines=s.split("\n");const mx=Math.max(...lines.map(l=>l.length))*h*CW;const rw=gn(e,41,0);w=rw>0?Math.min(rw,mx):mx;
+  const nl=lines.reduce((a,l)=>a+Math.max(1,Math.ceil(l.length*h*CW/(w||1)-1e-9)),0);H=nl*h*1.55;const a=gn(e,71,1);ox=-w*[0,.5,1][(a-1)%3];oy=-H*[1,.5,0][Math.floor((a-1)/3)]}
+ else return null;
+ if(!(h>0))return null;
+ if(xf){const p=xf(x,y);x=p[0];y=p[1];h*=xf.s;w*=xf.s;H*=xf.s;ox*=xf.s;oy*=xf.s;rot+=xf.r}
+ return{s:s.replace(/\n/g," "),x,y,h,rot,...boxOf(x,y,w,H,rot,ox,oy),lay:gs(e,8),hd:gs(e,5),kind:"T"}}
+function blockXf(ins,b){const ix=gn(ins,10,0),iy=gn(ins,20,0),sx=gn(ins,41,1),sy=gn(ins,42,1),r=gn(ins,50,0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+ const f=(x,y)=>{const a=(x-b.bx)*sx,bb=(y-b.by)*sy;return[ix+a*c-bb*s,iy+a*s+bb*c]};f.s=Math.abs(sy);f.r=r;return f}
+function blockBox(b,seen){seen=seen||0;if(b._bb!==undefined)return b._bb;let x0=1e300,y0=1e300,x1=-1e300,y1=-1e300;const add=(x,y)=>{if(!isFinite(x)||!isFinite(y))return;x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)};
+ b.ents.forEach(e=>{if(e.t==="LINE"){add(gn(e,10),gn(e,20));add(gn(e,11),gn(e,21))}else if(e.t==="LWPOLYLINE"||e.t==="SOLID"){const X=gall(e,10),Y=gall(e,20);X.forEach((x,k)=>add(x,Y[k]))}else if(e.t==="CIRCLE"||e.t==="ARC"){const r=gn(e,40,0);add(gn(e,10)-r,gn(e,20)-r);add(gn(e,10)+r,gn(e,20)+r)}});
+ b._bb=x0<x1&&y0<y1?{x0:x0-b.bx,y0:y0-b.by,x1:x1-b.bx,y1:y1-b.by}:null;return b._bb}
+
+function dxfAnalyze(D,fname){
+ const brName=h=>D.brec[(h||"").toUpperCase()]||"";
+ const layName={};D.layouts.forEach(l=>{layName[l.br]=l.name});
+ const space=e=>{const o=gs(e,330).toUpperCase();const n=brName(o);if(/^\*model_space$/i.test(n))return"M";if(layName[o])return layName[o];if(gn(e,67,0)===1){const pl=D.layouts.find(l=>/^\*paper_space$/i.test(brName(l.br)));return pl?pl.name:"PAPEL"}return o&&n&&!/^\*paper/i.test(n)?null:"M"};
+ const hidden=e=>{const l=D.layers[gs(e,8).toUpperCase()];return(l&&(l.off||l.frozen))||/^defpoints$/i.test(gs(e,8))};
+ const M={texts:[],dims:[]},PS={};const ps=n=>PS[n]||(PS[n]={texts:[],dims:[],vps:[],ins:[],rects:[]});
+ const dsty=n=>D.dims[(n||"STANDARD").toUpperCase()]||D.dims.STANDARD||{txt:2.5,sc:1,lfac:1,dec:2};
+ let lastIns=null;
+ for(const e of D.ents){const sp=space(e);if(!sp)continue;if(e.t!=="ATTRIB"&&e.t!=="SEQEND")lastIns=null;if(hidden(e)&&e.t!=="VIEWPORT"&&e.t!=="ATTRIB")continue;
+  const tgt=sp==="M"?M:ps(sp);
+  if(e.t==="INSERT"){const bn=gs(e,2),b=D.blocks[bn.toUpperCase()];const rec={e,b,bn,att:[]};lastIns=rec;if(sp!=="M")tgt.ins.push(rec);
+   if(b&&!/^\*(D|X|MODEL_SPACE|PAPER_SPACE)/i.test(bn)&&gn(e,70,0)<=1&&gn(e,71,0)<=1){const xf=blockXf(e,b);b.ents.forEach(be=>{if(be.t==="TEXT"||be.t==="MTEXT"){const it=textItem(be,xf);if(it){it.lay=gs(e,8);it.hd=gs(e,5)+"/"+gs(be,5);tgt.texts.push(it)}}})}}
+  else if(e.t==="ATTRIB"){if(lastIns)lastIns.att.push({tag:gs(e,2).toUpperCase(),val:dxfTxt(gs(e,1))});const it=textItem(e);if(it&&!hidden(e))tgt.texts.push(it)}
+  else if(e.t==="TEXT"||e.t==="MTEXT"){const it=textItem(e);if(it)tgt.texts.push(it)}
+  else if(e.t==="DIMENSION"){const ty=gn(e,70,0)&7;const st=dsty(gs(e,3));const meas=gn(e,42,NaN);const raw=dxfTxt(gs(e,1));
+   const d={hd:gs(e,5),lay:gs(e,8),ty,st,meas,raw,p1:[gn(e,13,0),gn(e,23,0)],p2:[gn(e,14,0),gn(e,24,0)],dp:[gn(e,10,0),gn(e,20,0)],tp:[gn(e,11,NaN),gn(e,21,NaN)],ang:gn(e,50,0)*Math.PI/180};
+   const disp=isFinite(meas)?nfmt(meas*st.lfac,st.dec):"";d.disp=raw?(raw.includes("<>")?raw.replace("<>",disp):raw):disp;tgt.dims.push(d)}
+  else if(e.t==="LWPOLYLINE"&&sp!=="M"&&(gn(e,70,0)&1)){const X=gall(e,10),Y=gall(e,20);if(X.length>=4&&X.length<=5)tgt.rects.push({x0:Math.min(...X),y0:Math.min(...Y),x1:Math.max(...X),y1:Math.max(...Y)})}
+  else if(e.t==="VIEWPORT"&&sp!=="M"){const vh=gn(e,45,0),ph=gn(e,41,0),pw=gn(e,40,0);if(gn(e,69,0)===1||!(vh>0)||!(ph>0)||!(pw>0))continue;
+   tgt.vps.push({cx:gn(e,10,0),cy:gn(e,20,0),pw,ph,vx:gn(e,12,0),vy:gn(e,22,0),vh,vw:vh*pw/ph,sc:ph/vh,id:gn(e,69,0)})}}
+ /* láminas: marcos dentro de cada presentación, o la presentación completa */
+ const sheets=[];const lays=Object.keys(PS).map(n=>({n,tab:(D.layouts.find(l=>l.name===n)||{}).tab||0})).sort((a,b)=>a.tab-b.tab);
+ let pf=1;// factor unidades de papel → mm
+ for(const {n} of lays){const S0=PS[n];if(!S0.vps.length&&!S0.texts.length)continue;
+  const boxes=S0.ins.map(r=>{const bb=r.b&&blockBox(r.b);if(!bb)return null;const xf=blockXf(r.e,r.b);const a=xf(r.b.bx+bb.x0,r.b.by+bb.y0),c=xf(r.b.bx+bb.x1,r.b.by+bb.y1);
+   return{r,x0:Math.min(a[0],c[0]),y0:Math.min(a[1],c[1]),x1:Math.max(a[0],c[0]),y1:Math.max(a[1],c[1])}}).filter(Boolean).concat(S0.rects.map(b=>Object.assign({r:null},b)));
+  const area=b=>(b.x1-b.x0)*(b.y1-b.y0);const big=Math.max(0,...boxes.map(area));
+  let frames=boxes.filter(b=>area(b)>=0.3*big&&S0.vps.some(v=>v.cx>=b.x0&&v.cx<=b.x1&&v.cy>=b.y0&&v.cy<=b.y1));
+  frames=frames.filter((b,k)=>!frames.some((o,j)=>j!==k&&area(o)>area(b)&&b.x0>=o.x0-1e-6&&b.x1<=o.x1+1e-6&&b.y0>=o.y0-1e-6&&b.y1<=o.y1+1e-6));
+  if(frames.length<2)frames=[{x0:-1e300,y0:-1e300,x1:1e300,y1:1e300,whole:true,r:frames[0]&&frames[0].r}];
+  frames.sort((a,b)=>{const h=0.5*(a.y1-a.y0);return Math.abs(a.y1-b.y1)>h?b.y1-a.y1:a.x0-b.x0});
+  frames.forEach((F,k)=>{const inF=(x,y)=>x>=F.x0&&x<=F.x1&&y>=F.y0&&y<=F.y1;
+   const att=[];if(!F.whole&&F.r&&F.r.att.length)att.push(...F.r.att);else S0.ins.forEach(r=>{if(!r.att.length||frames.some(o=>o!==F&&o.r===r))return;const bb=r.b&&blockBox(r.b);const xf=bb?blockXf(r.e,r.b):null;const c=xf?xf(r.b.bx+(bb.x0+bb.x1)/2,r.b.by+(bb.y0+bb.y1)/2):[gn(r.e,10,0),gn(r.e,20,0)];if(F.whole||inF(c[0],c[1]))att.push(...r.att)});
+   sheets.push({layout:n,k,nfr:frames.length,F,att,vps:S0.vps.filter(v=>inF(v.cx,v.cy)),ptexts:S0.texts.filter(t=>inF(t.x,t.y)),pdims:S0.dims.filter(d=>inF(d.dp[0],d.dp[1]))})});
+  const fw=Math.max(0,...frames.filter(f=>!f.whole).map(f=>f.x1-f.x0),...S0.vps.map(v=>v.pw));if(fw&&fw<15)pf=1000;else if(fw&&fw<150)pf=10}
+ if(!sheets.length&&(M.texts.length||M.dims.length))sheets.push({layout:"MODELO",k:0,nfr:1,F:{whole:true},att:[],vps:[],ptexts:[],pdims:[],model:true});
+ /* identificación de cada lámina */
+ const CODE=/^[A-Z]{1,4}[-_. ]?\d{1,4}[A-Z]?$/i;
+ sheets.forEach((s,i)=>{const A=s.att.filter(a=>a.val);const pick=re=>{const x=A.filter(a=>re.test(a.tag));return x.sort((a,b)=>b.val.length-a.val.length)[0]};
+  const c=A.find(a=>/L[ÁA]M|PLANO|COD|^N(UM|RO|°|O)?\b|DWG|SHEET/i.test(a.tag)&&CODE.test(a.val.replace(/\s/g,"")))||A.find(a=>CODE.test(a.val.replace(/\s/g,"")));
+  s.code=c?U(c.val.replace(/\s+/g,"")):"";const t=pick(/T[IÍ]T|NOMBRE|DESCRIP|CONTEN/i);s.title=t?U(t.val):"";const r=pick(/REV/i);s.rev=r?U(r.val):"";const es=pick(/ESC|SCALE/i);s.esc=es?U(es.val):"";
+  s.lab=s.code||(s.nfr>1?`L${String(sheets.filter(x=>x.layout===s.layout).indexOf(s)+1).padStart(2,"0")}`:U(s.layout));s.file=fname;
+  s.attEmpty=s.nfr>1||s.att.length?A.length===0:false});
+ /* contenido de cada lámina: lo del modelo visible en sus viewports + lo dibujado en papel */
+ const vis=(s,x,y)=>s.model?{sc:null}:s.vps.find(v=>Math.abs(x-v.vx)<=v.vw/2&&Math.abs(y-v.vy)<=v.vh/2);
+ sheets.forEach(s=>{s.mt=[];s.md=[];M.texts.forEach(t=>{const v=vis(s,t.x,t.y);if(v)s.mt.push(Object.assign({},t,{vp:v}))});
+  M.dims.forEach(d=>{const v=vis(s,d.dp[0],d.dp[1])||vis(s,d.p1[0],d.p1[1]);if(v)s.md.push(Object.assign({},d,{vp:v}))});
+  s.text=[...s.mt,...s.ptexts].map(t=>t.s).join(" ").slice(0,20000)});
+ return{sheets,M,pf,ins:D.hdr.$INSUNITS}}
+
+/* ---- verificaciones ---- */
+function dxfChecks(R){const out=[];const add=(s,o)=>out.push(Object.assign({sheet:s},o));const usedH=new Set();const once=h=>{if(!h||usedH.has(h))return false;usedH.add(h);return true};
+ const loc=(t,ps)=>ps?`PRESENTACIÓN «${t.layout||""}» X≈${f2(t.x)} Y≈${f2(t.y)}`:`MODELO X≈${f2(t.x)}, Y≈${f2(t.y)}${t.lay?" · CAPA "+U(t.lay):""}`;
+ const STD=[1,2,2.5,5,10,15,20,25,30,40,50,75,100,125,150,200,250,300,400,500,750,1000,1250,1500,2000,2500,5000];
+ // unidades del modelo (mm por unidad): $INSUNITS o la que deja más viewports con escala estándar
+ const allV=R.sheets.flatMap(s=>s.vps);const insu={4:1,5:10,6:1000,14:100}[+R.ins];
+ const isStd=d=>STD.some(x=>Math.abs(d-x)/x<0.005);
+ let mu=insu||1;if(!insu&&allV.length){let best=-1;[1,10,1000].forEach(m=>{const n=allV.filter(v=>isStd(m/(v.sc*R.pf))).length;if(n>best){best=n;mu=m}})}
+ const den=v=>mu/(v.sc*R.pf);const escTxt=d=>"1:"+(Math.round(d*100)/100).toString().replace(".",",");
+ R.sheets.forEach(s=>{
+  // 1) cotas con valor escrito distinto al medido
+  const dims=[...s.md,...s.pdims];
+  dims.forEach(d=>{if(!d.raw||d.raw.includes("<>")||!isFinite(d.meas)||d.ty===2||d.ty===5)return;const m=d.raw.match(/-?\d+(?:[.,]\d+)?/);if(!m)return;
+   const num=parseFloat(m[0].replace(",","."));const real=d.meas*d.st.lfac;const tol=Math.max(0.51*Math.pow(10,-d.st.dec),0.005*Math.abs(real));if(Math.abs(num-real)<=tol)return;
+   const unit=[0.1,10,0.01,100,0.001,1000].some(k=>Math.abs(num-real*k)<=Math.max(tol*Math.abs(k),0.005*Math.abs(real*k)));if(!once("ov"+d.hd))return;
+   add(s,{cat:"Cotas",item:"CT-01",elem:"COTA «"+d.raw+"»",ubic:loc({x:d.dp[0],y:d.dp[1],lay:d.lay}),prob:`El texto de la cota fue reemplazado: dice «${d.raw}» pero la medida real dibujada es ${nfmt(real,Math.max(d.st.dec,1))}.`,
+    sol:unit?"Verificar si el texto está en otra unidad a propósito; si no, devolver la cota al valor medido (texto «<>») o corregir el dibujo.":"Devolver la cota al valor medido (texto «<>») o corregir la geometría para que coincida con el valor escrito.",tipo:unit?"Verificar contra original":"Corregir",prio:unit?"Media":"Alta",key:"ov|"+d.hd})});
+  // 2) cadenas de cotas: filas, totales, tramos faltantes, superpuestas, repetidas
+  const lin=dims.filter(d=>(d.ty===0||d.ty===1)&&isFinite(d.meas)&&d.meas>0).map(d=>{let u;if(d.ty===0)u=[Math.cos(d.ang),Math.sin(d.ang)];else{const dx=d.p2[0]-d.p1[0],dy=d.p2[1]-d.p1[1],l=Math.hypot(dx,dy)||1;u=[dx/l,dy/l]}
+   let a=Math.atan2(u[1],u[0]);if(a<0)a+=Math.PI;if(a>=Math.PI-1e-6)a-=Math.PI;u=[Math.cos(a),Math.sin(a)];const n=[-u[1],u[0]];const pa=d.p1[0]*u[0]+d.p1[1]*u[1],pb=d.p2[0]*u[0]+d.p2[1]*u[1];
+   const m=d.raw&&!d.raw.includes("<>")?(d.raw.match(/-?\d+(?:[.,]\d+)?/)||[])[0]:null;const val=m?parseFloat(m.replace(",",".")):d.meas*d.st.lfac;
+   return Object.assign({},d,{a:Math.round(a*1800/Math.PI),lo:Math.min(pa,pb),hi:Math.max(pa,pb),off:d.dp[0]*n[0]+d.dp[1]*n[1],val})});
+  if(lin.length>1){const med=lin.map(d=>d.hi-d.lo).sort((a,b)=>a-b)[Math.floor(lin.length/2)]||1;const eps=Math.max(1e-6,med*0.002),rt=Math.max(1e-6,med*0.01);
+   const rows=[];lin.sort((a,b)=>a.a-b.a||a.off-b.off).forEach(d=>{let r=rows.find(r=>r.a===d.a&&Math.abs(r.off-d.off)<=rt);if(!r){r={a:d.a,off:d.off,ds:[]};rows.push(r)}r.ds.push(d)});
+   rows.forEach(r=>{r.ds.sort((a,b)=>a.lo-b.lo||a.hi-b.hi);for(let k=1;k<r.ds.length;k++){const p=r.ds[k-1],q=r.ds[k];
+     if(Math.abs(p.lo-q.lo)<=eps&&Math.abs(p.hi-q.hi)<=eps){if(once("dup"+q.hd))add(s,{cat:"Cotas",item:"CT-02",elem:"COTA "+q.disp,ubic:loc({x:q.dp[0],y:q.dp[1],lay:q.lay}),prob:`Cota repetida: hay dos cotas de ${q.disp} en el mismo lugar, una sobre la otra.`,sol:"Borrar la cota repetida.",tipo:"Corregir",prio:"Baja",key:"dup|"+q.hd});continue}
+     if(q.lo<p.hi-eps&&once("sp"+q.hd))add(s,{cat:"Cotas",item:"CT-02",elem:`COTAS ${p.disp} Y ${q.disp}`,ubic:loc({x:q.dp[0],y:q.dp[1],lay:q.lay}),prob:`Las cotas ${p.disp} y ${q.disp} están en la misma línea y se traslapan (tramo común ${nfmt((p.hi-q.lo)*q.st.lfac,q.st.dec)}).`,sol:"Ajustar los puntos de la cadena para que cada tramo empiece donde termina el anterior, o mover una de las cotas a otra línea.",tipo:"Corregir",prio:"Media",key:"sp|"+q.hd})}});
+   const seenGap=new Set();
+   lin.forEach(T=>{const cands=rows.filter(r=>r.a===T.a&&Math.abs(r.off-T.off)>rt).map(r=>{const ins=r.ds.filter(d=>d.lo>=T.lo-eps&&d.hi<=T.hi+eps&&d.hd!==T.hd);return{r,ins}})
+     .filter(c=>c.ins.length>=2&&Math.abs(c.ins[0].lo-T.lo)<=eps&&Math.abs(Math.max(...c.ins.map(d=>d.hi))-T.hi)<=eps).sort((a,b)=>Math.abs(a.r.off-T.off)-Math.abs(b.r.off-T.off));
+    if(!cands.length)return;const ins=cands[0].ins.filter((d,k,a)=>!a.slice(0,k).some(o=>Math.abs(o.lo-d.lo)<=eps&&Math.abs(o.hi-d.hi)<=eps));let cur=T.lo,gaps=[];ins.forEach(d=>{if(d.lo>cur+eps)gaps.push([cur,d.lo]);cur=Math.max(cur,d.hi)});
+    const lf=T.st.lfac,dec=T.st.dec;
+    if(gaps.length){const k=T.hd+"|"+gaps.map(g=>g.map(v=>Math.round(v/eps)).join(":")).join(",");if(seenGap.has(k))return;seenGap.add(k);
+     add(s,{cat:"Cotas",item:"CT-05",elem:"CADENA DE COTAS (TOTAL "+T.disp+")",ubic:loc({x:T.dp[0],y:T.dp[1],lay:T.lay}),prob:`La cadena de cotas parciales no cierra con la cota total ${T.disp}: falta${gaps.length>1?"n":""} ${gaps.length>1?gaps.length+" tramos":"un tramo"} de ${gaps.map(g=>nfmt((g[1]-g[0])*lf,dec)).join(" y ")}.`,sol:"Agregar la(s) cota(s) faltante(s) en la cadena para que las parciales sumen el total.",tipo:"Corregir",prio:"Media",key:"gap|"+k});return}
+    const sum=ins.reduce((a,d)=>a+d.val,0);const tol=Math.max(0.51*Math.pow(10,-dec)*ins.length,0.002*Math.abs(T.val));
+    if(Math.abs(sum-T.val)>tol&&!usedH.has("ov"+T.hd)&&once("sum"+T.hd))add(s,{cat:"Cotas",item:"CT-05",elem:"CADENA DE COTAS (TOTAL "+T.disp+")",ubic:loc({x:T.dp[0],y:T.dp[1],lay:T.lay}),prob:`Las cotas parciales (${ins.map(d=>d.disp).join(" + ")}) suman ${nfmt(sum,dec)}, pero la cota total dice ${T.disp}.`,sol:"Revisar las cotas con texto reemplazado y dejar parciales y total coherentes con el dibujo.",tipo:"Corregir",prio:"Alta",key:"sum|"+T.hd})})}
+  // 3) textos y cotas sobrepuestos (en el modelo y en el papel)
+  const dimBoxes=ds=>ds.filter(d=>isFinite(d.tp[0])&&d.disp).map(d=>{let h=d.st.txt*(d.st.sc||1);if(!d.st.sc&&d.vp&&d.vp.sc)h=d.st.txt/d.vp.sc;const w=d.disp.length*h*CW;
+   let a=d.ty===0?d.ang:Math.atan2(d.p2[1]-d.p1[1],d.p2[0]-d.p1[0]);if(a>Math.PI/2+1e-6||a<-Math.PI/2-1e-6)a+=Math.PI;return Object.assign(boxOf(d.tp[0],d.tp[1],w,h,a,-w/2,-h/2),{s:d.disp,x:d.tp[0],y:d.tp[1],h,lay:d.lay,hd:d.hd,kind:"D",vp:d.vp})});
+  const overl=(items,ps)=>{const it=items.slice().sort((a,b)=>a.x0-b.x0);const pr=[];
+   for(let a=0;a<it.length;a++){const A=it[a];for(let b=a+1;b<it.length;b++){const B=it[b];if(B.x0>A.x1)break;const ix=Math.min(A.x1,B.x1)-Math.max(A.x0,B.x0),iy=Math.min(A.y1,B.y1)-Math.max(A.y0,B.y0);if(ix<=0||iy<=0)continue;
+     const aA=(A.x1-A.x0)*(A.y1-A.y0),aB=(B.x1-B.x0)*(B.y1-B.y0);if(!aA||!aB||ix*iy/Math.min(aA,aB)<0.25)continue;pr.push([A,B])}}
+   let n=0;pr.forEach(([A,B])=>{const same=A.s===B.s&&Math.abs(A.x-B.x)<A.h*0.2&&Math.abs(A.y-B.y)<A.h*0.2;const k=[A.hd,B.hd].sort().join("~");if(!once("ol"+k))return;
+    if(same){if(A.kind==="D"&&B.kind==="D")return;add(s,{cat:"Texto y datos",item:"TD-02",elem:A.kind==="D"?"COTA "+A.s:"TEXTO «"+A.s.slice(0,40)+"»",ubic:loc(A,ps),prob:`${A.kind==="D"?"Cota":"Texto"} «${A.s.slice(0,80)}» duplicado en la misma posición (dos objetos uno encima del otro).`,sol:"Borrar el objeto duplicado.",tipo:"Corregir",prio:"Baja",key:"sm|"+k});return}
+    if(++n>25)return;const dA=A.kind==="D",dB=B.kind==="D";const item=dA&&dB?"CT-02":dA||dB?"CT-03":"TD-05";
+    add(s,{cat:item.startsWith("CT")?"Cotas":"Texto y datos",item,elem:dA&&dB?"COTAS":dA||dB?"COTA / TEXTO":"TEXTOS",ubic:loc(A,ps),prob:`${dA?"Cota":"Texto"} «${A.s.slice(0,60)}» se sobrepone con ${dB?"cota":"texto"} «${B.s.slice(0,60)}».`,sol:`Desplazar «${(dA&&!dB?B.s:A.s).slice(0,40)}» o la línea de cota para dejar al menos 2 mm impresos de separación.`,tipo:"Corregir",prio:dA||dB?"Media":"Baja",key:"ol|"+k})});
+   if(n>25)add(s,{cat:"Cotas",item:"CT-02",elem:"COTAS Y TEXTOS",ubic:"VARIAS ZONAS",prob:`Hay ${n} superposiciones de textos y cotas en esta lámina; se detallan las primeras 25.`,sol:"Revisar la lámina completa por superposiciones antes de emitir.",tipo:"Corregir",prio:"Media",key:"olN|"+s.lab})};
+  overl([...s.mt,...dimBoxes(s.md)],false);overl([...s.ptexts.map(t=>Object.assign({layout:s.layout},t)),...dimBoxes(s.pdims).map(t=>Object.assign({layout:s.layout},t))],true);
+  // 4) altura impresa de textos y cotas
+  const small=[];[...s.mt.map(t=>({t,ph:t.h*(t.vp.sc||1)*R.pf})),...dimBoxes(s.md).map(t=>({t,ph:t.h*(t.vp&&t.vp.sc||1)*R.pf})),...s.ptexts.map(t=>({t,ph:t.h*R.pf,ps:1}))]
+   .forEach(o=>{if(s.model)return;if(o.ph>0&&o.ph<1.8)small.push(o)});
+  if(small.length){const mn=Math.min(...small.map(o=>o.ph));const ej=small.sort((a,b)=>a.ph-b.ph).slice(0,6).map(o=>`«${o.t.s.slice(0,30)}» ${o.ph.toFixed(1).replace(".",",")} mm${o.t.vp&&o.t.vp.sc?" (viewport "+escTxt(den(o.t.vp))+")":""}`).join("; ");
+   add(s,{cat:"Texto y datos",item:small.some(o=>o.t.kind==="D")?"CT-04":"TD-05",elem:"TEXTOS / COTAS PEQUEÑOS",ubic:"VER EJEMPLOS",prob:`${small.length} textos o cotas quedan impresos con menos de 1,8 mm de altura (mínimo ${mn.toFixed(1).replace(".",",")} mm). Ej.: ${ej}.`,sol:"Subir la altura de texto/cota a ≥ 2,0 mm impresos (2,5 mm en títulos y llamados): ajustar la altura o usar estilo anotativo según la escala del viewport.",tipo:"Corregir",prio:"Baja",key:"small|"+s.lab})}
+  // 5) escalas de los viewports vs cajetín
+  if(s.vps.length){const ds=[...new Set(s.vps.map(v=>Math.round(den(v)*100)/100))];const raras=ds.filter(d=>!isStd(d));
+   if(raras.length)add(s,{cat:"Coherencia general",item:"CG-06",elem:"VIEWPORT",ubic:"PRESENTACIÓN «"+s.layout+"»",prob:`Viewport con escala no estándar: ${raras.map(escTxt).join(", ")} (unidades del modelo supuestas: ${({1:"mm",10:"cm",1000:"m"})[mu]}).`,sol:"Fijar la escala del viewport a un valor estándar (1:20, 1:25, 1:50…) y bloquearlo.",tipo:"Verificar contra original",prio:"Media",key:"vpe|"+s.lab});
+   const ce=(s.esc.match(/\d+(?:[.,]\d+)?\s*:\s*\d+(?:[.,]\d+)?/g)||[]).map(x=>{const [a,b]=x.split(":").map(v=>parseFloat(v.replace(",",".")));return b/a});
+   if(ce.length&&!/INDICAD|VAR|S\/E/i.test(s.esc)){const fuera=ds.filter(d=>isStd(d)&&!ce.some(c=>Math.abs(c-d)/d<0.01));
+    if(fuera.length)add(s,{cat:"Coherencia general",item:"CG-06",elem:"ESCALA DEL CAJETÍN",ubic:"CAJETÍN",prob:`El cajetín indica escala ${s.esc}, pero hay viewports a ${fuera.map(escTxt).join(", ")}.`,sol:"Corregir la escala del cajetín (o poner «INDICADAS») o ajustar la escala del viewport.",tipo:"Verificar contra original",prio:"Media",key:"esc|"+s.lab})}}
+  // 6) cajetín
+  if(!s.model&&s.nfr>1&&!s.code)add(s,{cat:"Coherencia general",item:"CG-05",elem:"CAJETÍN",ubic:"CAJETÍN",prob:"No se encontró el código de la lámina en los atributos del cajetín.",sol:"Completar el número/código de lámina en el cajetín.",tipo:"Verificar contra original",prio:"Media",key:"cod|"+s.lab})});
+ // códigos repetidos entre láminas
+ const byCode={};R.sheets.forEach(s=>{if(s.code)(byCode[s.code]=byCode[s.code]||[]).push(s)});
+ Object.entries(byCode).filter(([c,a])=>a.length>1).forEach(([c,a])=>a.slice(1).forEach(s=>add(s,{cat:"Coherencia general",item:"CG-02",elem:"CAJETÍN «"+c+"»",ubic:"CAJETÍN",prob:`Dos láminas tienen el mismo código ${c} en el cajetín (${a.map(x=>x.layout+(x.nfr>1?" marco "+(x.k+1):"")).join(" y ")}).`,sol:"Corregir el código de la lámina repetida.",tipo:"Corregir",prio:"Alta",key:"dc|"+c+"|"+s.k})));
+ return{obs:out,mu}}
+
+async function applyDXF(){if(!DXQ.length)return;const files=DXQ;DXQ=[];const sheets=[];let nObs=0;const pdfN=S.pages.length;
+ for(const f of files){$("#runSub").textContent=`Leyendo ${f.name}…`;step("Revisando el DXF…");await new Promise(r=>setTimeout(r,30));
+  try{const txt=await f.text();if(!/SECTION/.test(txt.slice(0,2000))){S.notes.push(`${f.name}: no es un DXF de texto (ASCII); expórtalo con INGEXPORT o DXFOUT.`);continue}
+   const R=dxfAnalyze(dxfRead(txt),f.name);const C=dxfChecks(R);R.sheets.forEach(s=>{s.obs=C.obs.filter(o=>o.sheet===s);sheets.push(s)});
+   S.notes.push(`${f.name}: revisión exacta desde el DXF (${R.sheets.length} lámina${R.sheets.length===1?"":"s"}; ${R.M.dims.length} cotas y ${R.M.texts.length} textos en el modelo; unidades del modelo: ${({1:"mm",10:"cm",1000:"m"})[C.mu]}).`)}
+  catch(e){console.error(e);S.notes.push(`No se pudo leer ${f.name}.`)}}
+ if(!sheets.length)return;
+ // unir con las páginas del PDF: mismo código, o mismo orden si la cantidad coincide (INGEXPORT exporta en el mismo orden)
+ const free=S.pages.slice();sheets.forEach((s,i)=>{let p=s.code&&S.pages.find(p=>p.codigo===s.code);if(!p&&pdfN===sheets.length)p=S.pages[i];
+  if(p){if(!p.codigo&&s.code)p.codigo=s.code;if(!p.titulo&&s.title)p.titulo=s.title;p.text=((p.text||"")+" "+s.text).trim();p.tokens=p.tokens&&p.tokens.length?p.tokens:[...new Set(s.text.toUpperCase().split(/\s+/))].slice(0,1500);s.page=p}
+  else{s.page={key:"dxf|"+s.file+"|"+i,file:s.file,page:i+1,codigo:s.code,titulo:s.title,rev:s.rev,escala:s.esc,fecha:"",dupCon:"",auto:{},text:s.text,tokens:[...new Set(s.text.toUpperCase().split(/\s+/))].slice(0,1500),hasText:true,items:[],dxf:true};
+   if(!s.code)s.page.codigo=s.lab;S.pages.push(s.page)}});
+ sheets.forEach(s=>s.obs.forEach(o=>{nObs+=addAutoObs({lam:lamLabel(s.page),cat:o.cat,item:o.item,elem:o.elem,ubic:o.ubic,prob:o.prob,sol:o.sol,tipo:o.tipo,prio:o.prio,autoKey:"dxf|"+o.key})}));
+ if(pdfN)detectDuplicates();autoChecksSet();
+ S.notes=S.notes.filter(n=>!/no traen texto legible/.test(n)&&!(pdfN?/REVISIÓN VISUAL NO REALIZADA: este informe/:/REVISIÓN VISUAL NO REALIZADA/).test(n));
+ if(!pdfN)S.notes.push("Revisión hecha solo con el DXF: arrastra también los PDF para detectar láminas repetidas por imagen.")}
+
+const _rvD=review;review=async function(list){const a=[...list];DXQ=a.filter(f=>/\.dxf$/i.test(f.name));return _rvD(a)};
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1751. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-1805. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
