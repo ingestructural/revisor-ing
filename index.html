@@ -58,14 +58,25 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
 .rep .note{font-size:.84rem;color:var(--muted);background:var(--alt);border-radius:6px;padding:10px 12px;line-height:1.5}
 .chip{font:600 .68rem var(--ff-m);padding:1px 6px;border-radius:9px;margin-right:4px;white-space:nowrap}
 .chip.Alta{background:var(--bad-bg);color:var(--bad)} .chip.Media{background:var(--warn-bg);color:var(--warn)} .chip.Baja{background:var(--good-bg);color:var(--good)} .chip.ver{background:var(--alt);color:var(--logo1)}
-.engine{font-size:.86rem;padding:9px 12px;border-radius:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.engine.on{background:var(--good-bg);color:var(--good)}.engine.off{background:var(--warn-bg);color:var(--warn)}button.lnk{padding:3px 9px;font-size:.8rem}
+.engine{font-size:.86rem;padding:9px 12px;border-radius:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.engine.on{background:var(--good-bg);color:var(--good)}.engine.info{background:var(--alt);color:var(--muted)}.engine.off{background:var(--warn-bg);color:var(--warn)}button.lnk{padding:3px 9px;font-size:.8rem}
 .chatbox{margin-top:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}.chatbox b{display:block;color:var(--logo1)}.chatbox span{font-size:.84rem;color:var(--muted)}
+.steps4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 12px}
+.steps4 button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;min-width:0}
+.steps4 button i{font:800 1.3rem var(--ff-d);color:var(--logo1);font-style:normal;line-height:1}
+.steps4 button span{font-weight:600;font-size:.86rem;line-height:1.2}.steps4 button small{font-size:.72rem;color:var(--muted)}
+.steps4 button[aria-selected="true"]{border-color:var(--logo1);background:color-mix(in srgb,var(--logo2) 12%,var(--surface));box-shadow:inset 0 -3px 0 var(--logo1)}
+@media (max-width:640px){.steps4{grid-template-columns:1fr 1fr}}
+.tab{display:flex;flex-direction:column;gap:12px}
+.stepc{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid color-mix(in srgb,var(--logo1) 22%,var(--line));border-radius:8px;padding:14px}
+.stepc>b{color:var(--logo1)}.stepc>span{font-size:.86rem;color:var(--muted);line-height:1.5}
+.stepc textarea{width:100%;font:.85rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical}
+.opts{display:flex;flex-direction:column;gap:6px;font-size:.88rem}.opts input{margin-right:6px;accent-color:var(--logo1)}
+table.ct{border-collapse:collapse;font-size:.76rem;width:100%}table.ct th{background:var(--logo1);color:#fff;font-weight:600;padding:4px 6px;white-space:nowrap}table.ct td{border-bottom:1px solid var(--line);padding:3px 6px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--logo1);color:#fff;padding:9px 14px;border-radius:6px;font-size:.88rem;font-weight:600;z-index:9}
 </style>
 
 <div class="wrap">
   <header><div class="logo"><img src="data:image/png;base64,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" alt="ING Estructural"></div><h1>Revisor de Planos</h1><button id="btnCfg" style="margin-left:auto">⚙ Configurar</button></header>
-  <div id="engine" class="engine off"></div>
   <section class="card" id="cfg" hidden><h2>Configurar Claude</h2><div class="in" style="display:flex;flex-direction:column;gap:10px">
     <label for="cfgKey" style="font-size:.85rem;color:var(--muted)">Clave API de Anthropic (se guarda solo en este equipo)</label>
     <input id="cfgKey" type="password" autocomplete="off" placeholder="sk-ant-..." style="font:500 .9rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink)">
@@ -77,16 +88,50 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
 
   <section id="vDrop">
     <div class="proj"><label for="pNombre">Proyecto</label><input id="pNombre" placeholder="OPCIONAL"></div>
-    <div style="height:12px"></div>
-    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir o arrastrar PDF">
-      <b>Arrastra aquí los PDF de los planos</b>
-      <span>o haz clic para elegirlos · recibirás el informe de revisión</span>
-      <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+    <nav class="steps4" role="tablist" aria-label="Etapas">
+      <button role="tab" data-t="1" aria-selected="true"><i>1</i><span>Revisión gratuita</span><small>en la app</small></button>
+      <button role="tab" data-t="2" aria-selected="false"><i>2</i><span>Revisión por chat</span><small>con la app</small></button>
+      <button role="tab" data-t="3" aria-selected="false"><i>3</i><span>Cubicación</span><small>por chat</small></button>
+      <button role="tab" data-t="4" aria-selected="false"><i>4</i><span>Complementar detalles</span><small>DXF por chat</small></button>
+    </nav>
+
+    <div class="tab" id="t1">
+      <div id="engine" class="engine off"></div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir o arrastrar PDF">
+        <b>Arrastra aquí los PDF de los planos</b>
+        <span>o haz clic para elegirlos · láminas repetidas, numeración de cortes y verificaciones de texto</span>
+        <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+      </div>
     </div>
-    <div class="chatbox" style="flex-direction:column;align-items:stretch"><div><b>¿Ya tienes el informe del chat?</b><span>Pégalo aquí: lo ordeno por lámina y te lo entrego en Word con el formato ING.</span></div>
-      <textarea id="pegado" rows="5" placeholder="Pega aquí el informe de revisión que te entregó Claude en el chat" style="width:100%;font:.85rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical"></textarea>
-      <div class="btns"><button class="pri" id="btnWordPeg">Descargar Word ING</button><button id="btnOrdenar">Ver ordenado por lámina</button></div></div>
-    <div class="chatbox"><div><b>Revisión gratis en el chat de Claude</b><span>Abre un chat nuevo con la instrucción lista; ahí adjuntas los mismos PDF y envías.</span></div><button class="pri" id="btnChat">Revisar en el chat ↗</button></div>
+
+    <div class="tab" id="t2" hidden>
+      <div class="stepc"><b>Paso 1 · Abrir el chat de revisión</b><span>Se abre un chat nuevo con la instrucción lista. Adjunta ahí los PDF y envía. Incluye tres revisiones: (1) coherencia, textos y cotas; (2) cortes, vistas y detalles; (3) normativa: recubrimientos, ganchos y doblados, empalmes y anclajes, espaciamientos, gramiles, distancias entre pernos y a bordes, soldaduras.</span>
+        <div class="btns"><button class="pri" id="btnChat">Abrir chat de revisión ↗</button></div></div>
+      <div class="stepc"><b>Paso 2 · Pegar el informe del chat</b><span>Lo ordeno por lámina y categoría y lo descargas en el formato ING.</span>
+        <textarea id="pegado" rows="6" placeholder="Pega aquí el informe que te entregó Claude"></textarea>
+        <div class="btns"><button class="pri" id="btnWordPeg">Word ING</button><button class="pri" id="btnPdfPeg">PDF</button><button class="pri" id="btnXlsPeg">Excel con ✔</button><button id="btnOrdenar">Ver ordenado</button></div></div>
+    </div>
+
+    <div class="tab" id="t3" hidden>
+      <div class="stepc"><b>Paso 1 · Abrir el chat de cubicación</b><span>Hormigones, armaduras, perfiles de acero, pernos de conexión, planchas y otros, por lámina y elemento. Adjunta los PDF en el chat y envía.</span>
+        <div class="btns"><button class="pri" id="btnChatCub">Abrir chat de cubicación ↗</button></div></div>
+      <div class="stepc"><b>Paso 2 · Pegar la cubicación del chat</b><span>Armo la planilla con fórmulas (volúmenes, pesos, totales por grado, diámetro y calidad, cuantía) y el PDF.</span>
+        <textarea id="pegCub" rows="6" placeholder="Pega aquí las tablas de cubicación que te entregó Claude"></textarea>
+        <div class="btns"><button id="btnCub">Ver cubicación</button><span id="cubBtns" hidden style="display:contents"><button class="pri" id="btnCubXls">Excel</button><button class="pri" id="btnCubPdf">PDF</button></span></div>
+        <div id="cubOut" hidden></div></div>
+    </div>
+
+    <div class="tab" id="t4" hidden>
+      <div class="stepc"><b>Complementar detalles en DXF</b><span>Elige qué generar y abre el chat; adjunta los PDF ahí. Claude dibuja los detalles en DXF (capas ordenadas, cotas en mm) y los deja en la carpeta del proyecto.</span>
+        <div class="opts">
+          <label><input type="checkbox" value="formas y dimensiones de barras de armadura (planilla de doblado con cotas)" checked> Formas y dimensiones de barras</label>
+          <label><input type="checkbox" value="vistas y cortes faltantes de los elementos" checked> Vistas y cortes faltantes</label>
+          <label><input type="checkbox" value="detalles de conexiones (placas, pernos, gramiles, soldaduras)"> Detalles de conexiones</label>
+          <label><input type="checkbox" value="detalles típicos de anclajes, empalmes y ganchos"> Anclajes, empalmes y ganchos típicos</label>
+        </div>
+        <textarea id="detReq" rows="3" placeholder="Opcional: detalles específicos (ej.: forma de barras de la viga V-3, corte 4-4 de la fundación F2)"></textarea>
+        <div class="btns"><button class="pri" id="btnChatDet">Abrir chat de detalles ↗</button></div></div>
+    </div>
   </section>
 
   <section class="card" id="vRun" hidden>
@@ -98,7 +143,7 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
   <section class="card" id="vRep" hidden>
     <h2>Informe de revisión</h2>
     <div class="in">
-      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnWord">Descargar Word ING</button><button id="btnSave">Descargar .txt</button><button id="btnNew">Revisar otros planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
+      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnWord">Word ING</button><button id="btnPdf">PDF</button><button id="btnXls">Excel con ✔</button><button id="btnSave">.txt</button><button id="btnNew">Revisar otros planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
       <div class="stats" id="stats"></div>
       <div class="rep" id="rep"></div>
     </div>
@@ -147,8 +192,8 @@ async function askJSON(prompt,opt){opt=opt||{};if(apiKey())return apiCall(prompt
 async function listModels(key){const r=await fetch("https://api.anthropic.com/v1/models?limit=100",{headers:{"x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"}});
  if(!r.ok)throw{code:r.status===401?"clave_invalida":"error_"+r.status};return((await r.json()).data||[])}
 function engineStatus(){const el=$("#engine");if(!el)return;const on=canImg();
- el.className="engine "+(on?"on":"off");
- el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"}`:`<b>Revisión visual: INACTIVA</b> · ${IN_CLAUDE?"esta vista de Claude no permite enviar imágenes; usa la app RP":"configura tu clave de Claude"} ${IN_CLAUDE?"":'<button id="btnCfg2" class="lnk">Configurar</button>'}`;
+ el.className="engine "+(on?"on":"info");
+ el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"} · además de las verificaciones automáticas`:`<b>Revisión gratuita:</b> láminas repetidas, numeración de cortes y detalles, y verificaciones de texto (si el PDF trae texto). Para la revisión visual completa usa la etapa 2.`;
  const b=$("#btnCfg2");if(b)b.onclick=openCfg;$("#btnCfg").hidden=IN_CLAUDE}
 function openCfg(){$("#cfg").hidden=false;$("#cfgKey").value=apiKey();const cur=lsg(MODK);if(cur&&!$("#cfgModel").options.length)$("#cfgModel").innerHTML=`<option>${esc(cur)}</option>`;$("#cfgKey").focus()}
 
@@ -268,7 +313,7 @@ async function openChat(){const t=chatPrompt();try{await navigator.clipboard.wri
 $("#btnChat").onclick=openChat;$("#btnChat2").onclick=openChat;
 const _rv=review;review=async function(list){lastFiles=[...list].map(f=>f.name);return _rv(list)};
 
-const CATS=["Coherencia general","Texto y datos","Cotas","Cortes y vistas"];
+const CATS=["Coherencia general","Texto y datos","Cotas","Cortes y vistas","Normativa"];
 const ESTADOS=["Pendiente","Corregido","Verificado"];
 const PRIOS=["Alta","Media","Baja"];
 const TIPOS_OBS=["Corregir","Verificar contra original"];
@@ -565,10 +610,270 @@ $("#btnWord").onclick=()=>downloadWord(lastModel||parseReport(lastText||""));
 
 const _sr=showReport;showReport=function(){_sr();try{lastModel=parseReport(lastText)}catch(e){lastModel=null}};
 
+/* ===== ZIP (sin compresión) + escritor XLSX mínimo con estilos, fórmulas, listas y formato condicional ===== */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC_T[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){const enc=new TextEncoder();const parts=[],central=[];let off=0;
+ const u16=v=>[v&255,(v>>>8)&255],u32=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
+ for(const f of files){const name=enc.encode(f.name);const data=typeof f.data==="string"?enc.encode(f.data):f.data;const crc=crc32(data);
+  const lh=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0)]);
+  parts.push(lh,name,data);
+  central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),name);
+  off+=lh.length+name.length+data.length}
+ const cs=central.reduce((a,b)=>a+b.length,0);const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cs),...u32(off),...u16(0)]);
+ return new Blob([...parts,...central,end],{type:"application/zip"})}
+const xesc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"");
+const colL=n=>{let s="";n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+/* Estilos fijos (índices): 0 normal · 1 encabezado ING · 2 texto con borde · 3 entrada (azul/amarillo) · 4 número 0.00 · 5 fórmula negrita 0.00 · 6 título · 7 subtítulo · 8 texto centrado · 9 entero · 10 casilla ✔ · 11 Alta · 12 Media · 13 Baja · 14 fórmula 0.000 · 15 entrada número */
+const XSTYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="#,##0.000"/></numFmts>
+<fonts count="8"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font><font><sz val="10"/><color rgb="FF0000FF"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font><font><b/><sz val="14"/><color rgb="FF1F3864"/><name val="Arial"/></font><font><i/><sz val="9"/><color rgb="FF595959"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFB91C1C"/><name val="Arial"/></font><font><b/><sz val="12"/><color rgb="FF15803D"/><name val="Arial"/></font></fonts>
+<fills count="7"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFA5622E"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFF99"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFDE8E8"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFEF3C7"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7F5EC"/></patternFill></fill></fills>
+<borders count="2"><border/><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom></border></borders>
+<cellStyleXfs count="1"><xf/></cellStyleXfs>
+<cellXfs count="16">
+<xf/>
+<xf fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf borderId="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf fontId="2" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="164" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="164" fontId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyBorder="1"/>
+<xf fontId="4" applyFont="1"/>
+<xf fontId="5" applyFont="1"/>
+<xf borderId="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top" wrapText="1"/></xf>
+<xf numFmtId="1" borderId="1" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf>
+<xf fontId="7" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf fontId="6" fillId="4" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
+<xf fontId="3" fillId="5" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
+<xf fontId="3" fillId="6" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
+<xf numFmtId="165" fontId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyBorder="1"/>
+<xf numFmtId="164" fontId="2" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+<dxfs count="2"><dxf><fill><patternFill><bgColor rgb="FFC6EFCE"/></patternFill></fill></dxf><dxf><fill><patternFill><bgColor rgb="FFFFF2CC"/></patternFill></fill></dxf></dxfs>
+</styleSheet>`;
+/* sheet: {name, rows:[[cell]], cols:[widths], freeze:"A5", filter:"A4:H4", merges:["A1:H1"], validations:[{sqref, list:["✔",""]}], cf:[{sqref, formula, dxf}], landscape:true, heights:{r:h}}
+   cell: null | value (string/number) | {v, f, s} */
+function xlsxBlob(sheets,title){const sh=sheets.map((S,i)=>{let x=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`;
+  x+=`<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>`;
+  if(S.freeze){const m=S.freeze.match(/([A-Z]+)(\d+)/);const ci=m[1].charCodeAt(0)-65,ri=+m[2]-1;x+=`<sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ${ci?`xSplit="${ci}" `:""}ySplit="${ri}" topLeftCell="${S.freeze}" activePane="${ci?"bottomRight":"bottomLeft"}" state="frozen"/></sheetView></sheetViews>`}
+  else x+=`<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>`;
+  if(S.cols)x+=`<cols>${S.cols.map((w,c)=>`<col min="${c+1}" max="${c+1}" width="${w}" customWidth="1"/>`).join("")}</cols>`;
+  x+=`<sheetData>`;S.rows.forEach((row,r)=>{if(!row)return;const h=S.heights&&S.heights[r+1];x+=`<row r="${r+1}"${h?` ht="${h}" customHeight="1"`:""}>`;
+   row.forEach((c,ci)=>{if(c===null||c===undefined||c==="")return;const o=typeof c==="object"?c:{v:c};const ref=colL(ci)+(r+1);const s=o.s?` s="${o.s}"`:"";
+    if(o.f)x+=`<c r="${ref}"${s}><f>${xesc(o.f)}</f></c>`;
+    else if(typeof o.v==="number"&&isFinite(o.v))x+=`<c r="${ref}"${s}><v>${o.v}</v></c>`;
+    else if(o.v===undefined||o.v===null||o.v==="")x+=`<c r="${ref}"${s}/>`;
+    else x+=`<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xesc(o.v)}</t></is></c>`});x+=`</row>`});
+  x+=`</sheetData>`;
+  if(S.filter)x+=`<autoFilter ref="${S.filter}"/>`;
+  if(S.merges&&S.merges.length)x+=`<mergeCells count="${S.merges.length}">${S.merges.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`;
+  (S.cf||[]).forEach((c,k)=>{x+=`<conditionalFormatting sqref="${c.sqref}"><cfRule type="expression" dxfId="${c.dxf||0}" priority="${k+1}"><formula>${xesc(c.formula)}</formula></cfRule></conditionalFormatting>`});
+  if(S.validations&&S.validations.length)x+=`<dataValidations count="${S.validations.length}">${S.validations.map(v=>`<dataValidation type="list" allowBlank="1" showDropDown="0" sqref="${v.sqref}"><formula1>"${xesc(v.list.join(","))}"</formula1></dataValidation>`).join("")}</dataValidations>`;
+  x+=`<pageMargins left="0.4" right="0.4" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="1" orientation="${S.landscape?"landscape":"portrait"}" fitToWidth="1" fitToHeight="0"/>`;
+  x+=`<headerFooter><oddFooter>&amp;L&amp;"Arial,Negrita"&amp;8ING ESTRUCTURAL — Proyectos Civiles e Industriales&amp;R&amp;"Arial"&amp;8Página &amp;P de &amp;N</oddFooter></headerFooter>`;
+  return x+`</worksheet>`});
+ const wb=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((S,i)=>`<sheet name="${xesc(S.name.slice(0,31))}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("")}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((S,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+ const ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((S,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`;
+ const core=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xesc(title||"")}</dc:title><dc:creator>ING Estructural</dc:creator></cp:coreProperties>`;
+ const root=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`;
+ const files=[{name:"[Content_Types].xml",data:ct},{name:"_rels/.rels",data:root},{name:"docProps/core.xml",data:core},{name:"xl/workbook.xml",data:wb},{name:"xl/_rels/workbook.xml.rels",data:rels},{name:"xl/styles.xml",data:XSTYLES},...sh.map((d,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:d}))];
+ const z=zipStore(files);return new Blob([z],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+
+/* ===== PDF mínimo (Carta, Helvetica WinAnsi, membrete ING en cada página, tablas con salto de página) ===== */
+const HW=[[761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556, 1015, 667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556, 333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584, 761, 556, 556, 222, 556, 333, 1000, 556, 556, 333, 1000, 667, 333, 1000, 556, 611, 556, 556, 222, 222, 333, 333, 350, 556, 1000, 333, 1000, 500, 333, 944, 556, 500, 667, 278, 333, 556, 556, 556, 556, 260, 556, 333, 737, 370, 556, 584, 333, 737, 333, 400, 584, 333, 333, 333, 556, 537, 278, 333, 333, 365, 556, 834, 834, 834, 611, 667, 667, 667, 667, 667, 667, 1000, 722, 667, 667, 667, 667, 278, 278, 278, 278, 722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722, 667, 667, 611, 556, 556, 556, 556, 556, 556, 889, 500, 556, 556, 556, 556, 278, 278, 278, 278, 556, 556, 556, 556, 556, 556, 556, 584, 611, 556, 556, 556, 556, 500, 556, 500],[761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 761, 278, 333, 474, 556, 556, 889, 722, 238, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 333, 333, 584, 584, 584, 611, 975, 722, 722, 722, 722, 667, 611, 778, 722, 278, 556, 722, 611, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 333, 278, 333, 584, 556, 333, 556, 611, 556, 611, 556, 333, 611, 611, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 778, 556, 556, 500, 389, 280, 389, 584, 761, 556, 556, 278, 556, 500, 1000, 556, 556, 333, 1000, 667, 333, 1000, 556, 611, 556, 556, 278, 278, 500, 500, 350, 556, 1000, 333, 1000, 556, 333, 944, 556, 500, 667, 278, 333, 556, 556, 556, 556, 280, 556, 333, 737, 370, 556, 584, 333, 737, 333, 400, 584, 333, 333, 333, 611, 556, 278, 333, 333, 365, 556, 834, 834, 834, 611, 722, 722, 722, 722, 722, 722, 1000, 722, 667, 667, 667, 667, 278, 278, 278, 278, 722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722, 667, 667, 611, 556, 556, 556, 556, 556, 556, 889, 556, 556, 556, 556, 556, 278, 278, 278, 278, 611, 611, 611, 611, 611, 611, 611, 584, 611, 611, 611, 611, 611, 556, 611, 556]];
+const CP1252=(()=>{const m=new Map();const d=new TextDecoder("windows-1252");for(let b=0;b<256;b++){const ch=d.decode(new Uint8Array([b]));if(!m.has(ch))m.set(ch,b)}return m})();
+const PREP={"≥":">=","≤":"<=","→":"->","←":"<-","✔":"OK","✓":"OK","☐":"[ ]","☑":"[x]","Φ":"Ø","φ":"Ø","≈":"~","×":"x","…":"..."," ":" "};
+function pdfStr(s){let out="";for(const ch0 of String(s??"")){let ch=PREP[ch0]??ch0;for(const ch1 of ch){const b=CP1252.get(ch1);if(b===undefined){out+="?";continue}
+ if(b===40||b===41||b===92)out+="\\"+ch1;else if(b<32||b>126)out+="\\"+b.toString(8).padStart(3,"0");else out+=ch1}}return out}
+function tw(s,size,bold){let w=0;const T=HW[bold?1:0];for(const ch0 of String(s??"")){const ch=PREP[ch0]??ch0;for(const c of ch){const b=CP1252.get(c);w+=b===undefined?556:T[b]}}return w*size/1000}
+function wrapT(s,width,size,bold){const out=[];String(s??"").split(/\n/).forEach(par=>{let line="";par.split(/\s+/).forEach(word=>{if(!word)return;const t=line?line+" "+word:word;
+  if(tw(t,size,bold)<=width){line=t;return}if(line)out.push(line);
+  if(tw(word,size,bold)>width){let cur="";for(const c of word){if(tw(cur+c,size,bold)>width){out.push(cur);cur=c}else cur+=c}line=cur}else line=word});out.push(line)});return out.length?out:[""]}
+const hex=c=>{const n=parseInt(c,16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255].map(v=>v.toFixed(3)).join(" ")};
+class MiniPDF{constructor(o){this.o=o;this.W=612;this.H=792;this.L=45.1;this.R=612-70.9;this.T=792-113.45;this.B=70.9+14;this.pages=[];this.newPage()}
+ get cw(){return this.R-this.L}
+ newPage(){this.ops=[];this.pages.push(this.ops);this.y=this.T}
+ txt(x,y,s,size,bold,color){this.ops.push(`BT /${bold?"F2":"F1"} ${size} Tf ${hex(color||"000000")} rg ${x.toFixed(2)} ${y.toFixed(2)} Td (${pdfStr(s)}) Tj ET`)}
+ rect(x,y,w,h,fill,stroke){this.ops.push(`${fill?hex(fill)+" rg ":""}${stroke?hex(stroke)+" RG 0.5 w ":""}${x.toFixed(2)} ${y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re ${fill&&stroke?"B":fill?"f":"S"}`)}
+ line(x1,y1,x2,y2,color,w){this.ops.push(`${hex(color||"000000")} RG ${w||0.8} w ${x1.toFixed(2)} ${y1.toFixed(2)} m ${x2.toFixed(2)} ${y2.toFixed(2)} l S`)}
+ need(h){if(this.y-h<this.B){this.newPage();return true}return false}
+ space(h){this.y-=h}
+ para(s,o={}){const size=o.size||10,lh=size*1.3,x=this.L+(o.indent||0),w=this.cw-(o.indent||0);const lines=wrapT(s,w,size,o.bold);
+  lines.forEach(l=>{this.need(lh);this.y-=lh;const xx=o.center?(this.L+(this.cw-tw(l,size,o.bold))/2):x;this.txt(xx,this.y+size*0.25,l,size,o.bold,o.color)});this.y-=(o.after??4)}
+ h1(s){this.need(40);this.y-=8;this.para(s,{size:14,bold:true,color:"1F3864",after:6})}
+ h2(s){this.need(34);this.y-=4;this.para(s,{size:12,bold:true,color:"2E5395",after:4})}
+ table(head,rows,widths,o={}){const sum=widths.reduce((a,b)=>a+b,0);widths=widths.map(w=>w*this.cw/sum);const size=o.size||8,pad=3,lh=size*1.25;
+  const drawRow=(cells,isHead,style)=>{const lines=cells.map((c,i)=>wrapT(typeof c==="object"&&c?c.text:c,widths[i]-2*pad,size,isHead||(c&&c.bold)));
+   const h=Math.max(...lines.map(l=>l.length))*lh+2*pad;
+   if(this.need(h+(isHead?lh*2:0))&&!isHead&&head)drawRow(head,true);
+   let x=this.L;const yTop=this.y;cells.forEach((c,i)=>{const cc=typeof c==="object"&&c?c:{};const fill=isHead?"1F3864":(cc.fill||style.fill);
+    this.rect(x,yTop-h,widths[i],h,fill,"A6A6A6");
+    lines[i].forEach((l,k)=>{const tx=(isHead||cc.center)?x+(widths[i]-tw(l,size,isHead||cc.bold))/2:x+pad;this.txt(tx,yTop-pad-(k+1)*lh+size*0.28,l,size,isHead||cc.bold,isHead?"FFFFFF":(cc.color||"000000"))});x+=widths[i]});
+   this.y-=h};
+  if(head)drawRow(head,true,{});rows.forEach((r,k)=>drawRow(r,false,{fill:o.zebra&&k%2?"F7F9FC":(o.key?null:null)}));this.y-=6}
+ decorate(){const n=this.pages.length,o=this.o;this.pages.forEach((ops,i)=>{const P=[];const add=s=>P.push(s);
+  if(o.logo)add(`q 216 0 0 70 ${this.L.toFixed(2)} ${(this.H-11.35-70).toFixed(2)} cm /Im1 Do Q`);
+  const rt=(s,y,size,bold,col)=>add(`BT /${bold?"F2":"F1"} ${size} Tf ${hex(col)} rg ${(this.R-tw(s,size,bold)).toFixed(2)} ${y.toFixed(2)} Td (${pdfStr(s)}) Tj ET`);
+  rt(o.title||"",this.H-52,9,true,"1F3864");rt(o.sub||"",this.H-63,8,false,"595959");rt(o.date||"",this.H-73,8,false,"595959");
+  add(`${hex("1F3864")} RG 1 w ${this.L.toFixed(2)} ${(this.H-86).toFixed(2)} m ${this.R.toFixed(2)} ${(this.H-86).toFixed(2)} l S`);
+  add(`${hex("1F3864")} RG 0.6 w ${this.L.toFixed(2)} ${(70.9).toFixed(2)} m ${this.R.toFixed(2)} ${(70.9).toFixed(2)} l S`);
+  add(`BT /F2 8 Tf ${hex("1F3864")} rg ${this.L.toFixed(2)} 60 Td (${pdfStr("ING ESTRUCTURAL — Proyectos Civiles e Industriales")}) Tj ET`);
+  const pg=`Página ${i+1} de ${n}`;add(`BT /F1 8 Tf ${hex("595959")} rg ${(this.R-tw(pg,8)).toFixed(2)} 60 Td (${pdfStr(pg)}) Tj ET`);
+  this.pages[i]=P.concat(ops)})}
+ blob(){this.decorate();const objs=[];const add=s=>{objs.push(s);return objs.length};
+  const cat=add(null),pagesId=add(null),f1=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"),f2=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+  let img=null;if(this.o.logo){img=add({img:this.o.logo})}
+  const kids=[];this.pages.forEach(ops=>{const content=ops.join("\n");const cid=add({stream:content});const pid=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${this.W} ${this.H}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> ${img?`/XObject << /Im1 ${img} 0 R >>`:""} >> /Contents ${cid} 0 R >>`);kids.push(pid)});
+  objs[cat-1]=`<< /Type /Catalog /Pages ${pagesId} 0 R >>`;objs[pagesId-1]=`<< /Type /Pages /Kids [${kids.map(k=>k+" 0 R").join(" ")}] /Count ${kids.length} >>`;
+  const parts=[];let off=0;const offs=[];const push=x=>{const u=typeof x==="string"?Uint8Array.from(x,c=>c.charCodeAt(0)&255):x;parts.push(u);off+=u.length};
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  objs.forEach((o,i)=>{offs.push(off);push(`${i+1} 0 obj\n`);
+   if(typeof o==="string")push(o+"\nendobj\n");
+   else if(o.stream!==undefined){push(`<< /Length ${o.stream.length} >>\nstream\n`);push(o.stream);push("\nendstream\nendobj\n")}
+   else if(o.img){const L=o.img;push(`<< /Type /XObject /Subtype /Image /Width ${L.w} /Height ${L.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${L.data.length} >>\nstream\n`);push(L.data);push("\nendstream\nendobj\n")}});
+  const xref=off;let x=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`;offs.forEach(o=>x+=String(o).padStart(10,"0")+" 00000 n \n");
+  push(x+`trailer\n<< /Size ${objs.length+1} /Root ${cat} 0 R >>\nstartxref\n${xref}\n%%EOF`);return new Blob(parts,{type:"application/pdf"})}}
+async function logoJpeg(){const img=$("header .logo img");if(!img)return null;await (img.decode?img.decode().catch(()=>{}):Promise.resolve());
+ const c=document.createElement("canvas");c.width=img.naturalWidth||530;c.height=img.naturalHeight||171;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
+ const d=c.toDataURL("image/jpeg",0.92);const b=atob(d.split(",")[1]);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return{data:u,w:c.width,h:c.height}}
+
+/* ===== Etapas, PDF, Excel con checks y cubicación ===== */
+function slugName(s){return(s||"Planos").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"")}
+async function saveBlob(blob,name){let dl=null;try{dl=await window.claude?.use?.("downloads")}catch(e){}
+ if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(!(e&&e.code==="declined"))toast("No se pudo descargar")}return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast("Descargado: "+name)}
+const PCOL={Alta:"B91C1C",Media:"B45309",Baja:"15803D"},PFIL={Alta:"FDE8E8",Media:"FEF3C7",Baja:"E7F5EC"};
+function curModel(){const t=$("#pegado").value.trim();if(lastModel)return lastModel;if(t)return parseReport(t);if(lastText)return parseReport(lastText);return null}
+function modelFromPaste(){const t=$("#pegado").value.trim();if(!t){toast("Pega primero el informe del chat");return null}const M=parseReport(t);
+ if(!M.laminas.length&&!M.set.length&&!M.general.length){toast("No reconocí observaciones en el texto pegado");return null}showModel(M);return M}
+
+/* ---- PDF del informe ---- */
+async function pdfReport(M){const C=countM(M);const P=new MiniPDF({logo:await logoJpeg(),title:"INFORME DE REVISIÓN DE PLANOS",sub:M.proyecto||"",date:M.fecha});
+ P.space(10);P.para("INFORME DE REVISIÓN DE PLANOS",{size:20,bold:true,color:"1F3864",center:true,after:6});if(M.proyecto)P.para(M.proyecto,{size:14,color:"2E5395",center:true,after:14});
+ P.table(null,[[{text:"Proyecto",bold:true,fill:"F2F5FA"},M.proyecto||"—"],[{text:"Fecha de revisión",bold:true,fill:"F2F5FA"},M.fecha],[{text:"Láminas con observaciones",bold:true,fill:"F2F5FA"},String(M.laminas.length)],[{text:"Observaciones",bold:true,fill:"F2F5FA"},`${C.t}  (Alta ${C.a} · Media ${C.m} · Baja ${C.b})`]],[2700,7220],{size:9});
+ if(M.laminas.length){P.para("Resumen por lámina",{size:10,bold:true,color:"1F3864",after:4});
+  P.table(["Lámina","Título","Alta","Media","Baja","Total"],M.laminas.map(L=>{const n=p=>String(L.items.filter(i=>i.prio===p).length);return[L.codigo,L.titulo||"—",{text:n("Alta"),center:true,bold:true,color:PCOL.Alta},{text:n("Media"),center:true,bold:true,color:PCOL.Media},{text:n("Baja"),center:true,bold:true,color:PCOL.Baja},{text:String(L.items.length),center:true,bold:true}]}),[1400,4920,900,900,900,900],{size:9})}
+ const obs=items=>P.table(["N°","Prioridad","Elemento / ubicación","Problema","Solución propuesta"],items.map((i,k)=>[{text:String(k+1),center:true},{text:i.prio.toUpperCase(),center:true,bold:true,color:PCOL[i.prio],fill:PFIL[i.prio]},i.head||"—",i.prob,(i.ver?"VERIFICAR CONTRA ORIGINAL: ":"")+(i.sol||"—")]),[520,1000,2100,3150,3150],{size:8});
+ let n=0;if(M.alcance.length){P.h1(`${++n}. ALCANCE DE LA REVISIÓN`);M.alcance.forEach(a=>P.para("• "+a,{size:9}))}
+ if(M.set.length||M.general.length){P.h1(`${++n}. SET COMPLETO`);obs([...M.set,...M.general])}
+ M.laminas.forEach(L=>{P.h1(`${++n}. LÁMINA ${L.codigo}${L.titulo?" — "+L.titulo:""}`);let m=0;CATS.forEach(c=>{const x=L.items.filter(i=>i.cat===c);if(!x.length)return;P.h2(`${n}.${++m} ${c.toUpperCase()}`);obs(x)})});
+ return P.blob()}
+
+/* ---- Excel del informe con casillas de control ---- */
+function xlsxReport(M){const H=t=>({v:t,s:1}),T=t=>({v:t,s:2}),Cc=t=>({v:t,s:8}),chk={v:"",s:10};
+ const rows=[[{v:"REGISTRO DE OBSERVACIONES — REVISIÓN DE PLANOS",s:6}],[{v:`${M.proyecto||"Proyecto"} · ${M.fecha} · Marque ✔ en las columnas Corregido y Verificado (lista desplegable).`,s:7}],[],
+  ["N°","Lámina","Categoría","Prioridad","Elemento / ubicación","Problema","Solución propuesta","Verificar contra original","Corregido","Verificado","Responsable","Fecha","Comentario"].map(H)];
+ const all=[...[...M.set,...M.general].map(i=>({...i,lam:"SET"})),...M.laminas.flatMap(L=>L.items.map(i=>({...i,lam:L.codigo})))];
+ all.forEach((i,k)=>rows.push([{v:k+1,s:9},Cc(i.lam),T(i.cat),{v:i.prio.toUpperCase(),s:{Alta:11,Media:12,Baja:13}[i.prio]},T(i.head||"—"),T(i.prob),T(i.sol||"—"),Cc(i.ver?"SÍ":""),chk,chk,{v:"",s:3},{v:"",s:3},{v:"",s:3}]));
+ const last=4+all.length;
+ const res=[[{v:"RESUMEN DE AVANCE",s:6}],[{v:"Se actualiza solo al marcar ✔ en la hoja Observaciones.",s:7}],[],["Lámina","Observaciones","Alta","Media","Baja","Corregidas","Verificadas","Pendientes","% verificado"].map(H)];
+ const labs=[...new Set(all.map(i=>i.lam))];const R=`Observaciones!$B$5:$B$${last}`,Pc=`Observaciones!$D$5:$D$${last}`,Ic=`Observaciones!$I$5:$I$${last}`,Jc=`Observaciones!$J$5:$J$${last}`;
+ labs.forEach((l,k)=>{const r=5+k;res.push([Cc(l),{f:`COUNTIF(${R},A${r})`,s:9},{f:`COUNTIFS(${R},A${r},${Pc},"ALTA")`,s:9},{f:`COUNTIFS(${R},A${r},${Pc},"MEDIA")`,s:9},{f:`COUNTIFS(${R},A${r},${Pc},"BAJA")`,s:9},{f:`COUNTIFS(${R},A${r},${Ic},"✔")`,s:9},{f:`COUNTIFS(${R},A${r},${Jc},"✔")`,s:9},{f:`B${r}-G${r}`,s:9},{f:`IF(B${r}=0,0,G${r}/B${r}*100)`,s:5}])});
+ const tr=5+labs.length;res.push([{v:"TOTAL",s:1},...["B","C","D","E","F","G","H"].map(c=>({f:`SUM(${c}5:${c}${tr-1})`,s:5})),{f:`IF(B${tr}=0,0,G${tr}/B${tr}*100)`,s:5}]);
+ return xlsxBlob([{name:"Observaciones",rows,cols:[5,10,16,10,24,46,46,11,11,11,14,11,24],freeze:"A5",filter:`A4:M${last}`,merges:["A1:M1","A2:M2"],landscape:true,
+   validations:[{sqref:`I5:J${last}`,list:["✔"]}],cf:[{sqref:`A5:M${last}`,formula:`$J5="✔"`,dxf:0},{sqref:`A5:M${last}`,formula:`AND($I5="✔",$J5<>"✔")`,dxf:1}]},
+  {name:"Resumen",rows:res,cols:[12,14,8,8,8,12,12,12,13],merges:["A1:I1","A2:I2"]}],"Registro de observaciones")}
+
+async function exportFmt(kind,M){M=M||curModel();if(!M){toast("Primero genera o pega un informe");return}const base=`Informe_Revision_${slugName(M.proyecto)}_${M.fecha}`;
+ try{if(kind==="word")return downloadWord(M);if(kind==="pdf"){toast("Generando PDF…");return saveBlob(await pdfReport(M),base+".pdf")}
+  if(kind==="xlsx")return saveBlob(xlsxReport(M),`Registro_Observaciones_${slugName(M.proyecto)}_${M.fecha}.xlsx`)}catch(e){console.error(e);toast("No se pudo generar: "+(e.message||e))}}
+
+/* ---- Cubicación ---- */
+const CUB=[
+ {k:"hor",re:/HORMIG/i,name:"Hormigón",cols:["Lámina","Elemento","Ubicación","Cantidad","Largo (m)","Ancho (m)","Alto (m)","Grado","Observación"],num:[3,4,5,6]},
+ {k:"arm",re:/ARMADUR|ENFIERRAD|BARRAS/i,name:"Armaduras",cols:["Lámina","Elemento","Marca","Ø (mm)","Forma","Largo unitario (m)","Cantidad","Calidad","Observación"],num:[3,5,6]},
+ {k:"per",re:/PERFIL/i,name:"Perfiles",cols:["Lámina","Elemento","Perfil","Largo (m)","Cantidad","Peso (kg/m)","Calidad","Observación"],num:[3,4,5]},
+ {k:"pno",re:/PERNO/i,name:"Pernos",cols:["Lámina","Conexión","Tipo / norma","Ø (mm)","Largo (mm)","Cantidad","Calidad","Observación"],num:[3,4,5]},
+ {k:"pla",re:/PLANCH|PLACA/i,name:"Planchas",cols:["Lámina","Elemento","Espesor (mm)","Largo (mm)","Ancho (mm)","Cantidad","Calidad","Observación"],num:[2,3,4,5]},
+ {k:"otr",re:/OTRO/i,name:"Otros",cols:["Lámina","Ítem","Unidad","Cantidad","Observación"],num:[3]}];
+const numv=s=>{if(s===undefined||s===null)return"";let t=String(s).trim().replace(/[^\d,.\-]/g,"");if(!t)return"";if(/,\d{1,3}$/.test(t)&&!/\.\d+,/.test(t))t=t.replace(/\./g,"").replace(",",".");else t=t.replace(/,/g,"");const v=parseFloat(t);return isFinite(v)?v:""};
+function parseCub(text){const D={proyecto:U($("#pNombre").value.trim()),fecha:today()};CUB.forEach(c=>D[c.k]=[]);let cur=null;
+ text.split("\n").forEach(raw=>{const l=raw.replace(/\*\*/g,"").replace(/`/g,"").trim();if(!l)return;
+  let m=l.match(/^CUBICACI[ÓO]N\s*(?:[—–-]\s*(.+?))?(?:\s*·\s*(\d{4}-\d{2}-\d{2}))?$/i);if(m){if(m[1])D.proyecto=U(m[1]);if(m[2])D.fecha=m[2];return}
+  const isRow=l.startsWith("|")||l.includes("\t");
+  if(!isRow){const h=l.replace(/^#+\s*/,"");const c=CUB.find(c=>c.re.test(h));if(c&&h.length<60){cur=c;return}return}
+  if(!cur)return;let cells=l.includes("\t")&&!l.startsWith("|")?l.split("\t"):l.replace(/^\|/,"").replace(/\|$/,"").split("|");cells=cells.map(x=>x.trim());
+  if(cells.every(x=>/^:?-{2,}:?$/.test(x)||x===""))return;
+  if(cur.num.every(i=>numv(cells[i])==="")&&/l[áa]mina|elemento|cantidad/i.test(cells.join(" ")))return;
+  const row=cur.cols.map((_,i)=>cur.num.includes(i)?numv(cells[i]):(cells[i]||""));D[cur.k].push(row)});
+ return D}
+function cubCount(D){return CUB.reduce((a,c)=>a+D[c.k].length,0)}
+function cubCalc(D){const s=(a,f)=>a.reduce((x,r)=>x+(+f(r)||0),0);const kgm=d=>Math.PI/4*d*d/1e6*7850;
+ return{hor:s(D.hor,r=>r[3]*r[4]*r[5]*r[6]),arm:s(D.arm,r=>kgm(r[3])*r[5]*r[6]),per:s(D.per,r=>r[3]*r[4]*r[5]),pno:s(D.pno,r=>r[5]),pla:s(D.pla,r=>r[2]*r[3]*r[4]/1e9*7850*r[5])}}
+function showCub(D){const K=cubCalc(D);const f=(v,d=2)=>Number(v).toLocaleString("es-CL",{minimumFractionDigits:d,maximumFractionDigits:d});
+ $("#cubOut").innerHTML=`<div class="stats"><span><b>${f(K.hor)}</b> m³ hormigón</span><span><b>${f(K.arm,0)}</b> kg armaduras</span><span><b>${f(K.per,0)}</b> kg perfiles</span><span><b>${f(K.pla,0)}</b> kg planchas</span><span><b>${f(K.pno,0)}</b> pernos</span>${K.hor?`<span><b>${f(K.arm/K.hor,0)}</b> kg/m³ cuantía</span>`:""}</div>`+
+ CUB.filter(c=>D[c.k].length).map(c=>`<h4 style="margin:12px 0 4px;color:var(--logo1)">${c.name} (${D[c.k].length})</h4><div style="overflow-x:auto"><table class="ct"><tr>${c.cols.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${D[c.k].slice(0,200).map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>`).join("");
+ $("#cubOut").hidden=false;$("#cubBtns").hidden=false}
+function xlsxCub(D){const H=t=>({v:t,s:1}),I=v=>typeof v==="number"?{v,s:15}:{v:v??"",s:3};const sheets=[];
+ const mk=(c,extra,fx,totCol)=>{const rows=[[{v:`CUBICACIÓN — ${c.name.toUpperCase()}`,s:6}],[{v:`${D.proyecto||"Proyecto"} · ${D.fecha} · Celdas azul/amarillo: datos (editables) · negro: fórmulas`,s:7}],[],[...c.cols,...extra].map(H)];
+  D[c.k].forEach((r,k)=>{const n=5+k;rows.push([...r.map(I),...fx.map(f=>({f:f(n),s:5}))])});const last=4+D[c.k].length;
+  if(totCol){const tr=[{v:"TOTAL",s:1}];for(let i=1;i<c.cols.length+extra.length;i++)tr.push(null);totCol.forEach(ci=>tr[ci]={f:`SUM(${colL(ci)}5:${colL(ci)}${Math.max(5,last)})`,s:5});rows.push(tr)}
+  sheets.push({name:c.name,rows,cols:[...c.cols.map((h,i)=>i===1||/Observ/.test(h)?24:/Forma|Ubicaci|Conexi|Perfil|Tipo/.test(h)?18:11),...extra.map(()=>14)],freeze:"A5",landscape:true,merges:[`A1:${colL(c.cols.length+extra.length-1)}1`,`A2:${colL(c.cols.length+extra.length-1)}2`]});return last};
+ const [ch,ca,cp,cn,cl,co]=CUB;
+ const lh=mk(ch,["Volumen (m³)"],[n=>`D${n}*E${n}*F${n}*G${n}`],[9]);
+ const la=mk(ca,["Peso unit. (kg/m)","Peso total (kg)"],[n=>`PI()/4*D${n}^2/1000000*7850`,n=>`F${n}*G${n}*J${n}`],[10]);
+ const lp=mk(cp,["Peso total (kg)"],[n=>`D${n}*E${n}*F${n}`],[8]);
+ const ln=mk(cn,[],[],[5]);
+ const ll=mk(cl,["Peso total (kg)"],[n=>`C${n}/1000*D${n}/1000*E${n}/1000*7850*F${n}`],[8]);
+ mk(co,[],[],null);
+ const r=[[{v:"RESUMEN DE CUBICACIÓN",s:6}],[{v:`${D.proyecto||"Proyecto"} · ${D.fecha}`,s:7}],[],["Partida","Detalle","Cantidad","Unidad"].map(H)];
+ const uniq=(a,i)=>[...new Set(a.map(x=>x[i]).filter(x=>x!==""&&x!==undefined))];
+ const add=(p,d,f,u)=>r.push([{v:p,s:2},{v:d,s:2},{f,s:5},{v:u,s:8}]);
+ add("Hormigón","Total",`SUM('Hormigón'!J5:J${Math.max(5,lh)})`,"m³");uniq(D.hor,7).forEach(g=>add("Hormigón",`Grado ${g}`,`SUMIF('Hormigón'!H5:H${Math.max(5,lh)},"${g}",'Hormigón'!J5:J${Math.max(5,lh)})`,"m³"));
+ add("Armaduras","Total",`SUM('Armaduras'!K5:K${Math.max(5,la)})`,"kg");uniq(D.arm,3).sort((a,b)=>a-b).forEach(d=>add("Armaduras",`Ø${d}`,`SUMIF('Armaduras'!D5:D${Math.max(5,la)},${d},'Armaduras'!K5:K${Math.max(5,la)})`,"kg"));
+ add("Armaduras","Cuantía",`IF(C5=0,0,C${6+uniq(D.hor,7).length}/C5)`,"kg/m³");
+ add("Perfiles","Total",`SUM('Perfiles'!H5:H${Math.max(5,lp)})`,"kg");uniq(D.per,6).forEach(q=>add("Perfiles",`Calidad ${q}`,`SUMIF('Perfiles'!G5:G${Math.max(5,lp)},"${q}",'Perfiles'!H5:H${Math.max(5,lp)})`,"kg"));
+ add("Planchas","Total",`SUM('Planchas'!H5:H${Math.max(5,ll)})`,"kg");
+ add("Pernos","Total",`SUM('Pernos'!F5:F${Math.max(5,ln)})`,"un");uniq(D.pno,3).sort((a,b)=>a-b).forEach(d=>add("Pernos",`Ø${d} mm`,`SUMIF('Pernos'!D5:D${Math.max(5,ln)},${d},'Pernos'!F5:F${Math.max(5,ln)})`,"un"));
+ sheets.unshift({name:"Resumen",rows:r,cols:[16,22,16,10],merges:["A1:D1","A2:D2"]});
+ return xlsxBlob(sheets,"Cubicación")}
+async function pdfCub(D){const K=cubCalc(D);const P=new MiniPDF({logo:await logoJpeg(),title:"CUBICACIÓN DE PLANOS",sub:D.proyecto||"",date:D.fecha});
+ const f=(v,d=2)=>Number(v).toLocaleString("es-CL",{minimumFractionDigits:d,maximumFractionDigits:d});
+ P.space(10);P.para("CUBICACIÓN DE PLANOS",{size:20,bold:true,color:"1F3864",center:true,after:6});if(D.proyecto)P.para(D.proyecto,{size:14,color:"2E5395",center:true,after:14});
+ P.table(["Partida","Cantidad","Unidad"],[["Hormigón",f(K.hor),"m³"],["Armaduras",f(K.arm,0),"kg"],["Perfiles de acero",f(K.per,0),"kg"],["Planchas",f(K.pla,0),"kg"],["Pernos",f(K.pno,0),"un"],...(K.hor?[["Cuantía de armadura",f(K.arm/K.hor,0),"kg/m³"]]:[])],[5000,3000,1920],{size:9});
+ CUB.forEach(c=>{if(!D[c.k].length)return;P.h1(c.name.toUpperCase());P.table(c.cols,D[c.k].map(r=>r.map(v=>typeof v==="number"?{text:f(v,v%1?2:0),center:true}:String(v))),c.cols.map((h,i)=>i===1||/Observ/.test(h)?2:/Forma|Ubicaci|Conexi|Perfil|Tipo/.test(h)?1.6:1),{size:7})});
+ return P.blob()}
+let lastCub=null;
+function cubFromPaste(){const t=$("#pegCub").value.trim();if(!t){toast("Pega primero la cubicación del chat");return null}const D=parseCub(t);if(!cubCount(D)){toast("No reconocí tablas de cubicación en el texto pegado");return null}lastCub=D;showCub(D);return D}
+
+/* ---- Prompts del chat por etapa ---- */
+function openChatWith(t,msg){try{navigator.clipboard.writeText(t)}catch(e){}const a=document.createElement("a");a.href="https://claude.ai/new?q="+encodeURIComponent(t);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();toast(msg||"Se abrió un chat nuevo: adjunta los PDF y envía")}
+const projTxt=()=>{const n=U($("#pNombre").value.trim());return n?` del proyecto ${n}`:""};
+const filesTxt=()=>lastFiles&&lastFiles.length?`\nArchivos: ${lastFiles.join(", ")}.`:"";
+function promptRevision(){return `Revisa estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
+Haz las tres revisiones: (1) coherencia general, textos y cotas; (2) cortes, vistas y detalles; (3) cumplimiento normativo de los detalles (recubrimientos de hormigón, ganchos y diámetros de doblado, empalmes y anclajes, espaciamientos de barras, gramiles, distancias entre pernos y a bordes, perforaciones, soldaduras y cualquier otro requisito normativo).
+Entrégame el informe en el formato ING por lámina, con la categoría «Normativa» para la tercera revisión.`}
+function promptCub(){return `Cubica estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
+Cuantifica hormigones, armaduras, perfiles de acero, pernos de conexión, planchas y otros, por lámina y elemento. Entrégalo en el formato de cubicación ING (tablas HORMIGÓN, ARMADURAS, PERFILES DE ACERO, PERNOS, PLANCHAS, OTROS) para pegarlo en la app.`}
+function promptDet(){const o=[...document.querySelectorAll("#t4 input[type=checkbox]:checked")].map(x=>x.value);const extra=$("#detReq").value.trim();
+ return `Complementa los detalles de estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
+Genera en DXF${o.length?": "+o.join("; "):" los detalles que falten"}.${extra?"\nDetalles pedidos: "+extra:""}
+Usa capas ordenadas, cotas en mm y textos legibles a la escala indicada; guarda los DXF en la carpeta del proyecto y dime qué contiene cada uno.`}
+
+/* ===== Pestañas y botones de las 4 etapas ===== */
+document.querySelectorAll(".steps4 button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".steps4 button").forEach(x=>x.setAttribute("aria-selected",x===b));["1","2","3","4"].forEach(t=>$("#t"+t).hidden=t!==b.dataset.t);try{localStorage.setItem("ing-revisor-tab",b.dataset.t)}catch(e){}});
+try{const t=localStorage.getItem("ing-revisor-tab");if(t)document.querySelector(`.steps4 button[data-t="${t}"]`)?.click()}catch(e){}
+$("#btnChat").onclick=()=>openChatWith(promptRevision(),"Chat de revisión abierto: adjunta los PDF y envía. Luego pega el informe en el Paso 2.");
+$("#btnChat2").onclick=$("#btnChat").onclick;
+$("#btnChatCub").onclick=()=>openChatWith(promptCub(),"Chat de cubicación abierto: adjunta los PDF y envía. Luego pega las tablas en el Paso 2.");
+$("#btnChatDet").onclick=()=>openChatWith(promptDet(),"Chat de detalles abierto: adjunta los PDF y envía.");
+$("#btnWordPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("word",M)};
+$("#btnPdfPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("pdf",M)};
+$("#btnXlsPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("xlsx",M)};
+$("#btnOrdenar").onclick=()=>modelFromPaste();
+$("#btnWord").onclick=()=>exportFmt("word");$("#btnPdf").onclick=()=>exportFmt("pdf");$("#btnXls").onclick=()=>exportFmt("xlsx");
+$("#btnCub").onclick=()=>cubFromPaste();
+$("#btnCubXls").onclick=()=>{const D=lastCub||cubFromPaste();if(D)saveBlob(xlsxCub(D),`Cubicacion_${slugName(D.proyecto)}_${D.fecha}.xlsx`)};
+$("#btnCubPdf").onclick=async()=>{const D=lastCub||cubFromPaste();if(D){toast("Generando PDF…");try{saveBlob(await pdfCub(D),`Cubicacion_${slugName(D.proyecto)}_${D.fecha}.pdf`)}catch(e){toast("No se pudo generar el PDF")}}};
+$("#pegCub").addEventListener("input",()=>{lastCub=null});$("#pegado").addEventListener("input",()=>{lastModel=null});
+
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1143. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-1205. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
