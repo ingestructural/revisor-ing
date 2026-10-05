@@ -59,6 +59,7 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
 .chip{font:600 .68rem var(--ff-m);padding:1px 6px;border-radius:9px;margin-right:4px;white-space:nowrap}
 .chip.Alta{background:var(--bad-bg);color:var(--bad)} .chip.Media{background:var(--warn-bg);color:var(--warn)} .chip.Baja{background:var(--good-bg);color:var(--good)} .chip.ver{background:var(--alt);color:var(--logo1)}
 .engine{font-size:.86rem;padding:9px 12px;border-radius:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.engine.on{background:var(--good-bg);color:var(--good)}.engine.off{background:var(--warn-bg);color:var(--warn)}button.lnk{padding:3px 9px;font-size:.8rem}
+.chatbox{margin-top:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}.chatbox b{display:block;color:var(--logo1)}.chatbox span{font-size:.84rem;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--logo1);color:#fff;padding:9px 14px;border-radius:6px;font-size:.88rem;font-weight:600;z-index:9}
 </style>
 
@@ -82,6 +83,7 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
       <span>o haz clic para elegirlos · recibirás el informe de revisión</span>
       <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
     </div>
+    <div class="chatbox"><div><b>Revisión gratis en el chat de Claude</b><span>Abre un chat nuevo con la instrucción lista; ahí adjuntas los mismos PDF y envías.</span></div><button class="pri" id="btnChat">Revisar en el chat ↗</button></div>
   </section>
 
   <section class="card" id="vRun" hidden>
@@ -93,7 +95,7 @@ button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-
   <section class="card" id="vRep" hidden>
     <h2>Informe de revisión</h2>
     <div class="in">
-      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnSave">Descargar</button><button id="btnNew">Revisar otros planos</button></div>
+      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnSave">Descargar</button><button id="btnNew">Revisar otros planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
       <div class="stats" id="stats"></div>
       <div class="rep" id="rep"></div>
     </div>
@@ -201,8 +203,8 @@ async function review(list){
  if(visual||txtOnly){for(let i=0;i<S.pages.length&&!stopFlag;i++){if(!visual&&!S.pages[i].hasText)continue;step(`Revisando lámina ${i+1} de ${S.pages.length}: ${lamLabel(S.pages[i])}`);prog(i,S.pages.length,`${lamLabel(S.pages[i])}: preparando sectores…`);await visualPage(S.pages[i],i,S.pages.length)}
   if(!visual)S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes de las láminas. Se revisó solo el texto del PDF; cotas, cortes, detalles y viewports NO fueron revisados.");
   if(stopFlag&&S.pages.some(p=>p)){S.notes.push("Revisión detenida antes de terminar: el informe puede estar incompleto.")}}
- else if(engineOn())S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes y los PDF no traen texto. Solo se verificaron láminas repetidas. Usa la app RP con tu clave de Claude para la revisión completa.");
- else S.notes.push("REVISIÓN VISUAL NO REALIZADA: falta configurar la clave de Claude (botón «Configurar»). Este informe incluye solo las verificaciones automáticas.");
+ else if(engineOn())S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes y los PDF no traen texto. Solo se verificaron láminas repetidas. Para la revisión completa usa «Revisar en el chat ↗» (gratis) o la app RP con tu clave de Claude.");
+ else S.notes.push("REVISIÓN VISUAL NO REALIZADA: este informe incluye solo las verificaciones automáticas. Para la revisión completa usa «Revisar en el chat ↗» (gratis) o configura tu clave de Claude (⚙ Configurar).");
  detectCortes();showReport()}
 
 /* ===== Informe ===== */
@@ -252,6 +254,16 @@ $("#cfgTest").onclick=async()=>{const k=$("#cfgKey").value.trim();const st=$("#c
   st.textContent=`Conexión correcta: ${ms.length} modelos disponibles. Elige el modelo y presiona Guardar.`}catch(e){st.textContent=e&&e.code==="clave_invalida"?"La clave no es válida.":"No se pudo conectar ("+(e&&e.code||"error")+")."}};
 $("#cfgSave").onclick=()=>{const k=$("#cfgKey").value.trim(),mo=$("#cfgModel").value;if(k&&!mo){$("#cfgMsg").textContent="Presiona «Probar conexión» para elegir el modelo.";return}lss(KEYK,k);lss(MODK,k?mo:"");$("#cfg").hidden=true;engineStatus();toast(k?"Clave guardada":"Clave eliminada")};
 engineStatus();
+
+/* ===== Revisión en el chat de Claude (gratis, usa la habilidad «revisar-planos») ===== */
+let lastFiles=[];
+function chatPrompt(){const nom=U($("#pNombre").value.trim());const fs=lastFiles.length?`\nArchivos: ${lastFiles.join(", ")}.`:"";
+ return `Revisa estos planos${nom?" del proyecto "+nom:""} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${fs}\nEntrégame el informe de revisión en el formato ING: punteado, solo lo que hay que corregir o verificar, con problema exacto y solución.`}
+async function openChat(){const t=chatPrompt();try{await navigator.clipboard.writeText(t)}catch(e){}
+ const a=document.createElement("a");a.href="https://claude.ai/new?q="+encodeURIComponent(t);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+ toast("Se abrió un chat nuevo: adjunta los PDF y envía (el texto también quedó copiado)")}
+$("#btnChat").onclick=openChat;$("#btnChat2").onclick=openChat;
+const _rv=review;review=async function(list){lastFiles=[...list].map(f=>f.name);return _rv(list)};
 
 const CATS=["Coherencia general","Texto y datos","Cotas","Cortes y vistas"];
 const ESTADOS=["Pendiente","Corregido","Verificado"];
@@ -445,7 +457,7 @@ function solCorte(e){const s=[];if(/SIN NÚMERO/.test(e))s.push("asignar número
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261004-1539. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-1116. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
