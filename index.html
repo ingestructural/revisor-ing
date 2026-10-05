@@ -97,7 +97,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
       <button role="tab" data-t="3" aria-selected="false"><i>3</i><span>Cubicación</span><small>por chat</small></button>
       <button role="tab" data-t="4" aria-selected="false"><i>4</i><span>Detallamiento complementario</span><small>DXF por chat</small></button>
     </nav>
-    <div class="folder"><div><b>Carpeta «Revisor Planos»</b><span id="fStat"></span></div><button class="pri" id="btnFolder">📁 Guardar carpeta con los 4 informes</button></div>
+    <div class="folder"><div><b>Carpeta «Revisor Planos»</b><span id="fStat"></span></div><div class="btns"><button class="pri" id="btnFolder">📁 Guardar carpeta con los 4 informes</button><button id="btnReset" title="Borra las 4 etapas, los textos pegados, los DXF y el último informe guardado">🗑 Nuevo set de planos</button></div></div>
 
     <div class="tab" id="t1">
       <div id="engine" class="engine off"></div>
@@ -109,7 +109,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
     </div>
 
     <div class="tab" id="t2" hidden>
-      <div class="stepc"><b>Paso 1 · Abrir el chat de revisión técnica</b><span>Se abre un chat nuevo con la instrucción lista. Adjunta ahí los PDF y envía. Incluye tres revisiones: (1) coherencia, textos y cotas; (2) cortes, vistas y detalles; (3) normativa: recubrimientos, ganchos y doblados, empalmes y anclajes, espaciamientos, gramiles, distancias entre pernos y a bordes, soldaduras.</span>
+      <div class="stepc"><b>Paso 1 · Abrir el chat de revisión técnica</b><span>Se abre un chat nuevo con la instrucción lista. Adjunta ahí los PDF y envía. <b>Deja ese chat abierto:</b> la cubicación y los detalles se piden en el mismo chat, sin volver a adjuntar los PDF. Incluye tres revisiones: (1) coherencia, textos y cotas; (2) cortes, vistas y detalles; (3) normativa: recubrimientos, ganchos y doblados, empalmes y anclajes, espaciamientos, gramiles, distancias entre pernos y a bordes, soldaduras.</span>
         <div class="btns"><button class="pri" id="btnChat">Abrir chat de revisión técnica ↗</button></div></div>
       <div class="stepc"><b>Paso 2 · Pegar el informe del chat</b><span>Lo ordeno por lámina y categoría y lo descargas en el formato ING.</span>
         <textarea id="pegado" rows="6" placeholder="Pega aquí el informe que te entregó Claude"></textarea>
@@ -117,8 +117,8 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
     </div>
 
     <div class="tab" id="t3" hidden>
-      <div class="stepc"><b>Paso 1 · Abrir el chat de cubicación</b><span>Hormigones, armaduras, perfiles de acero, pernos de conexión, planchas y otros, por lámina y elemento. Adjunta los PDF en el chat y envía.</span>
-        <div class="btns"><button class="pri" id="btnChatCub">Abrir chat de cubicación ↗</button></div></div>
+      <div class="stepc"><b>Paso 1 · Pedir la cubicación en el chat de la etapa 2</b><span>Hormigones, armaduras, perfiles de acero, pernos de conexión, planchas y otros, por lámina y elemento. Copia la instrucción y pégala en el mismo chat donde adjuntaste los PDF (no hay que volver a adjuntarlos). Si no hiciste la etapa 2, abre un chat nuevo y adjunta ahí los PDF.</span>
+        <div class="btns"><button class="pri" id="btnCopyCub">📋 Copiar instrucción (mismo chat)</button><button id="btnChatCub">Abrir chat nuevo ↗</button></div></div>
       <div class="stepc"><b>Paso 2 · Pegar la cubicación del chat</b><span>Armo la planilla con fórmulas (volúmenes, pesos, totales por grado, diámetro y calidad, cuantía) y el PDF.</span>
         <textarea id="pegCub" rows="6" placeholder="Pega aquí las tablas de cubicación que te entregó Claude"></textarea>
         <div class="btns"><button id="btnCub">Ver cubicación</button><span id="cubBtns" hidden style="display:contents"><button class="pri" id="btnCubXls">Excel</button><button class="pri" id="btnCubPdf">PDF</button></span></div>
@@ -126,7 +126,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
     </div>
 
     <div class="tab" id="t4" hidden>
-      <div class="stepc"><b>Paso 1 · Detallamiento complementario en DXF</b><span>Elige qué generar y abre el chat; adjunta los PDF ahí. Claude dibuja los detalles en DXF (capas ordenadas, cotas en mm) y los deja en la carpeta del proyecto.</span>
+      <div class="stepc"><b>Paso 1 · Detallamiento complementario en DXF</b><span>Elige qué generar, copia la instrucción y pégala en el mismo chat de la etapa 2 (los PDF ya están ahí). Si no hay chat previo, abre uno nuevo y adjunta los PDF. Claude dibuja los detalles en DXF (capas ordenadas, cotas en mm) y los deja en la carpeta del proyecto.</span>
         <div class="opts">
           <label><input type="checkbox" value="formas y dimensiones de barras de armadura (planilla de doblado con cotas)" checked> Formas y dimensiones de barras</label>
           <label><input type="checkbox" value="vistas y cortes faltantes de los elementos" checked> Vistas y cortes faltantes</label>
@@ -134,7 +134,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
           <label><input type="checkbox" value="detalles típicos de anclajes, empalmes y ganchos"> Anclajes, empalmes y ganchos típicos</label>
         </div>
         <textarea id="detReq" rows="3" placeholder="Opcional: detalles específicos (ej.: forma de barras de la viga V-3, corte 4-4 de la fundación F2)"></textarea>
-        <div class="btns"><button class="pri" id="btnChatDet">Abrir chat de detallamiento ↗</button></div></div>
+        <div class="btns"><button class="pri" id="btnCopyDet">📋 Copiar instrucción (mismo chat)</button><button id="btnChatDet">Abrir chat nuevo ↗</button></div></div>
       <div class="stepc"><b>Paso 2 · Agregar los DXF que entregó el chat</b><span>Arrástralos aquí (o haz clic) para incluirlos en la carpeta «Revisor Planos» junto con su índice.</span>
         <div class="drop small" id="dropDxf" tabindex="0" role="button" aria-label="Agregar DXF"><b>Arrastra aquí los DXF</b><input type="file" id="dxfIn" accept=".dxf" multiple hidden></div>
         <div id="dxfList" class="sub"></div></div>
@@ -878,10 +878,11 @@ const filesTxt=()=>lastFiles&&lastFiles.length?`\nArchivos: ${lastFiles.join(", 
 function promptRevision(){return `Revisa estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
 Haz las tres revisiones: (1) coherencia general, textos y cotas; (2) cortes, vistas y detalles; (3) cumplimiento normativo de los detalles (recubrimientos de hormigón, ganchos y diámetros de doblado, empalmes y anclajes, espaciamientos de barras, gramiles, distancias entre pernos y a bordes, perforaciones, soldaduras y cualquier otro requisito normativo).
 Entrégame el informe en el formato ING por lámina, con la categoría «Normativa» para la tercera revisión.`}
-function promptCub(){return `Cubica estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
+const adjTxt=same=>same?"Usa los PDF que adjunté antes en este chat.":"Te los adjunto en este mensaje.";
+function promptCub(same){return `Cubica estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). ${adjTxt(same)}${filesTxt()}
 Cuantifica hormigones, armaduras, perfiles de acero, pernos de conexión, planchas y otros, por lámina y elemento. Entrégalo en el formato de cubicación ING (tablas HORMIGÓN, ARMADURAS, PERFILES DE ACERO, PERNOS, PLANCHAS, OTROS) para pegarlo en la app.`}
-function promptDet(){const o=[...document.querySelectorAll("#t4 input[type=checkbox]:checked")].map(x=>x.value);const extra=$("#detReq").value.trim();
- return `Complementa los detalles de estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). Te los adjunto en este mensaje.${filesTxt()}
+function promptDet(same){const o=[...document.querySelectorAll("#t4 input[type=checkbox]:checked")].map(x=>x.value);const extra=$("#detReq").value.trim();
+ return `Complementa los detalles de estos planos${projTxt()} (estructurales, exportados de AutoCAD a PDF). ${adjTxt(same)}${filesTxt()}
 Genera en DXF${o.length?": "+o.join("; "):" los detalles que falten"}.${extra?"\nDetalles pedidos: "+extra:""}
 Usa capas ordenadas, cotas en mm y textos legibles a la escala indicada; guarda los DXF en la carpeta «Revisor Planos/4 Detallamiento Complementario» del proyecto (o entrégamelos como archivos) y dime qué contiene cada uno.`}
 
@@ -892,6 +893,9 @@ $("#btnChat").onclick=()=>openChatWith(promptRevision(),"Chat de revisión abier
 $("#btnChat2").onclick=$("#btnChat").onclick;
 $("#btnChatCub").onclick=()=>openChatWith(promptCub(),"Chat de cubicación abierto: adjunta los PDF y envía. Luego pega las tablas en el Paso 2.");
 $("#btnChatDet").onclick=()=>openChatWith(promptDet(),"Chat de detalles abierto: adjunta los PDF y envía.");
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();return ok}}
+$("#btnCopyCub").onclick=async()=>toast(await copyText(promptCub(true))?"Instrucción copiada: pégala en el chat de la etapa 2 y envía. Luego pega las tablas en el Paso 2.":"No se pudo copiar");
+$("#btnCopyDet").onclick=async()=>toast(await copyText(promptDet(true))?"Instrucción copiada: pégala en el chat de la etapa 2 y envía.":"No se pudo copiar");
 $("#btnWordPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("word",M)};
 $("#btnPdfPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("pdf",M)};
 $("#btnXlsPeg").onclick=()=>{const M=modelFromPaste();if(M)exportFmt("xlsx",M)};
@@ -941,12 +945,20 @@ async function saveFolder(){const fs=await folderFiles().catch(e=>{console.error
  const files=[];for(const f of fs)files.push({name:"Revisor Planos/"+f.path,data:new Uint8Array(await f.blob.arrayBuffer())});
  await saveBlob(zipStore(files),`Revisor Planos ${U($("#pNombre").value.trim())||""}`.trim().replace(/\s+/g," ")+".zip");if(faltan.length)toast("Falta: "+faltan.join(", "))}
 $("#btnFolder").onclick=()=>{toast("Preparando la carpeta…");saveFolder()};
+function resetAll(){RES.gen=null;RES.tec=null;RES.cub=null;RES.det.files=[];lastModel=null;lastCub=null;lastText="";lastFiles=[];S=null;stopFlag=false;
+ ["#pNombre","#pegado","#pegCub","#detReq"].forEach(id=>{const e=$(id);if(e)e.value=""});
+ $("#dxfList").innerHTML="";$("#rep").innerHTML="";$("#stats").innerHTML="";$("#cubOut").innerHTML="";$("#cubOut").hidden=true;$("#cubBtns").hidden=true;
+ $("#vRep").hidden=true;$("#vRun").hidden=true;$("#vDrop").hidden=false;
+ try{localStorage.removeItem("ing-revisor-simple-last")}catch(e){}
+ document.querySelector('.steps4 button[data-t="1"]')?.click();fStatus();window.scrollTo(0,0);toast("Listo: puedes arrastrar el nuevo set de planos")}
+$("#btnReset").onclick=()=>{const b=$("#btnReset");if(b.dataset.arm){clearTimeout(b._t);delete b.dataset.arm;b.textContent="🗑 Nuevo set de planos";resetAll();return}
+ b.dataset.arm="1";b.textContent="¿Borrar todo? Clic otra vez";b._t=setTimeout(()=>{delete b.dataset.arm;b.textContent="🗑 Nuevo set de planos"},4000)};
 fStatus();
 
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1232. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-2100. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
