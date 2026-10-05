@@ -97,7 +97,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
       <button role="tab" data-t="3" aria-selected="false"><i>3</i><span>Cubicación</span><small>por chat</small></button>
       <button role="tab" data-t="4" aria-selected="false"><i>4</i><span>Detallamiento complementario</span><small>DXF por chat</small></button>
     </nav>
-    <div class="folder"><div><b>Carpeta «Revisor Planos»</b><span id="fStat"></span></div><div class="btns"><button class="pri" id="btnFolder">📁 Guardar carpeta con los 4 informes</button><button id="btnReset" title="Borra las 4 etapas, los textos pegados, los DXF y el último informe guardado">🗑 Borrar todos los informes</button></div></div>
+    <div class="folder"><div><b>Carpeta «Revisor Planos»</b><span id="fStat"></span></div><div class="btns"><button class="pri" id="btnFolder">📁 Guardar carpeta con los 4 informes</button><button id="btnReset" title="Borra las 4 etapas, los textos pegados, los DXF y el último informe guardado">🗑 Nuevo set de planos</button></div></div>
 
     <div class="tab" id="t1">
       <div id="engine" class="engine off"></div>
@@ -150,7 +150,7 @@ table.cuadro tr.g td{background:color-mix(in srgb,var(--logo2) 16%,var(--surface
   <section class="card" id="vRep" hidden>
     <h2>Informe de revisión</h2>
     <div class="in">
-      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnWord">Word ING</button><button id="btnPdf">PDF</button><button id="btnXls">Excel con ✔</button><button id="btnSave">.txt</button><button id="btnNew">Revisar otros planos</button><button id="btnReset2">🗑 Borrar todos los informes</button><button id="btnChat2">Revisar en el chat ↗</button></div>
+      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnWord">Word ING</button><button id="btnPdf">PDF</button><button id="btnXls">Excel con ✔</button><button id="btnSave">.txt</button><button id="btnNew">Revisar otros planos</button><button id="btnReset2">🗑 Nuevo set de planos</button><button id="btnChat2">Revisar en el chat ↗</button></div>
       <div class="stats" id="stats"></div>
       <div class="rep" id="rep"></div>
     </div>
@@ -946,14 +946,14 @@ async function saveFolder(){const fs=await folderFiles().catch(e=>{console.error
  const files=[];for(const f of fs)files.push({name:"Revisor Planos/"+f.path,data:new Uint8Array(await f.blob.arrayBuffer())});
  await saveBlob(zipStore(files),`Revisor Planos ${U($("#pNombre").value.trim())||""}`.trim().replace(/\s+/g," ")+".zip");if(faltan.length)toast("Falta: "+faltan.join(", "))}
 $("#btnFolder").onclick=()=>{toast("Preparando la carpeta…");saveFolder()};
-function resetAll(){RES.gen=null;RES.tec=null;RES.cub=null;RES.det.files=[];lastModel=null;lastCub=null;lastText="";lastFiles=[];S=null;stopFlag=false;
+function resetAll(){for(const k in docs){try{docs[k].destroy&&docs[k].destroy()}catch(e){}delete docs[k]}try{DXQ=[]}catch(e){}RES.gen=null;RES.tec=null;RES.cub=null;RES.det.files=[];lastModel=null;lastCub=null;lastText="";lastFiles=[];S=null;stopFlag=false;
  ["#pNombre","#pegado","#pegCub","#detReq"].forEach(id=>{const e=$(id);if(e)e.value=""});
  $("#dxfList").innerHTML="";$("#rep").innerHTML="";$("#stats").innerHTML="";$("#cubOut").innerHTML="";$("#cubOut").hidden=true;$("#cubBtns").hidden=true;
  $("#vRep").hidden=true;$("#vRun").hidden=true;$("#vDrop").hidden=false;
  try{localStorage.removeItem("ing-revisor-simple-last")}catch(e){}
- document.querySelector('.steps4 button[data-t="1"]')?.click();fStatus();window.scrollTo(0,0);toast("Informes borrados: puedes arrastrar el nuevo set de planos")}
-$("#btnReset").onclick=()=>{const b=$("#btnReset");if(b.dataset.arm){clearTimeout(b._t);delete b.dataset.arm;b.textContent="🗑 Borrar todos los informes";b.style.background="";b.style.color="";b.style.borderColor="";resetAll();return}
- b.dataset.arm="1";b.textContent="⚠ ¿Borrar todo? Clic otra vez";b.style.background="#B3261E";b.style.color="#fff";b.style.borderColor="#B3261E";b._t=setTimeout(()=>{delete b.dataset.arm;b.textContent="🗑 Borrar todos los informes";b.style.background="";b.style.color="";b.style.borderColor=""},4000)};
+ document.querySelector('.steps4 button[data-t="1"]')?.click();fStatus();window.scrollTo(0,0);toast("Listo: todo borrado, arrastra el nuevo set de planos")}
+$("#btnReset").onclick=()=>{const b=$("#btnReset");if(b.dataset.arm){clearTimeout(b._t);delete b.dataset.arm;b.textContent="🗑 Nuevo set de planos";b.style.background="";b.style.color="";b.style.borderColor="";resetAll();return}
+ b.dataset.arm="1";b.textContent="⚠ ¿Borrar todo? Clic otra vez";b.style.background="#B3261E";b.style.color="#fff";b.style.borderColor="#B3261E";b._t=setTimeout(()=>{delete b.dataset.arm;b.textContent="🗑 Nuevo set de planos";b.style.background="";b.style.color="";b.style.borderColor=""},4000)};
 $("#btnReset2").onclick=()=>{$("#btnReset").scrollIntoView({behavior:"smooth",block:"center"});$("#btnReset").click()};
 fStatus();
 /* ===== Revisión general desde DXF (exacta, sin IA): cotas, cadenas, textos, escalas y cajetines ===== */
@@ -1151,7 +1151,7 @@ const _rvD=review;review=async function(list){const a=[...list];DXQ=a.filter(f=>
 </script>
 
 <script>
-/* App instalable (PWA) — versión 20261005-1805. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261005-2026. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
