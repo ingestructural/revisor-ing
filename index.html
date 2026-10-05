@@ -12,24 +12,440 @@
 <style>[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head><body>
 <title>Revisor de Planos ING</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-:root{--logo1:#0060C1;--bg:#EEF4FA;--ink:#16212D;--muted:#4E5D6C}
-@media (prefers-color-scheme: dark){:root{--logo1:#3D8FE6;--bg:#0E141C;--ink:#E6ECF3;--muted:#93A3B5}}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px Arial,sans-serif;padding:16px;text-align:center}
-.box{display:flex;flex-direction:column;gap:14px;align-items:center;max-width:420px}
-.logo{background:#fff;border-radius:8px;padding:10px 12px;width:220px}.logo img{width:100%;display:block}
-a{background:var(--logo1);color:#fff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:8px}
-p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+/* Una sola pantalla: arrastrar PDF → progreso → informe. Estilo Mesa de Cálculo (azules del logo ING). */
+:root{
+  --logo1:#0060C1; --logo2:#0184C8; --bg:#EEF4FA; --surface:#FFFFFF; --alt:#E7F1FB; --ink:#16212D; --muted:#4E5D6C; --line:#CFE0F2; --grid:0,96,193;
+  --bad:#B3261E; --bad-bg:#FBE7E6; --warn:#A35A00; --warn-bg:#FCEFD9; --good:#1E7A46; --good-bg:#E3F3E9;
+  --ff-d:'Big Shoulders Display','Arial Narrow',Arial,sans-serif; --ff-b:'IBM Plex Sans',Arial,sans-serif; --ff-m:'IBM Plex Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--logo1:#3D8FE6;--logo2:#3FB3EA;--bg:#0E141C;--surface:#151D28;--alt:#132339;--ink:#E6ECF3;--muted:#93A3B5;--line:#223247;--grid:61,143,230;--bad:#F0847C;--bad-bg:#3A1A18;--warn:#F2B24C;--warn-bg:#3A2A12;--good:#5FCB85;--good-bg:#153322;color-scheme:dark}}
+:root[data-theme="dark"]{--logo1:#3D8FE6;--logo2:#3FB3EA;--bg:#0E141C;--surface:#151D28;--alt:#132339;--ink:#E6ECF3;--muted:#93A3B5;--line:#223247;--grid:61,143,230;--bad:#F0847C;--bad-bg:#3A1A18;--warn:#F2B24C;--warn-bg:#3A2A12;--good:#5FCB85;--good-bg:#153322;color-scheme:dark}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;color:var(--ink);font-family:var(--ff-b);padding:0 16px 60px;
+  background:repeating-linear-gradient(0deg,rgba(var(--grid),.05) 0 1px,transparent 1px 88px),repeating-linear-gradient(90deg,rgba(var(--grid),.05) 0 1px,transparent 1px 88px),var(--bg)}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px;padding-top:22px}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:3px solid var(--logo1);padding-bottom:12px}
+header .logo{background:#fff;border-radius:6px;padding:8px 10px;width:190px;max-width:45%}
+header .logo img{width:100%;display:block}
+header h1{font-family:var(--ff-d);font-weight:800;font-size:2rem;margin:0;color:var(--logo1);line-height:1}
+.drop{border:2px dashed color-mix(in srgb,var(--logo1) 50%,var(--line));border-radius:10px;background:var(--surface);padding:48px 20px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.drop.over{border-color:var(--logo1);background:color-mix(in srgb,var(--logo2) 14%,var(--surface))}
+.drop b{display:block;font-family:var(--ff-d);font-size:1.7rem;color:var(--logo1)}
+.drop span{color:var(--muted);font-size:.92rem}
+.proj{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
+.proj input{flex:1;font:500 .92rem var(--ff-m);padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);min-width:0}
+.card{background:var(--surface);border:1px solid color-mix(in srgb,var(--logo1) 22%,var(--line));border-radius:8px;overflow:hidden}
+.card h2{margin:0;font-family:var(--ff-d);font-weight:700;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--logo1),var(--logo2));padding:9px 16px}
+.card .in{padding:16px}
+.bar{height:8px;background:var(--alt);border-radius:4px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--logo1),var(--logo2));transition:width .4s}
+.step{font-size:.92rem} .sub{font-size:.8rem;color:var(--muted);font-family:var(--ff-m)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font:600 .88rem var(--ff-b);border-radius:6px;padding:9px 14px;cursor:pointer;border:1px solid var(--logo1);background:var(--surface);color:var(--logo1)}
+button.pri{background:var(--logo1);color:#fff}
+button:focus-visible,.drop:focus-visible{outline:2px solid var(--logo1);outline-offset:2px}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--ff-m);font-size:.82rem;color:var(--muted);margin-bottom:14px}
+.stats b{font-size:1.2rem;color:var(--ink)} .stats .a b{color:var(--bad)} .stats .m b{color:var(--warn)} .stats .bj b{color:var(--good)}
+.rep h3{font-family:var(--ff-d);font-size:1.15rem;margin:18px 0 6px;color:var(--logo1);border-bottom:1px solid var(--line);padding-bottom:3px}
+.rep h4{margin:10px 0 4px;font-size:.78rem;font-family:var(--ff-m);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.rep ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.rep li{font-size:.9rem;line-height:1.45;padding-left:10px;border-left:3px solid var(--line)}
+.rep li.Alta{border-left-color:var(--bad)} .rep li.Media{border-left-color:var(--warn)} .rep li.Baja{border-left-color:var(--good)}
+.rep li .sol{color:var(--muted);display:block}
+.rep .note{font-size:.84rem;color:var(--muted);background:var(--alt);border-radius:6px;padding:10px 12px;line-height:1.5}
+.chip{font:600 .68rem var(--ff-m);padding:1px 6px;border-radius:9px;margin-right:4px;white-space:nowrap}
+.chip.Alta{background:var(--bad-bg);color:var(--bad)} .chip.Media{background:var(--warn-bg);color:var(--warn)} .chip.Baja{background:var(--good-bg);color:var(--good)} .chip.ver{background:var(--alt);color:var(--logo1)}
+.engine{font-size:.86rem;padding:9px 12px;border-radius:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.engine.on{background:var(--good-bg);color:var(--good)}.engine.off{background:var(--warn-bg);color:var(--warn)}button.lnk{padding:3px 9px;font-size:.8rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--logo1);color:#fff;padding:9px 14px;border-radius:6px;font-size:.88rem;font-weight:600;z-index:9}
 </style>
-<div class="box"><div class="logo"><img src="data:image/png;base64,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" alt="ING Estructural"></div>
-<b style="font-size:22px;color:var(--logo1)">Revisor de Planos</b>
-<p>Abriendo el revisor en Claude…</p>
-<a id="go" href="https://claude.ai/artifact/D1kQgXery7ngW6c3fRL7gC">Abrir Revisor de Planos</a>
-<p>Si no se abre solo, presiona el botón. La primera vez puede pedirte iniciar sesión en Claude.</p></div>
-<script>setTimeout(function(){location.replace(document.getElementById("go").href)},600)</script>
+
+<div class="wrap">
+  <header><div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAhIAAACrCAYAAAAzZ3UrAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAILlJREFUeNrsnQ+QXVV9x+8qQhhxsmntELGYRWnDCDWLnSEU/7AwWGiFsBGnRdLCLtNRIFUW6pQA1iy0YpzOyMZWROuQTVqQVizLvyqtY5YM2EAd2aC00NLxRWaYUMeymcGRICU9v7zvcc9e77t/3rvv7X3vfT4zZ97ue/fPub9zzu98z++ee+7AwYMHIwAAAIBmeA0mAAAAAIQEAAAAICQAAAAAIQEAAAAICQAAAACEBAAAACAkAAAAACEBAAAACAkAAABASAAAAAAgJAAAAAAhAQAAAAgJAAAAQEgAAAAAICQAAAAAIQEAAAAICQAAAOh+DivjIAPjuw5iSjAObnvvAFYAAOgfiEgAAAAAQgIAAAAQEgAAAICQAAAAAIQEAAAAAEICAAAAEBIAAACAkAAAAACEBAAAACAkAAAAABASAAAAgJAAAAAAhAQAAAAgJAAAAAAQEgAAAICQAAAAAIQEAAAAICQAAAAAIQEAAACAkAAAAACEBAAAACAkAAAAACEBAAAAgJAAAAAAhAQAAAAgJAAAAAAhAQAAAAgJAAAAAIQEAAAAICQAAAAAIQEAAAAICQAAAACEBAAAACAkAAAAACEBAAAACAkAAABASAAAAAAgJAAAAAAhAQAAAAgJAAAAQEgAAAAAICQAAAAAIVGcvRQ3AAAAQqIZ9rg07NI4RQ4AAICQKCoiRg5ue++8S9OICQAAAIREYRHhv0BMAAAAICSaEhGICQAAAIRESyICMQEAAICQSGO/S6NpIgIxAQAAgJBoJCIsElHLuwNiAgAAACERioi5ojsiJgAAAPpbSDQtIhATAAAA/S0kWhYRiAkAAID+FBKliQjEBAAAQH8JidJFBGICAACgP4RE20QEYgIAAKC3hUTbRQRiAgAAoDeFRMdEBGICAACgt4REx0UEYgIAAKA3hMSSiQjEBAAAQHcLiSUXEYgJAACA7hQSlRERiAkAAIDuEhKVExGICQAAgO4QEpUVEYgJAACAaguJyosIxAQAAEA1hUTXiAjEBAAAQLWERFtFxGs+9egQYgIAAKA3hUS7RYR19HPucxgxAQAA0FtCohMi4hKXlrs0i5gAAADoHSHRbhExKRHh8WJiCDEBAADQ3UKi3SJizH1sTvjJxMSM+30QMQEAANCdQqITImJbyiZronpkAjEBAADQZUJiqUUEYgIAAKBLhURVRARiAgAAoAuFxFiFRARiAgAAoIuExLjrUGcqJiIQEwAAAF0gJMbVkbZDRAy3KCIQEwAAABUWEu0WEbMlHhIxUQEGBgaucGnapVGsAQBQcZ998ODB1g8yvuvgEoqI5W04/B6XRl69fu182ww/vmssKieSUilceQ+0KCLidjnZ1dG52Da3u4+LXNrr0jr3+xNNnMcf4wWXzoyfI2W/Qe33R5a3hE2ed+kxl25zx2zLrTyXh5ESDjPn8jef41xD7mNYKU7NkjvObMb+QyWbwM5Zi5XJcDuuv4Ii267VBPZIA7taPZ5tVPfc/mansgdKS27LJtrEojpUUrmY7Sfa1e77VUh0q4hATCytkJiMFi8kdkbYUckRPh78/jOXTskrBIJj/JtLh+mrR9z+786x37XK22uDfRvxiks/cek6d+xbSnRYU+7jyhIOdUaGALC6ORHVo3Rhm/DtwTqxVcFv212ajh8zoTzL4AZ3nskSzmFC1HzUVFZH6M5xMH7eFsvxkJ3c8UZybm/2tnOHK/U+FAi6QaVh+UW7tkl3/OmE855ecnnE22iha8vrE9zxBhr8bvX05ibLf0blXyvJb9mTiUPNCivZzoTZRDf5/Xbd2uh2ERFF3OaoKlYeLwb/v86lBzQiaPYYR2WNNlz6vvvzz106IoeIiLSN1dGtbt+HC+YvDav/D5lTbTHNNhJZLtUCgXuVokK2z7B1DkpDcuwnaxvL106370x4rdbx5smPOsW815XYmec8zwrr+JTneTn/WpVvo6mjnJOI2B6Uhy+LMZdG9bfZfr3ExbaE8hjJaScv2JquSx32CVHeuh+Uf02ifE7CudnyGZLo3qM234oIOL2J6FpPColeEBGIiWrzSuz/Y1za0SYnbmVvt05OVCTC838uPefSHeZwVYZbXXo6QVC8S8eoNAoPPy7HvF7CYSot2mO/aZthOeeRqNx5S+W2NzdStI4vyPMZEhR3t9KZtLFMpjXatjI4TqJhLuMaZxQNsPI438qjRCHb9QTlP6Ly96Kr2WjTpPqkUQniiX6zd9lCopdEBGKiu/hdm6TZJhFxbPD1qy496dJZzhG92aUNGnVbWN/uj55gDt+lR7St5826pVJVEWHXamHe+qJxTdznNecsZ7qmBafc8U5FI8A96kyGK1Qmkz4KoUhCrYnywK9kl/+Iyn9z0bkWikb4MqoFomKin+xYppBop4jwTm75EtkJMVH96IRFC24uuSO4OyYiLArxCecwTkoL55pD0ZyLj2of40dF5nEsAaPeAbaST9nlBo3yuqUzsYjEWDC6rIKIsHq8WR3UWAvXNq3I0jyuIrX8RyWii5b/ZPip+t93UYmyhES7RYQVzqolthViopqE8xUOd+neMhqwRibviYmIjzlH8ekCDuoWOSi7r31Cxe04pM+WZ5z7CE2XdSZzKqfzK5Iliybs7beR7RKWvwlfq7OnK8rQTDQiFBd9FZUoRUh0QESsqYi9EBPV4x6XXg7+f1NUznyJv44W5kRY1GNHM09fuH3u133trhgR9vnIdTYQkUsdjbBJd5NEEjrKTExUF4pGBG2o76ISr6lsxqonIhAT1cQcrU0qezWIULQ0X0IjjRNj0Yir+8COUZXncXSAWkXyMebS/m6L6vQTKdGIvoxKVFJIVFhEICaqOYq2SMEDwVetzpeIj0jv6IORoR+NTffxDP+qXPdIVOEnX6BxNKJfoxKVExJdICIQE9XCi4WLo/rjmJ5W5ktcGPxtt00+1wdirKa6dqhe9+ny5F5ALvWk2DUVyEPUx+VfazEa0XdRiUoJiS4SEYiJ6nWEFjF4f1Rf6dLT7HyJlaEgSXuKwZyKS/9rKx9mpJfKfjy1DTa0urZeI3NbV2HeVtqzxxBtjQWbO6DUcyMsdQ5jLt2zlNGnwLYIic7b/dCiUjkes02NRvRjVKJqEYmpLhIRiInqdYRzcgatzpc4qsC2m6L6aolZ2IqYny3pUk/PIVzS0mSKDW0xoyEJiml9bTa1lS53Kr2g43ihYbdDJrp1fkWwhsZy+aClxNuQSZadLf9Zlf9kSdGIvopKHFaVjLiOeDpavI58N4qJtr2bw8TEwPiuKOrBF32VLCZucY39HPfnefrKz5f4doH1EV4qcMr/sdOaj8kpJspgb9DJN8NsDjvORLFHQWMvfPJ/Dyldom1sYZ+JCiybnLcTGZN4MGc/XoF8IyA6X/7W2a9S+Wc9/pwrGhFGJdw5tisqMdWrc60qISS6XEQgJqqHzZew1SeP0f9+vsQ7cjbkcJuXrQNtJELc9590v//U/bm6wbHW5YxYFKFW1sujmoj4JIqR4K2Uli9758Z4p586KLia5ki0+AVXo1UQP2Zjdx0+f7M05baV/7Bs7Mt/fZaIaCIaEYqPSxSVmOxF2y+5kOgREYGYqFZUwkLuNl/CXuf9On3t50usk1BYlnKI70T192N4ETIWpYQm0xapcvmYa4OQqKTNo/oTHzPqAG256dkyX9Wcg7xvALUVDK1czPfMVvC1z3ujLnxxUxsZLLn8DZu7cCjqVqD8C0UjgrZRC6IS0x1uE53pxxERbRMTzJlY4pFdlDxfYoN+SxMS5ljCF4ONYdFCgmJ0KeyW462PJ0tE1BSBmCjQiewpuXM/PWo8odKE2PldPEGvVrKthqOFV6a3Uv4rVI57VP5jecs/iEbYAnhDwcTjXCnKOQcDIYGIQExUr1Oz9SV2BV/ZfInbspbAVYj7J8FXR7l9tmDR/CMwjaqHKiguR5Svom/EPLRvScuvjwbHTGJan906Qe9Qp1nG5FvZO010FRW5I4pwFC1/LwBsCfWdTSQfQb4k7xLcCIn+FhGIiWphTx+8EPx/eExcNOLWaPELwa7p81Ufe0XkNCsmpqOFV0W3yoQiIzMpQvbQeza6NCoxU6IQmogdswwxMVqk/INoxA1ZUY+MiMhxMVGCkGhBRIz1gYjotJi4ii4i1XGcGfv6mBy7bolFJYxHi4gJPXZ6UvDV/qrayeY2aAZ7Gccyx2uz4Gu9IibUuVtIfKqVzl3RCBthZ83gH5NwmSmhPEY7KUh0Xds1+h5psR6ZkHiozImwTZT/lNruVIvnrQV26amoREeFhEREv00S7ISYmFIFhcaO47pYhCHvyOWVWDTjcecErs1wgIMu3RbVV8QMz/VAhc002GonGXO8fhTfS5GJCXXus83YSSJ0WtGGqRzCZWtUXzOkaTtKHN69BKPgn0ddmonkxdb2mFiq8pcQOj+H8MvLZC9GJTomJPpURHRSTIwhJlIdhz1Z8XDBfcyZXxnVX9oVcqMWY7otNqnKRn73ut+fj+q3nEIR8axLGytsIu+sZ1u5haNOzxzv1qrPTg8m5B5qnznrQ7iM+FABu4wG5xjN0ynZZNBgBDtbdBRr6xbI5+7pdMcVzEfwdWqkQL6Ho4UVjscLrP/SDjExWUY0otejEh0REn0uIhaJibY2XsREFvH5Enkavk3Y/Fjs68M0UrJO5esa8fl0niIXHhMh5jzeUeXFaGJO9XGtVlmoo9Sjrv45+66YKKi1Lg6Jgzwj/3B7l2zNh6k0O0lgzqpuHOpci3SM9mSBj0zofJNZ0RAtZ16TCL5H55xfwjpl7FSdGk7J95DK4HHVw7avRRLkcU1cTEj85LkN1fdRibavI4GIWCwmbKLpq9evHWunmNA6E708D2VZs6Mk5xzOlKMKeTFLTNjKmO7PO116W6zdLEvJj73w62a3/6YSr/1QZ6TOqaUIRLxD02JIQxp9XaJR014J4FqCEDZHW3hhnyqKCS0CZWtfzGeJIG1vtphWZ32lVvQ0G83FbLNc/5sYmGymQ7L8aH0OKxdbK2Gz+/+hhPKIl8X4Ur+KPKVOhfVpWGmV/r9H9bPWwTyOq5+ajRYeXZ0oMxoRRiW0roTZYjLhOodbbN8T7YriNBSB7oSIiM6zvZ1i4lDBju+aXgox4YTMQEv5roeA7w6+Oi5saBox7IsWlpveqKhBkXOcq3o5qIjBqXkbnvJncyROcclWtDwy+PkViQyLeuxotuPIOP+gOrBWb5NNZLyMzK9U6aMUpyds5hd2Mqc304rz8hM9m+n41FENtTohr5k86Nyj0cKTAL4z9MLCL3o0X1L5W3mMqVxWxX7eG5TFTIvnsc5zuswOSXVqLKhTawJbzQe2qlWh/GXrwXYIY+V5JF7XlIexdrbtrhISTkTEOwToAzHRqpAIGvCIHFktxXnPtth52TnmmnXy3tFoBFPzqRdXrgMA6KiQcCLCT5ZZjon7S0yUISQAAKB7KH2yJSKiEJdoca52duwmVJiACQAA1RcSiAjEBAAAICQQEYgJAACAXJQyRwIRURpdP2cibY7EwMDAQYoYAKA66D0glRAS84gIxESWkAAAgN6jrFsbiIjy4DYHAAD0nZAAxAQAACAkADEBAACAkEBMICYAAAAhAYgJyIO9xyDrrZCQbj+s0B82rlJZ90q9Q0ggJiolJlzD+qS9ArlBynxtcx/zHaVu6VTsldG329s27bHgWHpU7zGJb/+cS1e0eF573fmLYR1yf98X/eIbYXu5Q5/2L6jqME+58962xNf+YffxXLM+xOqfS0+XIQD0AsDne8GfISQQE1UTEzdE9bcaJiV7W6C9tvkH1glRJRbxNqVu6MjszZI/cOmiaOGV13uU7I2i9mbVnW67ewOHbc72TS59uMXT25o3r9fxPL8R+7+XRYQJNHv0e2IJTn+0S+9cYhOcFtXf2NtseVv9+/Vo4VXjrdbFw3uh7iEkEBOVjEzYIinx5L5e4dJGlw5YJ2QdDVWi6zqyeyUGD6gsV7iytVdADyuZcDjDRo0unRctvEHY3vL6ny59qcUszNooMKq/qRWgKF9SPZzDFAgJxEQXiIkEcTHv0i3uz1PVEZ0XhsAVKr9Cf1+hEPn3XBoOtrG5BNe69FQQVq9p9DsS6/TGXLorTxjTzuHS7vBcfgSoY9d0rnmd+9q04wb5/H6w7zMWGvb76Zzftd+D/fxtoKfieQnsYr/tC679F24lJFzDN2K3IfYl2SzDRhskDkwknGBlmfQKd/eddfYnBlGKSNt93aVv61h3KLKR57x2zQ/Ibmar3S7N59x3KCi/l2SDZ3SLbTCl7G6Unb29XtL/NzYTFtc1fDcot30qt7GSBN59Lr0nKO9Hg/K2vH8rq6xlqynVWW+rhnkM6m+e9mW3PD+ZUp9fCmzt28lQsN1daicX6Ks7g7by8VieHlYZ+rb7THBuq39fT6q32v7WRtcf2jjH9eb2Uwk+69GYPXxbbVvko6yVLVn6uPNUcgXMVle29MtoZy3bqsa5zaXH3LZrg31ttPmyS8dq05+5dIrbZk4d67cU2WjENrftpTreTvdhjfYz7rtNGfmxEYrdehl32057YRPVw/eNsDD+iOUt7mCjX1xyfn/w/wGJKXMMd7p0RIPjh3kxZ/14lB5Gvc9tvy4hgnBe8JXdhlgW1cPUnkz76Fh+BdyT49ecY18rByuP7W5fc5Yv6bqPc//X0hyy+9inba3cLaS/2aIeEiyROphV8TonUfr54KtXXDos+N/K4UK330ys7HYHZbJfomVl7LvhtHzH8p9VbntUj+YL2HGPRYDi37n0w1h5Px8r6+vcfp9OOO4W93FNyqkfdWlt7LyT8bLI6xfUKe4K2vkBlfNgQjsxOz8RbNuw3tv8Efm8r7j0oWCbnW6bM4N2vijPmvsxnnIJ33fppDzX36D9x7nD7bMhVk8elgBvZA9jowZjRCSgvyMTcij+2o+O/XS0HMYj6rAOl4gYlIO3zuRJNd7wlsl1Eh3jcorGVfqcyIgejMi57A867tskIl7WsVcE5ztO+bMGvjs2cvL5XK5tjtN+g9rvPnVIu60Dc2lZ2AHGbgeF9eMJdUYWDVgfu2W0MYjw3BvrHKxTeSHYx25DrAz2s+u7Jin6kSCOlsshlxEW9tGImYztNsleX8vT0TYQEVtVfq8Lys+Xw92xa/ciYpvKblA2WxYr97/LmZWw3M6Ildt6lc0adSKtskblfUAidCAo6+u0zU2KLIW2ujYQEVt9nVW7Wq+8ry3ZBdwftPPj1A6GEtrJtxTJfIvy5P1ZaMt1Ccf/kOq2t8OZKXVlSiLC/MdnfFtXPnwZnZQ3AibRtTzwYfFbu5avi2IRuS9LRNR0baE9Vihfxs3teFIEIYGY6FoxkTZCcw3o3bEO68tyLI+4708KRwByNDbKOkVfWcc4pP0f1H6bcnRq1wXOwI9O1tqxw07MRqKWv8DZ3Rocy0cYZnUNtdh+63Se+wt0ilvkdJ81ZxOOoHXcRreLPqjPd8b3CfYzsfVilH2r4EJ97iipjLcov2sahXrlML0Y/HgBe9l+NwcjuImE8lsXdK53BoLyCImlS+MRB/1/blS/x/69AuX2nMptNnY8K5O3+t9bfaIlGMmujInQSO1jo/79q5itJvXvybJVLWhXM+rgXii5jdsxn423kVj5fE22bpa1cTs06PivDCKfm3xdUT58GR3IeU4TmIcrSrLIhwW3dtfqfFcGg5BzgzKI15N5RQxNTPx3OxwuQgIx0ZViIug8nk/4eSyhY7gg1uCSohxzGlEZ/p7oZWlRiVg0wocMP+VHZxmj74vlYM4Ojn22Pten5NOEyQcLmMs/6XBxo1G58nm1/v1M7OfBlLzYPIc35AjTr9RnrZQ6Wb+OqZiQizMpp/y1PLcRAi7Xfg+mhYHVuf7YpdWxqMTr0/Lt0mqXLi9QbhtSys2+9xGCj5Vg2nNSznWLBMGKoAO7POj45lLyeHUb3MBRGXXkgy6d2uSx80bOLvUCIOP6b8gZjXiXIg4XZ/gpXy/Dp29ezrCHiZy3F4nMISQQEz0rJtTp+sc/tzdoaCHeyT+WoxH5Tum0YBTpoxKTWdEIP5LR53SOztCPHoYDcfRYWY1dzslCm89l3YcOOs01+vRRj8c02XJSE8pGKvLse8OohOrI5UWjEeL9+rw15wjSsPPPKT+nuPP/UBMPx7zNmqjjKyRQs8ptVudd3aI9M89ldUGfQzFbZa0PMVty2T8rQTOvSdYTQd0sI3SfN3L2gZzb/2uOYw0HIiavnzorsK8Jun2aWDrRybZ6GH1wT4mJqJ0TME1MDIzvOnSuDkYckkbxF6ljvy9hxLg35bCZiw6ZcHDntj+XBV9bVMLWPbjcOlPfyBtEI4w36nNGx0rjlxK++48STemdyI9ybm/2WyVbmDP6Fdn7bKXNQRnZh93H/eMco7eXsqIbzUQldJ/4GjnW4RKiEeFI99YcT4b46xlUfk6VU7dbElfG6nSkEf0Os23OTuXI8KmcFF5bgknznGdfA1vN5WxXZbFOIu5E1c+LYrbeLyE/2aQorxWsK2XM+/FlflrOMg/Pf6GEv0U0LogWIrDeHgdULy9roj0gJBATXSsmdmb8/vOnKwrwxiY7LHOCD6ojtQ5qIiUaYfinE1blPMVjckTDMeewFG19MHbtG9y1b9SI2zpJu0VxvGy5Wo7LHjdbmyEmbBLiR6J6KHimtPp48OAmd+7LfFTCRtQtRiNCji7Q6UwF0bBB3eowm50gWx0vUWdRBru3/dYGk/zCOhRJDOWtR5uX0Pd0dKln2fkk2dmnQX2uVNldqYjBW9qYlVdKPJbv4N+glIWJgz/0otp9vFvRB1/vVsoe5k/eJv9lj5OuLPv2BkICMVFVMbG9wajWOqSZgg3Bb3tKjkjIqP6Mz71YFJWQ00qKRvh9zfnf4H6bLBCF8Y7kt0p0uLMaCR6f4/xDEkDPxUf+6vxnEvbxj4feqFFiI2zfL0b1+SBDJY+KTMh9PohKtBKNMJ5U2X7F7X9RCx3dXIK9/OOh56XZQU8a+X9PLulJl3awW7Y6LW1UnnFrxz/umNUmi9h5SNGyY73AbNP1P6NOejTKuJWZA38dP3XpmGY6e9Wn6QR7mL+6WyLDRPanyzQCcyR6V0xMt/ME7Z4zYWsFJCQLy00XbWByNi/IqYxmbP4X+vxCQgN9UB2UdVS3NohGhPv+aRNOwPJ5TFo+tVhN/HHL/RkRjyOCx1obRnn0+VWdJ887GT6rz7dkXNu87GL225V1H1vX+HCe9xpIyO1XVGK0hGjEX+rzQ0Xut2sxo9m0fVQX/TtRhjIO+aA+P1FhX3OnPm/KsNXFKR3nZWn1IFq8loevG7NpjxyrLf1tTju3gvcDN2Zstymnn7J6fKSESVSg7qW2VbU/P5F8ddlGQEggJiorJkrmo/r8+6TRkZyTja79Y2VJtvMOzzqqsxtEI/waFzYZ7MjY+yLinc5dCc7w0qx8RvW1BR6P/b4vGInF+Yg+r9Ez/0mOaItGKweihUml5sy2ZTxeuTkYxWcxKbvY/IEnGk0Ck03sGu22yZE5haMXdHdEC09cNBX1kEN/RP8+0aD8hhLKz/4+3aX7U1a9HAkiY1lRBl/fLkgptw3Bqp0dRyP9JxXJ+mZSmaqDG0/Yd0Yd5+okkRuMoo+J/TQkOz+QYmcri4kEO/u/zynp+mcUwTs2pa1fES08jZWFf8T2iyntbkvC3J1LtM9wSlv9XM56VxhubfS+mOiZCZgtNnib2f37UT0Mby+Eejqqh9vtdsmvRfXJSUeoI13XaJQTzJVoFI3w2DF263w2k9qeaf+vqD6J84ygM3k4bNjmmPQ2yqR8vlPnPlwdcugQPqeR2yNun+vVqb3dpd9TmHyjfreRowmhf4zqt3wskvABdQT2+NipQcdtj4HeFMuHXZM5pfcFNrP9rs9RBjYZ8R3RwiqDP9DqoTuUF3OcvxPVX4oU6RrX5SzfW9yxbooWVvG7rMUqc26Qz+eVz9367dRYx+AfxZ3RyPRdKvN/juorqc6p4zo3Wlh58I4sgaT6Fpbbn0T1CYbzKoMPRAurNQ5FS/f+B7uup1z6TZXpv0jQWR08K7jmJEys7pTItb+36PrWBfXy2eA6/W2fJ3XcsGxmgzrk29eTsdtCVka2RshVmpBp/Lb938LtI3ty5VG12Rfccf/Jff6N8hKWURl+6v2yyU+jxY9+mr0v0gDjMdn0GyqDc+RzvN8ofYDJEtn9QceW0y5hiexn1KCOb2Jfa2x7/JLZjUZwcsxJy8+aSLgwzcHL2d2taERWeN6c+60NRiPW+X6h0ez9jHzaLYir4/lMWM7aCJeCNsd2l0u/nHBMc8x/kLBcd1o+DFtWeayJJa+n1Nkf0cg2UTDjXiMte+rmi3aLq8Ex/WqUFo04p8E2E+pIQrtYnftVrT4ZH8XtSLCpxwTforU5tM+dKSNQE6pTeZYUj0UxdjTokKwztEWzbs95LKuT/255DJaC97a9L2MCqG1rt33sltGieRu6brPnmgbXbE8V/ENUXxDujITowTcb1MtDNvYRL7fvm4Pz2W21Deogk+rQ7Q3aSXzpc2OrnlIyIfhnUYOl14Nl8+PXb3a9v4Fo2q9O31749VW/tHVSXQyO51cLTWp3T8tPzSVEFSeixkvmZ/o3hARkcYMTE5PtFhO63dGKkBj0o9cm9rXGPF/gnQN+prc14lrOdx/YyGt1VGDNel2Tn8VveZvLO/krIZ9zGUJnWKM8czKzDV4u5Ge5+1HsXNa1a59BXUNUxGY5rs86fZthbrdndietohmIuNms688SNRZqD29dqd4MNtovVn5RznIYDGxsqSZ7zbZgK3+8YR1vrplRdNIkzzy2Dcus0XUEiyq9T6Pob/jjZrXPoO4uU12Y8flM8wuqQ4XsrLyMBu1xLk8dUj5GUupoeP3zuvaZFLuPpa2eGbu2vG11JFp4gmU+2G++bb4fIdFXjDsxMY0ZWur0bETyY9du3ohFAABKEhIAfSIkfDRiPGsNfgAAhAQAhCLC30cmGgEAEMDjnwD5qLlks7HPwhQAAMFAi4gEAAAANAsRCQAAAEBIAAAAAEICAAAAEBIAAACAkAAAAABASAAAAABCAgAAABASAAAAgJAAAAAAhAQAAAAAQgIAAAAQEgAAAICQAAAAAIQEAAAAAEICAAAASuf/BRgArSyNn1ccH4sAAAAASUVORK5CYII=" alt="ING Estructural"></div><h1>Revisor de Planos</h1><button id="btnCfg" style="margin-left:auto">⚙ Configurar</button></header>
+  <div id="engine" class="engine off"></div>
+  <section class="card" id="cfg" hidden><h2>Configurar Claude</h2><div class="in" style="display:flex;flex-direction:column;gap:10px">
+    <label for="cfgKey" style="font-size:.85rem;color:var(--muted)">Clave API de Anthropic (se guarda solo en este equipo)</label>
+    <input id="cfgKey" type="password" autocomplete="off" placeholder="sk-ant-..." style="font:500 .9rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink)">
+    <label for="cfgModel" style="font-size:.85rem;color:var(--muted)">Modelo</label><select id="cfgModel" style="font:500 .9rem var(--ff-m);padding:8px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink)"></select>
+    <div class="btns"><button id="cfgTest">Probar conexión</button><button class="pri" id="cfgSave">Guardar</button><button id="cfgClose">Cerrar</button></div>
+    <div class="sub" id="cfgMsg"></div>
+    <div class="sub" style="line-height:1.5">La clave se crea en console.anthropic.com → API Keys. El uso se cobra aparte según el consumo (cada lámina se revisa en 12 sectores).</div>
+  </div></section>
+
+  <section id="vDrop">
+    <div class="proj"><label for="pNombre">Proyecto</label><input id="pNombre" placeholder="OPCIONAL"></div>
+    <div style="height:12px"></div>
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir o arrastrar PDF">
+      <b>Arrastra aquí los PDF de los planos</b>
+      <span>o haz clic para elegirlos · recibirás el informe de revisión</span>
+      <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+    </div>
+  </section>
+
+  <section class="card" id="vRun" hidden>
+    <h2>Revisando…</h2>
+    <div class="in"><div class="step" id="runStep"></div><div class="bar"><i id="runBar"></i></div><div class="sub" id="runSub"></div>
+      <div class="btns" style="margin-top:12px"><button id="btnStop">Detener y ver informe</button></div></div>
+  </section>
+
+  <section class="card" id="vRep" hidden>
+    <h2>Informe de revisión</h2>
+    <div class="in">
+      <div class="btns" style="margin-bottom:14px"><button class="pri" id="btnCopy">Copiar informe</button><button id="btnSave">Descargar</button><button id="btnNew">Revisar otros planos</button></div>
+      <div class="stats" id="stats"></div>
+      <div class="rep" id="rep"></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const U=v=>String(v??"").toLocaleUpperCase("es-CL");
+const today=()=>new Date().toISOString().slice(0,10);
+const lamLabel=p=>p.codigo||("PÁG. "+(S.pages.indexOf(p)+1));
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+const docs={};let S=null,stopFlag=false,lastText="";
+function save(){}
+function blankS(){return{proj:{nombre:U($("#pNombre").value.trim()),num:"GLOBAL",resp:""},pages:[],cortes:[],obs:[],notes:[]}}
+
+/* ===== Claude ===== */
+let sample=null,imgLimits=null;
+(async()=>{try{sample=await window.claude?.use?.("sample")}catch(e){sample=null}
+ if(sample){try{const l=await sample.limits();imgLimits=l.images||null}catch(e){imgLimits=null}}engineStatus()})();
+
+/* ===== Motor: Claude API con clave propia (app instalada) o capacidad de Claude (dentro de claude.ai) ===== */
+const KEYK="ing-revisor-apikey",MODK="ing-revisor-model";
+const lsg=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lss=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
+const IN_CLAUDE=!!window.claude;
+const apiKey=()=>IN_CLAUDE?"":lsg(KEYK);
+const canImg=()=>!!apiKey()||!!(sample&&imgLimits);
+const engineOn=()=>!!apiKey()||!!sample;
+const engineMaxImgs=()=>apiKey()?2:Math.max(1,(imgLimits&&imgLimits.maxCount)||1);
+const blob64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(b)});
+function parseJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"bad_json"};return JSON.parse(t.slice(a,b+1))}
+const API_HDR=()=>({"x-api-key":apiKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"});
+async function apiCall(prompt,imgs){const content=[];for(const b of imgs||[])content.push({type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blob64(b)}});content.push({type:"text",text:prompt});
+ const body=JSON.stringify({model:lsg(MODK),max_tokens:8000,messages:[{role:"user",content}]});
+ for(let att=0;att<5;att++){let r;try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:API_HDR(),body})}catch(e){if(att<4){await new Promise(z=>setTimeout(z,3000*(att+1)));continue}throw{code:"sin_conexion"}}
+  if(r.ok){const d=await r.json();return parseJSON((d.content||[]).filter(c=>c.type==="text").map(c=>c.text).join(""))}
+  if(r.status===401||r.status===403)throw{code:"clave_invalida"};if(r.status===400){let m="";try{m=(await r.json()).error.message}catch(e){}throw{code:"solicitud_rechazada",message:m}}
+  if(r.status===429||r.status>=500){const ra=+(r.headers.get("retry-after")||0);await new Promise(z=>setTimeout(z,(ra||5*(att+1))*1000));continue}throw{code:"error_"+r.status}}
+ throw{code:"saturado"}}
+async function askJSON(prompt,opt){opt=opt||{};if(apiKey())return apiCall(prompt,opt.images||[]);return sample.json(prompt,Object.assign({modelTier:"complex",cache:false},opt))}
+async function listModels(key){const r=await fetch("https://api.anthropic.com/v1/models?limit=100",{headers:{"x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"}});
+ if(!r.ok)throw{code:r.status===401?"clave_invalida":"error_"+r.status};return((await r.json()).data||[])}
+function engineStatus(){const el=$("#engine");if(!el)return;const on=canImg();
+ el.className="engine "+(on?"on":"off");
+ el.innerHTML=on?`<b>Revisión visual: ACTIVA</b> · ${apiKey()?"Claude API ("+esc(lsg(MODK))+")":"Claude"}`:`<b>Revisión visual: INACTIVA</b> · ${IN_CLAUDE?"esta vista de Claude no permite enviar imágenes; usa la app RP":"configura tu clave de Claude"} ${IN_CLAUDE?"":'<button id="btnCfg2" class="lnk">Configurar</button>'}`;
+ const b=$("#btnCfg2");if(b)b.onclick=openCfg;$("#btnCfg").hidden=IN_CLAUDE}
+function openCfg(){$("#cfg").hidden=false;$("#cfgKey").value=apiKey();const cur=lsg(MODK);if(cur&&!$("#cfgModel").options.length)$("#cfgModel").innerHTML=`<option>${esc(cur)}</option>`;$("#cfgKey").focus()}
+
+const GRID={c:4,r:3};const CONC=3;
+
+async function pool(tasks,n){let i=0,done=0;const run=async()=>{while(i<tasks.length&&!stopFlag){const k=i++;await tasks[k]();done++}};await Promise.all(Array.from({length:Math.min(n,tasks.length)},run))}
+
+async function visualPage(p,idx,total){
+ const doc=docs[p.file];const pg=await doc.getPage(p.page);const jobs=[];const lam=lamLabel(p);
+ if(canImg()){const maxN=engineMaxImgs();const ov=await renderToCanvas(pg,1568);const ovB=await new Promise(r=>ov.toBlob(r,"image/jpeg",.88));
+  const big=await renderToCanvas(pg,Math.min((apiKey()?1450:1300)*Math.max(GRID.c,GRID.r),7200));const sx=p.W/big.width,sy=p.H/big.height;const tw=big.width/GRID.c,th=big.height/GRID.r;
+  for(let r=0;r<GRID.r;r++)for(let c=0;c<GRID.c;c++){const ovl=0.08;const x0=Math.max(0,c*tw-tw*ovl),y0=Math.max(0,r*th-th*ovl),w=Math.min(big.width-x0,tw*(1+2*ovl)),h=Math.min(big.height-y0,th*(1+2*ovl));
+   const t=document.createElement("canvas");t.width=Math.round(w);t.height=Math.round(h);t.getContext("2d").drawImage(big,x0,y0,w,h,0,0,t.width,t.height);
+   const b=await new Promise(res=>t.toBlob(res,"image/jpeg",.92));const name=`SECTOR F${r+1}-C${c+1} (fila ${r+1} de ${GRID.r} desde arriba, columna ${c+1} de ${GRID.c} desde la izquierda)`;
+   const withOv=maxN>=2;jobs.push({imgs:withOv?[ovB,b]:[b],scope:name,texts:sectorTexts(p,x0*sx,y0*sy,(x0+w)*sx,(y0+h)*sy),
+    desc:withOv?`imagen 1 = lámina completa (solo contexto, no reportes desde ella); imagen 2 = ${name}, ampliado: revisa ESTE sector en detalle. Ubica cada observación como «${name.split(" (")[0]}» más la zona dentro del sector.`:`imagen 1 = ${name}, ampliado.`})}
+  big.width=big.height=0}
+ else if(p.hasText)jobs.push({imgs:[],scope:"texto de la lámina (sin imagen)",texts:(p.items||[]).map(t=>t.s).join(" | ").slice(0,12000),desc:"sin imágenes: analiza solo los textos"});
+ const all=[];let caj=null,cor=[],err="",ilegible=0,ok=0;
+ const tasks=jobs.map((j,k)=>async()=>{if(stopFlag)return;try{const opt={};if(j.imgs.length)opt.images=j.imgs;
+   const r=await askJSON(buildPrompt(p,j),opt);ok++;
+   if(r){if(Array.isArray(r.observaciones))all.push(...r.observaciones.map(o=>Object.assign(o,{_sec:j.scope.split(" (")[0]})));if(r.cajetin&&!caj)caj=r.cajetin;if(Array.isArray(r.cortes))cor.push(...r.cortes);if(r.legibilidad==="MALA")ilegible++}
+  }catch(e){const c=e&&e.code;err=c||"error";if(c==="not_granted"||c==="rate_limited"||c==="images_unavailable"||c==="clave_invalida"||c==="sin_conexion")stopFlag=true}
+  finally{prog(idx,total,`${lam}: ${ok}/${jobs.length} sectores revisados`)}});
+ tasks.push(async()=>{try{await spellCheck(p)}catch(e){}});
+ await pool(tasks,CONC);
+ const okv=v=>v&&/[A-Z0-9ÁÉÍÓÚÑ]{2,}/i.test(v)&&!/[?¿]|NO LE[IÍ]DO|SIN T[IÍ]TULO/i.test(v);if(caj){if(!p.codigo&&okv(caj.codigo))p.codigo=U(caj.codigo);if(!p.titulo&&okv(caj.titulo))p.titulo=U(caj.titulo)}
+ const L=lamLabel(p);const seen=new Set(S.obs.filter(o=>o.lam===L).map(o=>(o.prob||"").toLowerCase().slice(0,60)));
+ const JUNK=/capa de texto|texto (seleccionable|extra[ií]ble|buscable)|no se (entreg[óo]|dispone de|adjunt[óo]) (la )?imagen|sin imagen|ni imagen|no se pudo (leer|extraer)|figura como\s*["'«]?\?|\(sin t[ií]tulo\)|t[ií]tulo no le[ií]do|no le[ií]do por la herramienta|[ií]ndice del set|reexport|re-export|PDFSHX|fuentes? SHX|inventario/i;
+ for(const o of all){const k=(o.problema||"").toLowerCase().slice(0,60);if(!o.problema||seen.has(k)||JUNK.test((o.problema||"")+" "+(o.solucion||"")+" "+(o.elemento||"")))continue;seen.add(k);const ub=U(o.ubicacion||"");
+  S.obs.push({lam:L,cat:CATS.includes(o.categoria)?o.categoria:"Coherencia general",item:o.item||"",elem:U(o.elemento),ubic:ub.includes(o._sec)?ub:(o._sec&&o._sec.startsWith("SECTOR")?o._sec+" · ":"")+ub,prob:o.problema,sol:o.solucion||"",tipo:o.tipo==="Verificar contra original"?o.tipo:"Corregir",prio:PRIOS.includes(o.prioridad)?o.prioridad:"Media"})}
+ for(const c of cor){if(!c.id)continue;let x=S.cortes.find(y=>y.id.toUpperCase()===String(c.id).toUpperCase());
+  if(!x){x={id:U(c.id),tipo:TIPOS_COR.includes(c.tipo)?c.tipo:"Corte",sub:"",num:ordinal(String(c.id).replace(/^\D+(?=\d)/,"")),dib:"",ref:"",esc:"",leg:"",obs:"",auto:true};S.cortes.push(x)}
+  const list=k=>x[k]?x[k].split(/,\s*/):[];if(c.rol==="dibujo"&&!list("dib").includes(L))x.dib=[...list("dib"),L].join(", ");
+  if(c.rol==="llamado"&&!list("ref").includes(L))x.ref=[...list("ref"),L].join(", ");if(c.legible==="No")x.leg="No";else if(c.legible==="Sí"&&!x.leg)x.leg="Sí"}
+ if(err&&!ok)S.notes.push(`${L}: la revisión visual falló (${err==="clave_invalida"?"clave de Claude inválida o sin saldo":err}).`);else if(err)S.notes.push(`${L}: algunos sectores no se pudieron revisar (${err}).`);
+ if(ilegible)S.notes.push(`${L}: ${ilegible} sector(es) con texto poco legible en la imagen; verificar esa zona a escala de impresión.`)}
+
+function prog(i,n,sub){const f=n?(i+(sub&&/(\d+)\/(\d+)/.test(sub)?(+RegExp.$1/+RegExp.$2):0))/n:0;$("#runBar").style.width=Math.min(100,Math.round(f*100))+"%";if(sub!=null)$("#runSub").textContent=sub}
+function step(t){$("#runStep").textContent=t}
+
+async function review(list){
+ const files=[...list].filter(f=>/\.pdf$/i.test(f.name)||f.type==="application/pdf");if(!files.length){toast("Solo se aceptan archivos PDF");return}
+ if(!window.pdfjsLib){toast("No se pudo cargar el lector de PDF; revisa la conexión y recarga");return}
+ S=blankS();stopFlag=false;$("#vDrop").hidden=true;$("#vRep").hidden=true;$("#vRun").hidden=false;step("Leyendo los PDF…");prog(0,1,"");
+ for(const f of files){try{const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer(),isEvalSupported:false}).promise;docs[f.name]=doc;
+  for(let n=1;n<=doc.numPages;n++){$("#runSub").textContent=`${f.name} · página ${n} de ${doc.numPages}`;const key=f.name+"|"+n;
+   const p={key,file:f.name,page:n,codigo:"",titulo:"",rev:"",escala:"",fecha:"",dupCon:"",auto:{}};S.pages.push(p);
+   const pg=await doc.getPage(n);const c=await renderToCanvas(pg,520);p.hash=dHash(c);
+   const items=await extractText(pg,p);p.hasText=items.length>5;p.items=items;p.text=items.map(i=>i.s).join(" ").slice(0,12000);p.tokens=[...new Set(items.map(i=>i.s.toUpperCase()))].slice(0,1500);
+   readCajetin(p,items)}}catch(e){console.error(e);S.notes.push(`No se pudo leer ${f.name}.`)}}
+ detectDuplicates();detectCortes();S.pages.forEach(p=>autoChecksPage(p));autoChecksSet();
+ const sinTxt=S.pages.filter(p=>!p.hasText).length;if(sinTxt)S.notes.push(`${sinTxt} de ${S.pages.length} láminas no traen texto legible por máquina (textos SHX exportados como dibujo): en ellas no se aplicaron las verificaciones automáticas de texto (cotas sobrepuestas, tamaño de texto, ortografía); solo la revisión visual.`);
+ const visual=canImg(),txtOnly=engineOn()&&!visual&&S.pages.some(p=>p.hasText);
+ if(visual||txtOnly){for(let i=0;i<S.pages.length&&!stopFlag;i++){if(!visual&&!S.pages[i].hasText)continue;step(`Revisando lámina ${i+1} de ${S.pages.length}: ${lamLabel(S.pages[i])}`);prog(i,S.pages.length,`${lamLabel(S.pages[i])}: preparando sectores…`);await visualPage(S.pages[i],i,S.pages.length)}
+  if(!visual)S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes de las láminas. Se revisó solo el texto del PDF; cotas, cortes, detalles y viewports NO fueron revisados.");
+  if(stopFlag&&S.pages.some(p=>p)){S.notes.push("Revisión detenida antes de terminar: el informe puede estar incompleto.")}}
+ else if(engineOn())S.notes.push("REVISIÓN VISUAL NO REALIZADA: esta vista de Claude no permite enviar imágenes y los PDF no traen texto. Solo se verificaron láminas repetidas. Usa la app RP con tu clave de Claude para la revisión completa.");
+ else S.notes.push("REVISIÓN VISUAL NO REALIZADA: falta configurar la clave de Claude (botón «Configurar»). Este informe incluye solo las verificaciones automáticas.");
+ detectCortes();showReport()}
+
+/* ===== Informe ===== */
+function setItems(){const out=[];S.pages.forEach((p,i)=>{if(p.dupCon)out.push({prio:"Alta",txt:`Pág. ${i+1} (${lamLabel(p)}): lámina repetida con ${p.dupCon}.`,sol:"Eliminar la página repetida o reemplazarla por la lámina que corresponde."})});
+ S.cortes.forEach(c=>{const e=corEstado(c,S.cortes);if(e!=="CORRELATIVO")out.push({prio:/SALTO|REPETIDO|SIN NÚMERO/.test(e)?"Media":"Baja",txt:`${c.id}${c.dib?" (dibujado en "+c.dib+")":""}: ${e}.`,sol:solCorte(e)})});return out}
+function showReport(){$("#vRep").querySelector("h2").textContent="Informe de revisión";$("#vRun").hidden=true;$("#vRep").hidden=false;$("#vDrop").hidden=false;
+ const pr={Alta:0,Media:1,Baja:2};const setI=setItems();const all=S.obs.length+setI.length;const cnt=x=>S.obs.filter(o=>o.prio===x).length+setI.filter(o=>o.prio===x).length;
+ $("#stats").innerHTML=`<span><b>${S.pages.length}</b> láminas</span><span><b>${all}</b> observaciones</span><span class="a"><b>${cnt("Alta")}</b> alta</span><span class="m"><b>${cnt("Media")}</b> media</span><span class="bj"><b>${cnt("Baja")}</b> baja</span>`;
+ const T=[];const H=[];
+ T.push(`INFORME DE REVISIÓN DE PLANOS${S.proj.nombre?" — "+S.proj.nombre:""} · ${today()}`);T.push(`Láminas revisadas: ${S.pages.length} (${S.pages.map(lamLabel).join(", ")}). Observaciones: ${all} (Alta ${cnt("Alta")}, Media ${cnt("Media")}, Baja ${cnt("Baja")}).`);
+ if(S.notes.length){H.push(`<div class="note"><b>Alcance:</b><br>${S.notes.map(esc).join("<br>")}</div>`);T.push("","ALCANCE",...S.notes.map(n=>"• "+n))}
+ if(setI.length){H.push(`<h3>Set completo</h3><ul>${setI.map(o=>`<li class="${o.prio}"><span class="chip ${o.prio}">${o.prio.toUpperCase()}</span>${esc(o.txt)}<span class="sol">→ ${esc(o.sol)}</span></li>`).join("")}</ul>`);
+  T.push("","SET COMPLETO",...setI.flatMap(o=>[`• [${o.prio}] ${o.txt}`,`  → ${o.sol}`]))}
+ const labs=[...new Set(S.pages.map(lamLabel))];
+ labs.forEach(l=>{const os=S.obs.filter(o=>o.lam===l);if(!os.length)return;const pg=S.pages.find(p=>lamLabel(p)===l);const tit=`LÁMINA ${l}${pg&&pg.titulo?" — "+pg.titulo:""}`;
+  H.push(`<h3>${esc(tit)}</h3>`);T.push("",tit);
+  CATS.forEach(c=>{const oc=os.filter(o=>o.cat===c).sort((a,b)=>pr[a.prio]-pr[b.prio]);if(!oc.length)return;H.push(`<h4>${esc(c)}</h4><ul>`);T.push(`  ${c}`);
+   oc.forEach(o=>{const v=o.tipo==="Verificar contra original";const head=`${o.elem}${o.ubic?" · "+o.ubic:""}`;
+    H.push(`<li class="${o.prio}"><span class="chip ${o.prio}">${o.prio.toUpperCase()}</span>${v?'<span class="chip ver">VERIFICAR CONTRA ORIGINAL</span>':""}<b>${esc(head)}</b>: ${esc(o.prob)}<span class="sol">→ ${esc(o.sol)}</span></li>`);
+    T.push(`  • [${o.prio}]${v?" VERIFICAR CONTRA ORIGINAL ·":""} ${head}: ${o.prob}`,`    → ${o.sol}`)});H.push("</ul>")})});
+ if(!all){H.push(`<div class="note">No se encontraron observaciones.</div>`);T.push("","Sin observaciones.")}
+ $("#rep").innerHTML=H.join("");lastText=T.join("\n");try{localStorage.setItem("ing-revisor-simple-last",JSON.stringify({h:$("#rep").innerHTML,s:$("#stats").innerHTML,t:lastText}))}catch(e){}
+ $("#vRep").scrollIntoView({behavior:"smooth",block:"start"})}
+
+async function saveFile(filename,data){let d=null;try{d=await window.claude?.use?.("downloads")}catch(e){}
+ if(!d){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/plain;charset=utf-8"}));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return}
+ try{await d.save({filename,data})}catch(e){if(!(e&&e.code==="declined"))toast("No se pudo descargar")}}
+
+/* ===== Eventos ===== */
+const drop=$("#drop");
+["dragenter","dragover"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==="drop"||!e.relatedTarget)drop.classList.remove("over")}));
+document.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files.length&&$("#vRun").hidden)review(e.dataTransfer.files)});
+drop.onclick=()=>$("#fileIn").click();drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("#fileIn").click()}};
+$("#fileIn").onchange=e=>{const f=[...e.target.files];e.target.value="";review(f)};
+$("#pNombre").addEventListener("input",e=>{const t=e.target,a=t.selectionStart;t.value=U(t.value);try{t.setSelectionRange(a,a)}catch(er){}});
+$("#btnStop").onclick=()=>{stopFlag=true;$("#runStep").textContent="Deteniendo… terminando los sectores en curso"};
+$("#btnCopy").onclick=async()=>{try{await navigator.clipboard.writeText(lastText);toast("Informe copiado")}catch(e){const ta=document.createElement("textarea");ta.value=lastText;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Informe copiado")}catch(_){}ta.remove()}};
+$("#btnSave").onclick=()=>saveFile(`Informe_revision_${(S&&S.proj.nombre||"planos").replace(/[^\wÁÉÍÓÚÑ-]+/g,"_")}_${today()}.txt`,lastText);
+$("#btnNew").onclick=()=>{$("#vRep").hidden=true;$("#vDrop").hidden=false;window.scrollTo(0,0)};
+try{const L=JSON.parse(localStorage.getItem("ing-revisor-simple-last")||"null");if(L){$("#rep").innerHTML=L.h;$("#stats").innerHTML=L.s;lastText=L.t;$("#vRep").hidden=false;$("#vRep").querySelector("h2").textContent="Último informe de revisión"}}catch(e){}
+
+$("#btnCfg").onclick=openCfg;$("#cfgClose").onclick=()=>{$("#cfg").hidden=true};
+$("#cfgTest").onclick=async()=>{const k=$("#cfgKey").value.trim();const st=$("#cfgMsg");if(!k){st.textContent="Pega tu clave primero.";return}st.textContent="Conectando…";
+ try{const ms=await listModels(k);const prev=lsg(MODK);const sorted=ms.slice();const def=(sorted.find(x=>/sonnet/i.test(x.id))||sorted[0]||{}).id;
+  $("#cfgModel").innerHTML=sorted.map(x=>`<option value="${esc(x.id)}" ${x.id===(prev||def)?"selected":""}>${esc(x.display_name||x.id)}</option>`).join("");
+  st.textContent=`Conexión correcta: ${ms.length} modelos disponibles. Elige el modelo y presiona Guardar.`}catch(e){st.textContent=e&&e.code==="clave_invalida"?"La clave no es válida.":"No se pudo conectar ("+(e&&e.code||"error")+")."}};
+$("#cfgSave").onclick=()=>{const k=$("#cfgKey").value.trim(),mo=$("#cfgModel").value;if(k&&!mo){$("#cfgMsg").textContent="Presiona «Probar conexión» para elegir el modelo.";return}lss(KEYK,k);lss(MODK,k?mo:"");$("#cfg").hidden=true;engineStatus();toast(k?"Clave guardada":"Clave eliminada")};
+engineStatus();
+
+const CATS=["Coherencia general","Texto y datos","Cotas","Cortes y vistas"];
+const ESTADOS=["Pendiente","Corregido","Verificado"];
+const PRIOS=["Alta","Media","Baja"];
+const TIPOS_OBS=["Corregir","Verificar contra original"];
+const TIPOS_COR=["Corte","Sección","Detalle","Elevación","Vista"];
+const ITEMS=[
+["CG-01",0,"Título del cajetín coincide con el contenido"],["CG-02",0,"Lámina no duplicada con otra"],["CG-03",0,"Sin elementos repetidos dentro de la lámina"],["CG-04",0,"Ningún sector cortado por viewports"],["CG-05",0,"Cajetín consistente con índice del set"],["CG-06",0,"Escala indicada = escala real de la vista"],
+["TD-01",1,"Sin errores ortográficos"],["TD-02",1,"Sin información duplicada"],["TD-03",1,"Títulos de vistas/detalles corresponden al contenido"],["TD-04",1,"Notas/especificaciones consistentes entre láminas"],["TD-05",1,"Textos legibles a escala de impresión"],
+["CT-01",2,"Cotas en puntos correctos"],["CT-02",2,"Cotas sin superponerse entre sí"],["CT-03",2,"Cotas sin superponerse con otros elementos"],["CT-04",2,"Cotas legibles a escala de impresión"],["CT-05",2,"Cadenas de cotas cierran con cota total"],["CT-06",2,"Unidades y formato de cotas consistentes"],
+["CV-01",3,"Llamados de corte legibles en planta"],["CV-02",3,"Dirección del corte coincide con la línea de corte"],["CV-03",3,"Sentido de mirada coincide con flechas del llamado"],["CV-04",3,"La vista muestra lo que corresponde en ese punto"],["CV-05",3,"Sin información faltante"],["CV-06",3,"Sin información sobrante o errada"],["CV-07",3,"Identificación correlativa"],["CV-08",3,"Referencia cruzada llamado ↔ lámina correcta"]];
+const ITEM_CODES=ITEMS.map(i=>i[0]);
+/* ---------------- PDF ---------------- */
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"}
+async function renderToCanvas(pageObj,longSide){const v1=pageObj.getViewport({scale:1});const sc=longSide/Math.max(v1.width,v1.height);const vp=pageObj.getViewport({scale:sc});
+ const c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);
+ await pageObj.render({canvasContext:ctx,viewport:vp}).promise;return c}
+function dHash(c){const w=17,h=16,t=document.createElement("canvas");t.width=w;t.height=h;const x=t.getContext("2d");x.drawImage(c,0,0,w,h);const d=x.getImageData(0,0,w,h).data;const g=[];for(let i=0;i<w*h;i++)g.push(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11);let bits="";for(let y=0;y<h;y++)for(let k=0;k<w-1;k++)bits+=g[y*w+k]>g[y*w+k+1]?"1":"0";return bits}
+const ham=(a,b)=>{if(!a||!b)return 999;let n=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])n++;return n};
+function jacc(a,b){if(!a.length&&!b.length)return null;const A=new Set(a),B=new Set(b);let i=0;A.forEach(x=>{if(B.has(x))i++});return i/(A.size+B.size-i||1)}
+
+async function extractText(pg,p){const vp=pg.getViewport({scale:1});p.W=vp.width;p.H=vp.height;const out=[];
+ const push=(s,x0,y0,x1,y1,hpt)=>{out.push({s,x0,y0,x1,y1,hmm:ptmm(hpt),x:(x0+x1)/2/vp.width,y:(y0+y1)/2/vp.height,h:hpt})};
+ try{const tc=await pg.getTextContent();for(const it of tc.items){const s=(it.str||"").trim();if(!s)continue;const m=pdfjsLib.Util.transform(vp.transform,it.transform);
+  const fs=Math.hypot(m[2],m[3]);const la=Math.hypot(m[0],m[1])||1;const w=it.width||s.length*fs*.6;const ax=m[0]/la*w,ay=m[1]/la*w;
+  const xs=[m[4],m[4]+ax,m[4]+m[2],m[4]+ax+m[2]],ys=[m[5],m[5]+ay,m[5]+m[3],m[5]+ay+m[3]];
+  push(s,Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),fs)}}catch(e){}
+ p.textSrc=out.length>5?"TEXTO PDF":"";
+ if(out.length<=5){try{const an=await pg.getAnnotations();let k=0;for(const a of an){const s=String(a.contentsObj?.str||a.contents||"").trim();if(!s||!a.rect)continue;
+   const r=vp.convertToViewportRectangle(a.rect);const x0=Math.min(r[0],r[2]),x1=Math.max(r[0],r[2]),y0=Math.min(r[1],r[3]),y1=Math.max(r[1],r[3]);
+   const lines=Math.max(1,s.split(/\n/).length);push(s.replace(/\s+/g," "),x0,y0,x1,y1,Math.min(x1-x0,y1-y0)/lines);k++}
+  if(k>5)p.textSrc="COMENTARIOS SHX"}catch(e){}}
+ return out}
+function readCajetin(p,items){
+ const box=items.filter(i=>i.x>0.55&&i.y>0.62);const src=box.length?box:items;const joined=src.map(i=>i.s).join("  ");
+ const code=(joined.match(/\b(?:[A-Z]{1,4}[-_.]?){1,2}\d{2,4}[A-Z]?\b/g)||[]).filter(c=>!/^(NCH|ACI|AISC|ASTM|ISO|A\d|DS|NTM|RUT)/i.test(c)&&!/^\d/.test(c));
+ const rev=joined.match(/REV(?:ISI[ÓO]N)?\.?\s*[:N°º\-]*\s*([A-Z0-9]{1,2})\b/i);
+ const escs=[...new Set((p.text.match(/\b1\s*:\s*\d{1,4}\b/g)||[]).map(s=>s.replace(/\s/g,"")))];
+ const fecha=joined.match(/\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b/);
+ const big=src.filter(i=>/[A-ZÁÉÍÓÚÑ]{3,}/.test(i.s)&&i.s.length>8&&!/^(PROYECTO|CLIENTE|DIBUJ|REVIS|APROB|FECHA|ESCALA|L[ÁA]MINA|PLANO|ARQUITECT|INGENIER|CALCUL|PROPIETARI|UBICACI|N[°º])/i.test(i.s)).sort((a,b)=>b.h-a.h||b.s.length-a.s.length);
+ const a={codigo:code[code.length-1]||"",rev:rev?rev[1]:"",escala:escs.slice(0,3).join(" / "),fecha:fecha?fecha[0]:"",titulo:big[0]?big[0].s:""};
+ p.auto=a;for(const k of ["codigo","rev","escala","fecha","titulo"])if(!p[k])p[k]=U(a[k]);
+}
+function detectDuplicates(){
+ S.pages.forEach(p=>{p.dupAuto="";p.sim=null});
+ for(let i=0;i<S.pages.length;i++)for(let j=0;j<i;j++){const a=S.pages[i],b=S.pages[j];
+  const hm=ham(a.hash,b.hash);const jc=jacc(a.tokens||[],b.tokens||[]);
+  const imgSame=hm<=14, txtSame=jc===null?true:jc>=0.9;
+  const sameCode=a.codigo&&a.codigo===b.codigo;
+  if((imgSame&&txtSame)||sameCode){const lab=`${lamLabel(b)} (pág. ${j+1})`;a.dupAuto=lab;a.sim=Math.round((1-Math.min(hm,256)/256)*100);if(!a.dupCon)a.dupCon=lab;
+   if(!b.dupAuto){b.dupAuto=`${lamLabel(a)} (pág. ${i+1})`;b.sim=a.sim}}
+ }}
+function ordinal(id){const m=id.match(/(?:^|[\s.°º])0*(\d{1,3})\b/);if(m)return +m[1];const l=id.match(/^([A-Z])(?:\s*-\s*\1)?$/i)||id.match(/\b([A-Z])\s*-\s*\1\b/i);if(l)return l[1].toUpperCase().charCodeAt(0)-64;return ""}
+function detectCortes(){
+ const found=new Map();const add=(id,tipo,role,lam)=>{const k=id.toUpperCase();let c=found.get(k);if(!c){c={id,tipo,sub:"",num:/s\/n/i.test(id)?"":ordinal(id.replace(/^\D+/,"")||id),dib:"",ref:"",esc:"",leg:"",obs:"",auto:true};found.set(k,c)}
+  if(role==="dib"){if(!c.dib.split(", ").includes(lam))c.dib=c.dib?c.dib+", "+lam:lam}else{if(!c.ref.split(", ").includes(lam)&&!c.dib.split(", ").includes(lam))c.ref=c.ref?c.ref+", "+lam:lam}};
+ S.pages.forEach(p=>{if(!p.text)return;const lam=lamLabel(p);const T=p.text.toUpperCase();
+  const reT=/\b(CORTE|SECCI[ÓO]N|DETALLE|ELEVACI[ÓO]N)\s+(?:N[°º.]?\s*)?([A-Z]{1,2}\s*-\s*[A-Z]{1,2}|\d{1,3}\s*-\s*\d{1,3}|\d{1,3}|(?![YEO]\b)[A-Z])(?![\wÁÉÍÓÚÑ])/g;let m;const titled=new Set();
+  while((m=reT.exec(T))){let t=m[1].replace("Ó","O");const tipo=t.startsWith("CORTE")?"Corte":t.startsWith("SECC")?"Sección":t.startsWith("DET")?"Detalle":"Elevación";
+   let id=m[2].replace(/\s/g,"");if(tipo==="Detalle"&&/^\d+$/.test(id))id="Detalle "+id.padStart(2,"0");else if(tipo==="Sección"&&!/-/.test(id))id="Sección "+id;
+   titled.add(id.toUpperCase());add(id,tipo,"dib",lam)}
+  const reS=/\bDETALLE\s+(?!N[°º]|\d|[A-Z]\b)(TIPO|DE|DEL|UNI[ÓO]N|PLACA|ANCLAJE|CONEXI[ÓO]N)\b/g;let k=0;
+  while((m=reS.exec(T))&&k<5){k++;add(`Detalle s/n (${lam} #${k})`,"Detalle","dib",lam)}
+  const reB=/\b([A-Z]|\d{1,2})\s*-\s*\1\b/g;
+  while((m=reB.exec(T))){const id=m[0].replace(/\s/g,"");if(!titled.has(id))add(id,"Corte","ref",lam)}
+ });
+ const manual=S.cortes.filter(c=>!c.auto);const merged=[...manual];
+ found.forEach(c=>{if(!manual.some(m=>m.id.toUpperCase()===c.id.toUpperCase()))merged.push(c)});
+ S.cortes=merged;
+}
+function corEstado(c,all){const fl=[];const key=c.tipo+"|"+(c.sub||"");
+ if(c.num===""||c.num==null)fl.push("SIN NÚMERO");
+ const dupId=all.filter(x=>x.id.toUpperCase()===c.id.toUpperCase()).length>1;const dupNum=c.num!==""&&all.filter(x=>x.tipo+"|"+(x.sub||"")===key&&String(x.num)===String(c.num)).length>1;
+ if(dupId||dupNum)fl.push("REPETIDO");
+ const n=+c.num;if(n>1&&!all.some(x=>x.tipo+"|"+(x.sub||"")===key&&+x.num===n-1))fl.push(`SALTO (falta N° ${n-1})`);
+ if(!c.ref)fl.push("SIN LLAMADO EN PLANTA");
+ if(c.leg==="No")fl.push("LLAMADO ILEGIBLE");
+ if(c.dib&&S.pages.length&&!c.dib.split(/,\s*/).every(d=>S.pages.some(p=>lamLabel(p)===d)))fl.push("LÁMINA NO EXISTE");
+ return fl.length?fl.join(" / "):"CORRELATIVO"}
+
+/* ---------------- Claude (capacidad sample) ---------------- */
+/* ================= Revisión automática del texto del PDF (sin IA, reglas fijas) ================= */
+const ISO={A0:[841,1189],A1:[594,841],A2:[420,594],A3:[297,420],A4:[210,297]};
+const ptmm=v=>v*25.4/72;
+function sheetFormat(p){const w=ptmm(Math.min(p.W,p.H)),h=ptmm(Math.max(p.W,p.H));for(const [k,[a,b]] of Object.entries(ISO))if(Math.abs(w-a)/a<0.03&&Math.abs(h-b)/b<0.03)return k;return ""}
+function zona(p,x,y){const r=Math.min(3,Math.floor(y/p.H*3)+1),c=Math.min(4,Math.floor(x/p.W*4)+1);
+ const fil=["","SUPERIOR","MEDIA","INFERIOR"][r],col=["","IZQUIERDA","CENTRO-IZQ.","CENTRO-DER.","DERECHA"][c];
+ return `ZONA ${fil} ${col} (X≈${Math.round(ptmm(x))} MM, Y≈${Math.round(ptmm(p.H-y))} MM DESDE ESQ. INF. IZQ.)`}
+const isNum=s=>/^[±ØΦ%]?\s*\d+([.,]\d+)?\s*(MM|CM|M|°|%)?$/i.test(s.trim());
+function addAutoObs(o){if(S.obs.some(x=>x.autoKey===o.autoKey))return 0;S.obs.push(Object.assign({resp:S.proj.resp||"",fdet:today(),fcie:"",est:"Pendiente",auto:true},o));return 1}
+function autoChecksPage(p){if(!p.items||!p.items.length)return 0;const lam=lamLabel(p);let n=0;const it=p.items;const fmt=sheetFormat(p);
+ // 1) Textos y cotas sobrepuestos
+ const ord=it.map((t,i)=>i).sort((a,b)=>it[a].x0-it[b].x0);let ov=[];
+ for(let a=0;a<ord.length;a++){const A=it[ord[a]];for(let b=a+1;b<ord.length;b++){const B=it[ord[b]];if(B.x0>A.x1)break;
+  const ix=Math.min(A.x1,B.x1)-Math.max(A.x0,B.x0),iy=Math.min(A.y1,B.y1)-Math.max(A.y0,B.y0);if(ix<=0||iy<=0)continue;
+  if(A.s===B.s&&Math.abs(A.x0-B.x0)<1&&Math.abs(A.y0-B.y0)<1)continue;
+  const aA=(A.x1-A.x0)*(A.y1-A.y0),aB=(B.x1-B.x0)*(B.y1-B.y0);if(!aA||!aB)continue;
+  if(ix*iy/Math.min(aA,aB)>0.2)ov.push([A,B])}}
+ ov.slice(0,30).forEach(([A,B])=>{const nA=isNum(A.s),nB=isNum(B.s);const item=nA&&nB?"CT-02":(nA||nB)?"CT-03":"TD-05";
+  n+=addAutoObs({lam,cat:item.startsWith("CT")?"Cotas":"Texto y datos",item,elem:U(nA&&nB?"COTAS":(nA||nB)?"COTA / TEXTO":"TEXTOS"),ubic:zona(p,(A.x0+A.x1)/2,(A.y0+A.y1)/2),
+   prob:`${nA?"Cota":"Texto"} «${A.s}» se sobrepone con ${nB?"cota":"texto"} «${B.s}».`,sol:`Desplazar «${nA&&!nB?B.s:A.s}» o la línea de cota para dejar ≥ 2 mm impresos de separación; si es por espacio, acotar fuera del elemento o ampliar el detalle.`,
+   tipo:"Corregir",prio:nA||nB?"Media":"Baja",autoKey:`ov|${p.key}|${A.s}|${B.s}|${Math.round(A.x0)}|${Math.round(A.y0)}`})});
+ if(ov.length>30)n+=addAutoObs({lam,cat:"Cotas",item:"CT-02",elem:"COTAS Y TEXTOS",ubic:"VARIAS ZONAS",prob:`Hay ${ov.length} superposiciones de texto en total; se detallan las primeras 30.`,sol:"Revisar la lámina completa por superposiciones antes de reemitir.",tipo:"Corregir",prio:"Media",autoKey:`ovN|${p.key}`});
+ // 2) Textos muy pequeños a escala de impresión
+ const small=it.filter(t=>t.hmm>0&&t.hmm<1.8&&t.s.length>0);
+ if(small.length){const mn=Math.min(...small.map(t=>t.hmm));const ej=small.slice(0,6).map(t=>`«${t.s}» ${t.hmm.toFixed(1)} mm (${zona(p,t.x0,t.y0).split(" (")[0]})`).join("; ");
+  n+=addAutoObs({lam,cat:"Texto y datos",item:small.some(t=>isNum(t.s))?"CT-04":"TD-05",elem:"TEXTOS / COTAS PEQUEÑOS",ubic:"VER EJEMPLOS",
+   prob:`${small.length} textos con altura impresa < 1,8 mm (mínima ${mn.toFixed(1)} mm) en hoja ${fmt||"de tamaño no estándar"}. Ej.: ${ej}.`,
+   sol:fmt?"Aumentar altura de texto/cota a ≥ 2,0 mm impresos (2,5 mm en títulos y llamados); revisar escala de anotación del viewport.":"VERIFICAR CONTRA ORIGINAL: comparar tamaño de papel de la configuración de ploteo con el tamaño real de impresión; luego aplicar mínimo 2,0 mm impresos.",
+   tipo:fmt?"Corregir":"Verificar contra original",prio:"Baja",autoKey:`small|${p.key}`})}
+ // 3) Notas o textos largos repetidos en la misma lámina
+ const cnt={};it.forEach(t=>{if(t.s.length>=20&&!isNum(t.s)){(cnt[t.s]=cnt[t.s]||[]).push(t)}});
+ Object.entries(cnt).filter(([s,a])=>a.length>1&&!a.every(t=>Math.abs(t.x0-a[0].x0)<1&&Math.abs(t.y0-a[0].y0)<1)).slice(0,8).forEach(([s,a])=>{
+  n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-02",elem:"TEXTO REPETIDO",ubic:a.slice(0,3).map(t=>zona(p,t.x0,t.y0).split(" (")[0]).join(" / "),
+   prob:`El texto «${s.slice(0,90)}» aparece ${a.length} veces en la lámina.`,sol:"Verificar si es información duplicada; dejar una sola vez o referenciar a la nota general.",tipo:"Verificar contra original",prio:"Baja",autoKey:`dup|${p.key}|${s.slice(0,60)}`})});
+ return n}
+function autoChecksSet(){let n=0;const codes=S.pages.map(p=>p.codigo).filter(Boolean);
+ // 4) Referencias a láminas que no existen en el set
+ const pre=[...new Set(codes.map(c=>{const m=c.match(/^([A-Z]{1,4})([-_. ]?)(\d+)/);return m?m[1]+"|"+m[2]+"|"+m[3].length:null}).filter(Boolean))];
+ S.pages.forEach(p=>{if(!p.text)return;const T=p.text.toUpperCase();pre.forEach(k=>{const [L,sep,d]=k.split("|");const re=new RegExp("\\b"+L+(sep?"\\"+sep:"")+"\\d{"+d+"}\\b","g");
+  const found=[...new Set(T.match(re)||[])].filter(x=>!codes.includes(x));
+  found.forEach(x=>{n+=addAutoObs({lam:lamLabel(p),cat:"Cortes y vistas",item:"CV-08",elem:`REFERENCIA ${x}`,ubic:"TEXTO DE LA LÁMINA",prob:`Se cita la lámina ${x}, que no está en el set revisado.`,sol:`Corregir la referencia a la lámina correcta o incorporar ${x} al set.`,tipo:"Corregir",prio:"Media",autoKey:`ref|${p.key}|${x}`})})})});
+ // 5) Calidades de materiales con notación distinta entre láminas
+ const fam=[["Hormigón",/\b(?:H|G)\s?-?\s?\d{2}(?:\s?\(\d{2}\))?\b/g],["Acero de refuerzo",/\bA\s?6?3[0]?\s?-\s?4[2]0?\s?H\b|\bA\s?44\s?-\s?28\s?H\b/g],["Acero estructural",/\bA\s?(?:36|572|270\s?ES|345\s?ES|42\s?-\s?27\s?ES)\b/g]];
+ fam.forEach(([nom,re])=>{const per={};S.pages.forEach(p=>{if(!p.text)return;(p.text.toUpperCase().match(re)||[]).forEach(v=>{v=v.replace(/\s/g,"");(per[v]=per[v]||new Set()).add(lamLabel(p))})});
+  const ks=Object.keys(per);if(ks.length>1){const first=[...per[ks[0]]][0];n+=addAutoObs({lam:first,cat:"Texto y datos",item:"TD-04",elem:U(nom),ubic:"NOTAS / ESPECIFICACIONES",
+   prob:`${nom}: se usan ${ks.length} designaciones distintas en el set: ${ks.map(k=>`${k} (${[...per[k]].join(", ")})`).join("; ")}.`,sol:"Verificar que cada designación corresponda al elemento indicado y unificar la notación (norma vigente) en todas las láminas.",tipo:"Verificar contra original",prio:"Baja",autoKey:`mat|${nom}|${ks.sort().join(",")}`})}});
+ return n}
+function sectorTexts(p,x0,y0,x1,y1){if(!p.items)return"";return p.items.filter(t=>t.x0>=x0&&t.x1<=x1&&t.y0>=y0&&t.y1<=y1).slice(0,400).map(t=>`${t.s} [${t.hmm.toFixed(1)}mm]`).join(" | ").slice(0,7000)}
+function buildPrompt(p,o){
+ const idx=S.pages.map((x,i)=>`${i+1}. ${lamLabel(x)} — ${x.titulo||"(título no leído)"}${x.dupCon?" [posible duplicado de "+x.dupCon+"]":""}`).join("\n");
+ const cor=S.cortes.map(c=>`${c.id} | ${c.tipo} | dibujo: ${c.dib||"-"} | llamado: ${c.ref||"-"}`).join("\n").slice(0,4000);
+ const ya=S.obs.filter(x=>x.lam===lamLabel(p)).map(x=>`- ${x.item} ${x.elem}: ${x.prob}`).join("\n").slice(0,3000);
+ return `Eres un revisor senior y EXIGENTE de planos de ingeniería estructural (hormigón armado, acero, madera) de ING Estructural. Tu trabajo vale por lo que encuentras: un set real casi siempre tiene errores. Revisa este ${o.scope} de una lámina exportada de AutoCAD 2026 a PDF.
+
+IMÁGENES: ${o.desc}
+LÁMINA: N° ${S.pages.indexOf(p)+1} · código "${p.codigo||"(no leído por la herramienta)"}" · título cajetín "${p.titulo||"(no leído por la herramienta)"}" · rev "${p.rev||"(no leído)"}" · escala(s) "${p.escala||"(no leído)"}" · hoja ${sheetFormat(p)||"(no determinada)"}
+NUMERACIÓN DE DETALLES DEL SET: ${S.proj.num}
+
+ÍNDICE DEL SET:
+${idx}
+
+CORTES/DETALLES DEL SET:
+${cor||"(ninguno)"}
+
+TEXTOS DEL PDF EN ESTA ZONA (con altura impresa; vacío si los textos son SHX):
+${o.texts||"(sin capa de texto)"}
+
+OBSERVACIONES YA REGISTRADAS PARA ESTA LÁMINA (no las repitas):
+${ya||"(ninguna)"}
+
+MÉTODO — recorre la imagen ampliada completa, de izquierda a derecha y de arriba abajo:
+1. Cada COTA: ¿está en el punto correcto (eje, cara, centro)? ¿su texto se sobrepone a otra cota, línea, armadura, achurado o texto? ¿se lee a escala de impresión? ¿la cadena suma la cota total?
+2. Cada TEXTO y título de vista: ortografía, legibilidad, si corresponde a lo dibujado, si está repetido.
+3. Cada LLAMADO de corte/detalle: ¿legible? ¿tiene identificador y lámina de referencia? ¿flechas de dirección y sentido claras?
+4. Cada VISTA/CORTE dibujado: ¿coincide con su llamado (dirección y sentido)? ¿falta o sobra información (armaduras, perfiles, pernos, soldaduras, niveles, ejes, cotas)?
+5. Bordes del viewport: ¿algo queda cortado (elementos, cotas, textos)?
+6. Detalles sin número, numeración con saltos o repetida.
+
+REGLAS:
+- Los datos marcados "no leído" y la ausencia de texto del PDF son limitaciones de ESTA HERRAMIENTA, no errores del plano: NUNCA generes observaciones sobre ellos, ni sobre falta de imagen, capa de texto, índice o cajetín no leído. Reporta solo lo que ves dibujado en la imagen.
+- Reporta SOLO lo que hay que corregir o verificar; nunca lo que está bien.
+- Cada observación: problema exacto (qué cota/texto/elemento, con su valor o texto literal, y dónde dentro de la imagen) + solución concreta.
+- Si dudas o la imagen no permite confirmarlo: NO lo omitas; repórtalo con tipo "Verificar contra original" e indica qué comparar.
+- No inventes valores que no se lean. Elemento y ubicación en MAYÚSCULAS.
+- Prioridad: Alta = altera lo que se construye; Media = ambigüedad o referencia cruzada errada; Baja = forma, ortografía, legibilidad.
+
+Responde SOLO JSON válido:
+{"legibilidad":"BUENA|PARCIAL|MALA",
+ "inventario":{"cotas":0,"textos":0,"llamados":0,"vistas":0},
+ "items":[{"item":"CG-01","estado":"OK|OBS|VER|NA"}  (los 25 códigos: ${ITEM_CODES.join(", ")})],
+ "cajetin":{"codigo":"","titulo":"","revision":"","escala":""},
+ "cortes":[{"id":"A-A","tipo":"Corte|Sección|Detalle|Elevación|Vista","rol":"dibujo|llamado","lamina_referida":"","legible":"Sí|No"}],
+ "observaciones":[{"categoria":"${CATS.join("|")}","item":"código","elemento":"","ubicacion":"","problema":"","solucion":"","tipo":"Corregir|Verificar contra original","prioridad":"Alta|Media|Baja"}]}`}
+
+async function spellCheck(p){if(!engineOn()||!p.items||p.items.length<5)return{n:0,calls:0};
+ const words=[...new Set(p.items.flatMap(t=>t.s.toUpperCase().split(/[^A-ZÁÉÍÓÚÑÜ]+/)).filter(w=>w.length>=4))].slice(0,1800);if(!words.length)return{n:0,calls:0};
+ const r=await askJSON(`Eres corrector ortográfico de planos de ingeniería estructural en español de Chile. Lista de palabras (en mayúsculas) extraídas de una lámina:
+${words.join(" ")}
+
+Identifica SOLO palabras mal escritas (errores de tipeo, letras cambiadas o faltantes) y palabras sin tilde que la requieren. No marques siglas, normas (NCh, ACI, AISC), designaciones de materiales, abreviaturas técnicas habituales (ESP., DIAM., REF., NIV., EJ.) ni nombres propios.
+Responde SOLO JSON: {"errores":[{"palabra":"","correccion":"","tipo":"ortografia|tilde"}]}`,{modelTier:"default",cache:false});
+ const errs=(r&&r.errores)||[];const lam=lamLabel(p);let n=0;
+ const loc=w=>{const t=p.items.find(t=>t.s.toUpperCase().includes(w));return t?zona(p,t.x0,t.y0):"TEXTO DE LA LÁMINA"};
+ errs.filter(e=>e.tipo!=="tilde"&&e.palabra&&e.correccion&&e.palabra!==e.correccion).slice(0,30).forEach(e=>{n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-01",elem:`TEXTO «${U(e.palabra)}»`,ubic:loc(U(e.palabra)),prob:`Error ortográfico: «${e.palabra}».`,sol:`Corregir a «${e.correccion}».`,tipo:"Corregir",prio:"Baja",autoKey:`sp|${p.key}|${e.palabra}`})});
+ const til=errs.filter(e=>e.tipo==="tilde"&&e.palabra&&e.correccion);
+ if(til.length)n+=addAutoObs({lam,cat:"Texto y datos",item:"TD-01",elem:"TILDES",ubic:"VARIOS TEXTOS",prob:`Palabras sin tilde: ${til.slice(0,25).map(e=>`${e.palabra} → ${e.correccion}`).join(", ")}${til.length>25?` (+${til.length-25})`:""}.`,sol:"Corregir tildes (en AutoCAD usar fuente que admita tildes o el código %%… correspondiente).",tipo:"Corregir",prio:"Baja",autoKey:`til|${p.key}`});
+ return{n,calls:1}}
+
+function solCorte(e){const s=[];if(/SIN NÚMERO/.test(e))s.push("asignar número correlativo y actualizar llamados");if(/REPETIDO/.test(e))s.push("renumerar uno de los repetidos");if(/SALTO/.test(e))s.push("dibujar el faltante o renumerar la secuencia");if(/SIN LLAMADO/.test(e))s.push("agregar llamado en planta/elevación o eliminar la vista");if(/ILEGIBLE/.test(e))s.push("aumentar tamaño del llamado y despejar textos/cotas encima");if(/NO EXISTE/.test(e))s.push("corregir lámina de referencia");return s.join("; ")}
+</script>
 
 <script>
-/* App instalable (PWA) — versión 20261004-1523. Funciona sin conexión y se actualiza sola al abrirla con internet. */
+/* App instalable (PWA) — versión 20261004-1539. Funciona sin conexión y se actualiza sola al abrirla con internet. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
